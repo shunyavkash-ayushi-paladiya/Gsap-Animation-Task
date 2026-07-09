@@ -1,0 +1,16 @@
+@media screen and (max-width:991px) and (min-width:767px) {
+   .hero-title{
+    font-size: 48px;
+   }
+
+   .container{
+    padding: 0 16px;
+   }
+}
+
+@media screen and (max-width:767px) and (min-width:320px) {
+   .hero-title{
+    font-size: 34px;
+    line-height: 1.2;
+   }
+}

@@ -4,17 +4,19 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Gsap Animation</title>
-    <link rel="stylesheet" href="Style.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap"
       rel="stylesheet"
     />
+    <link rel="stylesheet" href="Style.css" />
+    <link rel="stylesheet" href="Media.css" />
   </head>
   <body>
     <section class="hero-section">
       <div class="container">
+        <div class="hero-contents">
         <div class="hero-content">
           <div class="hero-title-content">
             <h1 class="hero-title">Modular engineering, Robotic Assembly</h1>
@@ -80,7 +82,7 @@
               <div class="hero-border-overlay"></div>
             </div>
             <div class="hero-content-wrapper">
-              <div class="hero-content-item">
+              <div class="hero-content-item max-w-366">
                 <p class="hero-content-title">
                   1: Single-Ply Digital Patterning, Pixeling, and Excising
                 </p>
@@ -91,7 +93,7 @@
                   directly from a digital file.
                 </p>
               </div>
-              <div class="hero-content-item">
+              <div class="hero-content-item max-w-266">
                 <p class="hero-content-title">
                   2: Mechanically-Enabled Joinery
                 </p>
@@ -101,14 +103,14 @@
                   production.
                 </p>
               </div>
-              <div class="hero-content-item">
+              <div class="hero-content-item max-w-206">
                 <p class="hero-content-title">3: Fabric Lamination</p>
                 <p class="hero-content-description">
                   Multi-layered fabrics are joined together via controlled heat
                   and pressure before being cut.
                 </p>
               </div>
-              <div class="hero-content-item">
+              <div class="hero-content-item max-w-266">
                 <p class="hero-content-title">
                   4: Two-Ply Digital Patterning, Pixeling, and Excising
                 </p>
@@ -136,6 +138,7 @@
               </div>
             </div>
           </div>
+        </div>
         </div>
       </div>
     </section>
