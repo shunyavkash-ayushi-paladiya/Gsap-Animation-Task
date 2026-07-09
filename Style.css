@@ -92,13 +92,25 @@ img {
   position: relative;
 }
 
-.hero-img-overlay{
-    width: 100%;
-    height: 100%;
-    position: absolute;
-    top: 0;
-    left: 0;
-    background-color:#000000A6;
+.hero-overlays {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  inset: 0;
+}
+
+.hero-img-overlay {
+  width: 100%;
+  height: 100%;
+  background-color: #00000000;
+}
+
+.hero-img-overlay-2 {
+  width: 100%;
+  height: 100%;
+  background-color: #000000a6;
+  flex: none;
 }
 
 .hero-content-items {
@@ -128,6 +140,21 @@ img {
 
 .hero-border-item {
   margin-top: 26px;
+  position: relative;
+}
+
+.hero-border-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0%;
+  background: linear-gradient(to right, #3349EF, #92DDCE);
+  z-index: 1;
+  height: 100%;
+}
+
+.hero-border-overlay-2 {
+  background:#92DDCE;
 }
 
 .hero-border {
