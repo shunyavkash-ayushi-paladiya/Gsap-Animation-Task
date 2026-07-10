@@ -11,9 +11,26 @@ window.addEventListener("load", () => {
   const heroContentItems = document.querySelector(".hero-content-items");
   const heroOverlays = document.querySelector(".hero-overlays");
 
+  // Safety break check
   if (!section || !wrap || !title1 || !title2 || !description1 || !heroImgContent) {
     return;
   }
+
+  // --- IMAGE WIDTH LOGGER ---
+  // Gathers image elements and outputs data to console prior to GSAP layout transforms.
+  const heroImages = heroImgContent.querySelectorAll(".hero-img");
+  console.log("%c--- HERO IMAGES WIDTH REPORT ---", "color: #00dafd; font-weight: bold;");
+  heroImages.forEach((img, index) => {
+    const srcName = img.getAttribute("src") || `Image ${index + 1}`;
+    const layoutWidth = img.getBoundingClientRect().width;
+    console.log(
+      `Image ${index + 1} (${srcName}):\n` +
+      `  -> Natural Asset Width = ${img.naturalWidth}px\n` +
+      `  -> Current Rendered Width = ${layoutWidth}px`
+    );
+  });
+  console.log("%c--------------------------------", "color: #00dafd; font-weight: bold;");
+
 
   function splitTitle(el) {
     const text = el.textContent.trim();
@@ -135,7 +152,7 @@ window.addEventListener("load", () => {
   const lettersByColumn = getLettersByColumn();
 
   // Initialization States
-  gsap.set(title1, { opacity: 0, y: 0 }); // UPDATED: Start hidden to enable initial fade-in
+  gsap.set(title1, { opacity: 0, y: 0 }); 
   gsap.set(title2, { opacity: 0, y: 150 });     
   gsap.set(description1, { opacity: 0, y: 0 }); 
   if (description2) gsap.set(description2, { opacity: 0, xPercent: -50, y: 50 }); 
@@ -149,7 +166,7 @@ window.addEventListener("load", () => {
     transformOrigin: "center center",
   });
 
-  // Timeline Setup
+  // Master Scroll Timeline Setup
   const tl = gsap.timeline({
     scrollTrigger: {
       trigger: section,
@@ -163,26 +180,26 @@ window.addEventListener("load", () => {
 
   const stepDuration = 0.035; 
   const totalColumns = lettersByColumn.length;
-  const titleFadeDuration = 0.3; // Duration for the initial title entry
+  const titleFadeDuration = 0.3; 
 
-  // 1. Initial Step: Fade in the hero-title
+  // STEP 1: Smoothly fade in .hero-title (opacity 0 to 1)
   tl.to(title1, {
     opacity: 1,
     duration: titleFadeDuration,
     ease: "power1.out"
   }, 0);
 
-  // 2. Hide the outer words column-by-column (Starts right after title completes its fade-in)
+  // STEP 2: Start word-hide animation (column by column)
   lettersByColumn.forEach((letters, index) => {
     tl.to(letters, {
       opacity: 0,
       duration: stepDuration,
       ease: "none",
       delay: index * stepDuration, 
-    }, titleFadeDuration); // Modified position marker to wait for title fade-in
+    }, titleFadeDuration); 
   });
 
-  // Highlight remaining letters
+  // Highlight remaining standalone acronym letters
   tl.to(firstLetters, {
     color: "#00dafd",
     duration: 0.2,
@@ -192,7 +209,7 @@ window.addEventListener("load", () => {
   tl.set(meraClones, { opacity: 1 });
   tl.set(firstLetters, { opacity: 0 });
 
-  // Move remaining letters to center 
+  // Slide clones to center alignment
   tl.to(meraClones, {
     left: (i, el) => Number(el.dataset.targetLeft),
     top: (i, el) => Number(el.dataset.targetTop),
@@ -200,7 +217,7 @@ window.addEventListener("load", () => {
     ease: "power2.inOut",
   });
 
-  // 3. Show hero-img-content
+  // STEP 3: Show hero-img-content
   tl.to(heroImgContent, {
     opacity: 1,
     yPercent: 0,
@@ -209,7 +226,7 @@ window.addEventListener("load", () => {
     ease: "power2.inOut",
   });
 
-  // 4. Show initial descriptions
+  // STEP 4: Show descriptions
   tl.to(description1, {
     opacity: 1,
     duration: 0.4,
@@ -226,7 +243,7 @@ window.addEventListener("load", () => {
 
   const finalMoveDuration = 0.55;
 
-  // 5. Transform positions (Title & Descriptions shift)
+  // STEP 5: Transform layout elements positions (Vertical structural shifting)
   tl.to(description1, {
     y: -40, 
     duration: finalMoveDuration,
@@ -247,7 +264,6 @@ window.addEventListener("load", () => {
     ease: "power2.inOut",
   }, "<");
 
-  // Reveal title2 simultaneously during shift
   tl.to(title2, {
     opacity: 1,
     y: 0, 
@@ -255,7 +271,7 @@ window.addEventListener("load", () => {
     ease: "power2.inOut",
   }, "<");
 
-  // 6. Show secondary items block
+  // STEP 6: Reveal auxiliary content pieces
   if (heroContentItems) {
     tl.to(heroContentItems, {
       opacity: 1,
@@ -264,7 +280,7 @@ window.addEventListener("load", () => {
     }, "<");
   }
 
-  // 7. Show hero-overlays (Fades opacity from 0 to 1)
+  // STEP 7: Fade in overlays (opacity 0 to 1) 
   if (heroOverlays) {
     tl.to(heroOverlays, {
       opacity: 1,
