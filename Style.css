@@ -23,7 +23,7 @@ img {
 }
 
 .hero-section {
-  min-height: 300vh;
+  height: 300vh;
   background-color: #000;
   overflow: hidden;
 }
@@ -33,6 +33,14 @@ img {
   display: flex;
   flex-direction: column;
   justify-content: center;
+  height: 100dvh;
+}
+
+.hero-content{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: stretch;
 }
 
 .container {

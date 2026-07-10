@@ -2,62 +2,17 @@ gsap.registerPlugin(ScrollTrigger);
 
 window.addEventListener("load", () => {
   const section = document.querySelector(".hero-section");
-  const heroContent = document.querySelector(".hero-content");
   const wrap = document.querySelector(".hero-title-content");
   const title1 = document.querySelector(".hero-title:not(.hero-title-2)");
   const title2 = document.querySelector(".hero-title-2");
-  const description1 = document.querySelector(
-    ".hero-description:not(.hero-description-2)",
-  );
+  const description1 = document.querySelector(".hero-description:not(.hero-description-2)");
+  const description2 = document.querySelector(".hero-description-2"); 
   const heroImgContent = document.querySelector(".hero-img-content");
-  const heroContentItems = document.querySelector(".hero-content-items");
+  const heroContentItems = document.querySelector(".hero-content-items"); // Added reference
 
-  if (
-    !section ||
-    !heroContent ||
-    !wrap ||
-    !title1 ||
-    !title2 ||
-    !description1 ||
-    !heroImgContent ||
-    !heroContentItems
-  ) {
+  if (!section || !wrap || !title1 || !title2 || !description1 || !heroImgContent) {
     return;
   }
-
-  let heroContentNaturalHeight = 0;
-
-  function measureHeroContentNaturalHeight() {
-    const previousMinHeight = heroContent.style.minHeight;
-    const previousDisplay = heroContent.style.display;
-    const previousFlexDirection = heroContent.style.flexDirection;
-    const previousJustifyContent = heroContent.style.justifyContent;
-
-    heroContent.style.minHeight = "";
-    heroContent.style.display = "";
-    heroContent.style.flexDirection = "";
-    heroContent.style.justifyContent = "";
-
-    heroContentNaturalHeight = heroContent.scrollHeight;
-
-    heroContent.style.minHeight = previousMinHeight;
-    heroContent.style.display = previousDisplay;
-    heroContent.style.flexDirection = previousFlexDirection;
-    heroContent.style.justifyContent = previousJustifyContent;
-  }
-
-  function setHeroContentHeight() {
-    gsap.set(heroContent, {
-      minHeight: "100vh",
-      display: "flex",
-      flexDirection: "column",
-      justifyContent: "center",
-    });
-
-    measureHeroContentNaturalHeight();
-  }
-
-  setHeroContentHeight();
 
   function splitTitle(el) {
     const text = el.textContent.trim();
@@ -178,61 +133,43 @@ window.addEventListener("load", () => {
   let meraClones = buildMeraClones();
   const lettersByColumn = getLettersByColumn();
 
-  gsap.set(title1, { opacity: 0 });
-  gsap.set(title2, { opacity: 0 });
-  gsap.set(description1, { opacity: 0 });
+  gsap.set(title1, { opacity: 1, y: 0 }); 
+  gsap.set(title2, { opacity: 0, y: 150 });     
+  gsap.set(description1, { opacity: 0, y: 0 }); 
+  if (description2) gsap.set(description2, { opacity: 0, xPercent: -50, y: 50 }); 
+  if (heroContentItems) gsap.set(heroContentItems, { opacity: 0 });
 
   gsap.set(heroImgContent, {
     opacity: 0,
-    yPercent: 30,
-    scale: 1.05,
+    yPercent: 70,
+    scale: 1.1,
     transformOrigin: "center center",
-  });
-
-  gsap.set(heroContentItems, {
-    opacity: 0,
   });
 
   const tl = gsap.timeline({
     scrollTrigger: {
       trigger: section,
       start: "top top",
-      end: "+=100%",
+      end: "+=1800", 
       pin: true,
       scrub: 0.6,
       invalidateOnRefresh: true,
     },
   });
 
-  tl.to(title1, {
-    opacity: 1,
-    duration: 0.25,
-    ease: "power1.out",
-  });
-
-  tl.to({}, { duration: 0.08 });
-
   lettersByColumn.forEach((letters) => {
-    tl.to(
-      letters,
-      {
-        opacity: 0,
-        duration: 0.035,
-        ease: "none",
-      },
-      ">",
-    );
+    tl.to(letters, {
+      opacity: 0,
+      duration: 0.035,
+      ease: "none",
+    }, ">");
   });
 
-  tl.to(
-    firstLetters,
-    {
-      color: "#00dafd",
-      duration: 0.2,
-      ease: "none",
-    },
-    "-=0.08",
-  );
+  tl.to(firstLetters, {
+    color: "#00dafd",
+    duration: 0.2,
+    ease: "none",
+  }, "-=0.08");
 
   tl.set(meraClones, { opacity: 1 });
   tl.set(firstLetters, { opacity: 0 });
@@ -244,64 +181,66 @@ window.addEventListener("load", () => {
     ease: "power2.inOut",
   });
 
-  tl.to(
-    heroContent,
-    {
-      minHeight: () => heroContentNaturalHeight,
-      duration: 0.45,
-      ease: "power2.inOut",
-    },
-    ">",
-  );
-
-  tl.set(heroContent, {
-    clearProps: "minHeight,display,flexDirection,justifyContent",
-  });
-
-  tl.to(
-    heroImgContent,
-    {
-      opacity: 1,
-      yPercent: 0,
-      scale: 1,
-      duration: 0.65,
-      ease: "power2.inOut",
-    },
-    "-=0.25",
-  );
-
-  tl.to(heroContentItems, {
+  tl.to(heroImgContent, {
     opacity: 1,
-    duration: 0.35,
-    ease: "power1.out",
-  });
-
-  tl.to({}, { duration: 0.12 });
-
-  tl.to(description1, {
-    opacity: 1,
-    duration: 0.35,
-    ease: "power1.out",
-  });
-
-  tl.to(title1, {
-    opacity: 0,
-    duration: 0.4,
+    yPercent: 0,
+    scale: 1,
+    duration: 0.65,
     ease: "power2.inOut",
   });
 
-  tl.to(
-    title2,
-    {
+  tl.to(description1, {
+    opacity: 1,
+    duration: 0.4,
+    ease: "power1.out",
+  });
+
+  if (description2) {
+    tl.to(description2, {
       opacity: 1,
-      duration: 0.45,
-      ease: "power2.out",
-    },
-    "-=0.15",
-  );
+      duration: 0.4,
+      ease: "power1.out",
+    }, "<"); 
+  }
+
+  const finalMoveDuration = 0.55;
+
+  tl.to(description1, {
+    y: -40, 
+    duration: finalMoveDuration,
+    ease: "power2.inOut",
+  });
+
+  if (description2) {
+    tl.to(description2, {
+      y: 0,
+      duration: finalMoveDuration,
+      ease: "power2.inOut",
+    }, "<");
+  }
+
+  tl.to([title1, cloneWrap], {
+    y: -70, 
+    duration: finalMoveDuration,
+    ease: "power2.inOut",
+  }, "<");
+
+  tl.to(title2, {
+    opacity: 1,
+    y: 0, 
+    duration: finalMoveDuration,
+    ease: "power2.inOut",
+  }, "<");
+
+  if (heroContentItems) {
+    tl.to(heroContentItems, {
+      opacity: 1,
+      duration: 0.4,
+      ease: "power1.out"
+    }, "<");
+  }
 
   window.addEventListener("resize", () => {
-    setHeroContentHeight();
     meraClones = buildMeraClones();
     ScrollTrigger.refresh();
   });
