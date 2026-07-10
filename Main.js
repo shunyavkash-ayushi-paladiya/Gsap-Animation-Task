@@ -8,7 +8,7 @@ window.addEventListener("load", () => {
   const description1 = document.querySelector(".hero-description:not(.hero-description-2)");
   const description2 = document.querySelector(".hero-description-2"); 
   const heroImgContent = document.querySelector(".hero-img-content");
-  const heroContentItems = document.querySelector(".hero-content-items"); // Added reference
+  const heroContentItems = document.querySelector(".hero-content-items");
 
   if (!section || !wrap || !title1 || !title2 || !description1 || !heroImgContent) {
     return;
@@ -142,7 +142,7 @@ window.addEventListener("load", () => {
   gsap.set(heroImgContent, {
     opacity: 0,
     yPercent: 70,
-    scale: 1.1,
+    scale: 0.5,
     transformOrigin: "center center",
   });
 
@@ -157,19 +157,23 @@ window.addEventListener("load", () => {
     },
   });
 
-  lettersByColumn.forEach((letters) => {
+  const stepDuration = 0.035; 
+  const totalColumns = lettersByColumn.length;
+
+  lettersByColumn.forEach((letters, index) => {
     tl.to(letters, {
       opacity: 0,
-      duration: 0.035,
+      duration: stepDuration,
       ease: "none",
-    }, ">");
+      delay: index * stepDuration, 
+    }, 0); 
   });
 
   tl.to(firstLetters, {
     color: "#00dafd",
     duration: 0.2,
     ease: "none",
-  }, "-=0.08");
+  }, (totalColumns * stepDuration) + 0.1);
 
   tl.set(meraClones, { opacity: 1 });
   tl.set(firstLetters, { opacity: 0 });
