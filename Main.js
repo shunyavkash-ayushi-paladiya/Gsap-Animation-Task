@@ -2,6 +2,7 @@ gsap.registerPlugin(ScrollTrigger);
 
 window.addEventListener("load", () => {
   const section = document.querySelector(".hero-section");
+  const heroContent = document.querySelector(".hero-content");
   const wrap = document.querySelector(".hero-title-content");
   const title1 = document.querySelector(".hero-title:not(.hero-title-2)");
   const title2 = document.querySelector(".hero-title-2");
@@ -13,6 +14,7 @@ window.addEventListener("load", () => {
 
   if (
     !section ||
+    !heroContent ||
     !wrap ||
     !title1 ||
     !title2 ||
@@ -22,6 +24,40 @@ window.addEventListener("load", () => {
   ) {
     return;
   }
+
+  let heroContentNaturalHeight = 0;
+
+  function measureHeroContentNaturalHeight() {
+    const previousMinHeight = heroContent.style.minHeight;
+    const previousDisplay = heroContent.style.display;
+    const previousFlexDirection = heroContent.style.flexDirection;
+    const previousJustifyContent = heroContent.style.justifyContent;
+
+    heroContent.style.minHeight = "";
+    heroContent.style.display = "";
+    heroContent.style.flexDirection = "";
+    heroContent.style.justifyContent = "";
+
+    heroContentNaturalHeight = heroContent.scrollHeight;
+
+    heroContent.style.minHeight = previousMinHeight;
+    heroContent.style.display = previousDisplay;
+    heroContent.style.flexDirection = previousFlexDirection;
+    heroContent.style.justifyContent = previousJustifyContent;
+  }
+
+  function setHeroContentHeight() {
+    gsap.set(heroContent, {
+      minHeight: "100vh",
+      display: "flex",
+      flexDirection: "column",
+      justifyContent: "center",
+    });
+
+    measureHeroContentNaturalHeight();
+  }
+
+  setHeroContentHeight();
 
   function splitTitle(el) {
     const text = el.textContent.trim();
@@ -142,22 +178,14 @@ window.addEventListener("load", () => {
   let meraClones = buildMeraClones();
   const lettersByColumn = getLettersByColumn();
 
-  gsap.set(title1, {
-    opacity: 0,
-  });
-
-  gsap.set(title2, {
-    opacity: 0,
-  });
-
-  gsap.set(description1, {
-    opacity: 0,
-  });
+  gsap.set(title1, { opacity: 0 });
+  gsap.set(title2, { opacity: 0 });
+  gsap.set(description1, { opacity: 0 });
 
   gsap.set(heroImgContent, {
     opacity: 0,
-    yPercent: 80,
-    scale: 1.1,
+    yPercent: 30,
+    scale: 1.05,
     transformOrigin: "center center",
   });
 
@@ -206,13 +234,8 @@ window.addEventListener("load", () => {
     "-=0.08",
   );
 
-  tl.set(meraClones, {
-    opacity: 1,
-  });
-
-  tl.set(firstLetters, {
-    opacity: 0,
-  });
+  tl.set(meraClones, { opacity: 1 });
+  tl.set(firstLetters, { opacity: 0 });
 
   tl.to(meraClones, {
     left: (i, el) => Number(el.dataset.targetLeft),
@@ -221,13 +244,31 @@ window.addEventListener("load", () => {
     ease: "power2.inOut",
   });
 
-  tl.to(heroImgContent, {
-    opacity: 1,
-    yPercent: 0,
-    scale: 1,
-    duration: 0.65,
-    ease: "power2.inOut",
+  tl.to(
+    heroContent,
+    {
+      minHeight: () => heroContentNaturalHeight,
+      duration: 0.45,
+      ease: "power2.inOut",
+    },
+    ">",
+  );
+
+  tl.set(heroContent, {
+    clearProps: "minHeight,display,flexDirection,justifyContent",
   });
+
+  tl.to(
+    heroImgContent,
+    {
+      opacity: 1,
+      yPercent: 0,
+      scale: 1,
+      duration: 0.65,
+      ease: "power2.inOut",
+    },
+    "-=0.25",
+  );
 
   tl.to(heroContentItems, {
     opacity: 1,
@@ -260,6 +301,7 @@ window.addEventListener("load", () => {
   );
 
   window.addEventListener("resize", () => {
+    setHeroContentHeight();
     meraClones = buildMeraClones();
     ScrollTrigger.refresh();
   });
