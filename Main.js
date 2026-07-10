@@ -9,6 +9,7 @@ window.addEventListener("load", () => {
   const description2 = document.querySelector(".hero-description-2"); 
   const heroImgContent = document.querySelector(".hero-img-content");
   const heroContentItems = document.querySelector(".hero-content-items");
+  const heroOverlays = document.querySelector(".hero-overlays");
 
   if (!section || !wrap || !title1 || !title2 || !description1 || !heroImgContent) {
     return;
@@ -133,11 +134,13 @@ window.addEventListener("load", () => {
   let meraClones = buildMeraClones();
   const lettersByColumn = getLettersByColumn();
 
-  gsap.set(title1, { opacity: 1, y: 0 }); 
+  // Initialization States
+  gsap.set(title1, { opacity: 0, y: 0 }); // UPDATED: Start hidden to enable initial fade-in
   gsap.set(title2, { opacity: 0, y: 150 });     
   gsap.set(description1, { opacity: 0, y: 0 }); 
   if (description2) gsap.set(description2, { opacity: 0, xPercent: -50, y: 50 }); 
   if (heroContentItems) gsap.set(heroContentItems, { opacity: 0 });
+  if (heroOverlays) gsap.set(heroOverlays, { opacity: 0 });
 
   gsap.set(heroImgContent, {
     opacity: 0,
@@ -146,6 +149,7 @@ window.addEventListener("load", () => {
     transformOrigin: "center center",
   });
 
+  // Timeline Setup
   const tl = gsap.timeline({
     scrollTrigger: {
       trigger: section,
@@ -159,25 +163,36 @@ window.addEventListener("load", () => {
 
   const stepDuration = 0.035; 
   const totalColumns = lettersByColumn.length;
+  const titleFadeDuration = 0.3; // Duration for the initial title entry
 
+  // 1. Initial Step: Fade in the hero-title
+  tl.to(title1, {
+    opacity: 1,
+    duration: titleFadeDuration,
+    ease: "power1.out"
+  }, 0);
+
+  // 2. Hide the outer words column-by-column (Starts right after title completes its fade-in)
   lettersByColumn.forEach((letters, index) => {
     tl.to(letters, {
       opacity: 0,
       duration: stepDuration,
       ease: "none",
       delay: index * stepDuration, 
-    }, 0); 
+    }, titleFadeDuration); // Modified position marker to wait for title fade-in
   });
 
+  // Highlight remaining letters
   tl.to(firstLetters, {
     color: "#00dafd",
     duration: 0.2,
     ease: "none",
-  }, (totalColumns * stepDuration) + 0.1);
+  }, titleFadeDuration + (totalColumns * stepDuration) + 0.1);
 
   tl.set(meraClones, { opacity: 1 });
   tl.set(firstLetters, { opacity: 0 });
 
+  // Move remaining letters to center 
   tl.to(meraClones, {
     left: (i, el) => Number(el.dataset.targetLeft),
     top: (i, el) => Number(el.dataset.targetTop),
@@ -185,6 +200,7 @@ window.addEventListener("load", () => {
     ease: "power2.inOut",
   });
 
+  // 3. Show hero-img-content
   tl.to(heroImgContent, {
     opacity: 1,
     yPercent: 0,
@@ -193,6 +209,7 @@ window.addEventListener("load", () => {
     ease: "power2.inOut",
   });
 
+  // 4. Show initial descriptions
   tl.to(description1, {
     opacity: 1,
     duration: 0.4,
@@ -209,6 +226,7 @@ window.addEventListener("load", () => {
 
   const finalMoveDuration = 0.55;
 
+  // 5. Transform positions (Title & Descriptions shift)
   tl.to(description1, {
     y: -40, 
     duration: finalMoveDuration,
@@ -229,6 +247,7 @@ window.addEventListener("load", () => {
     ease: "power2.inOut",
   }, "<");
 
+  // Reveal title2 simultaneously during shift
   tl.to(title2, {
     opacity: 1,
     y: 0, 
@@ -236,12 +255,22 @@ window.addEventListener("load", () => {
     ease: "power2.inOut",
   }, "<");
 
+  // 6. Show secondary items block
   if (heroContentItems) {
     tl.to(heroContentItems, {
       opacity: 1,
       duration: 0.4,
       ease: "power1.out"
     }, "<");
+  }
+
+  // 7. Show hero-overlays (Fades opacity from 0 to 1)
+  if (heroOverlays) {
+    tl.to(heroOverlays, {
+      opacity: 1,
+      duration: 0.5,
+      ease: "power1.inOut"
+    }, "-=0.2");
   }
 
   window.addEventListener("resize", () => {
