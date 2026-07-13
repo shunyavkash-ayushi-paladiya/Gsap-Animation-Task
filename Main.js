@@ -11,10 +11,12 @@ window.addEventListener("load", () => {
   const heroContentItems = document.querySelector(".hero-content-items");
   const heroOverlays = document.querySelector(".hero-overlays");
   
-  // Both border elements retrieved here
+  // Target overlays
   const heroBorderOverlay = document.querySelector(".hero-border-overlay");
   const heroBorderOverlay2 = document.querySelector(".hero-border-overlay-2");
   
+  // Parent wrapper container
+  const borderWrapper = document.querySelector(".hero-content-item-wrapper");
   const contentItems = document.querySelectorAll(".hero-content-item");
 
   if (!section || !wrap || !title1 || !title2 || !description1 || !heroImgContent) {
@@ -22,14 +24,35 @@ window.addEventListener("load", () => {
   }
 
   const heroImages = heroImgContent.querySelectorAll(".hero-img");
-  console.log("%c--- HERO IMAGES WIDTH REPORT ---", "color: #00dafd; font-weight: bold;");
-  heroImages.forEach((img, index) => {
-    const srcName = img.getAttribute("src") || `Image ${index + 1}`;
-    const layoutWidth = img.offsetWidth; 
-    console.log(`Image ${index + 1} (${srcName}): Current Rendered Width = ${layoutWidth}px`);
-  });
-  console.log("%c--------------------------------", "color: #00dafd; font-weight: bold;");
 
+  // Transform-Safe Coordinate Pre-calculations
+  let imagePositions = [];
+
+  function calculateImagePositions() {
+    imagePositions = [];
+    if (!borderWrapper || heroImages.length === 0) return;
+
+    // Temporarily remove active timeline transforms to get pristine measurements
+    const originalTransform = heroImgContent.style.transform;
+    heroImgContent.style.transform = "none";
+
+    const wrapperRect = borderWrapper.getBoundingClientRect();
+    
+    heroImages.forEach((img) => {
+      const rect = img.getBoundingClientRect();
+      imagePositions.push({
+        left: rect.left - wrapperRect.left,
+        right: rect.right - wrapperRect.left,
+        width: rect.width
+      });
+    });
+
+    // Restore transforms smoothly
+    heroImgContent.style.transform = originalTransform;
+  }
+
+  // Run initial calculation before any GSAP properties distort the layout
+  calculateImagePositions();
 
   function splitTitle(el) {
     const text = el.textContent.trim();
@@ -151,7 +174,7 @@ window.addEventListener("load", () => {
   const lettersByColumn = getLettersByColumn();
 
   gsap.set(title1, { opacity: 0, y: 0 }); 
-  gsap.set(title2, { opacity: 0, y: 150 });     
+  gsap.set(title2, { opacity: 0, y: 150 });      
   gsap.set(description1, { opacity: 0, y: 0 }); 
   if (description2) gsap.set(description2, { opacity: 0, xPercent: -50, y: 50 }); 
   if (heroContentItems) gsap.set(heroContentItems, { opacity: 0 });
@@ -280,8 +303,6 @@ window.addEventListener("load", () => {
     }, "-=0.2");
 
     if (heroImages.length > 0) {
-      const fifthImage = heroImages[4]; 
-
       heroImages.forEach((img, index) => {
         const matchingBlock = contentItems[index];
         const prevBlock = contentItems[index - 1]; 
@@ -289,24 +310,21 @@ window.addEventListener("load", () => {
 
         const currentBorderTarget = index < 4 ? heroBorderOverlay : heroBorderOverlay2;
 
-        if (currentBorderTarget) {
-          tl.to(currentBorderTarget, {
-            // FIXED CALCULATION METHOD USING VIEWPORT RECTS
-            width: () => {
-              // Extract the relative parent border container bounds
-              const parentContainer = currentBorderTarget.parentElement;
-              if (!parentContainer) return 0;
+        if (currentBorderTarget && imagePositions[index]) {
+          const positionParam = isFirst ? "<" : "+=0.1";
 
-              const parentRect = parentContainer.getBoundingClientRect();
-              const imgRect = img.getBoundingClientRect();
+          tl.to(currentBorderTarget, {
+            width: () => {
+              if (!borderWrapper) return 0;
 
               if (index < 4) {
-                // Measure directly from left boundary of parent to right edge of current image
-                return imgRect.right - parentRect.left;
+                // First overlay spans cumulatively from left across the first 4 images
+                return Math.max(0, Math.min(imagePositions[index].right, borderWrapper.offsetWidth));
               } else {
-                // Measure from the start position of the fifth image to the right edge of current image
-                const startRect = fifthImage ? fifthImage.getBoundingClientRect() : imgRect;
-                return imgRect.right - startRect.left;
+                // FIXED: Animates width strictly based on layout metrics without altering position styles
+                // NOTE: Change this to 'imagePositions[index].right - imagePositions[3].right' 
+                // if your overlay-2 starts structural layout from the end of the 4th image.
+                return Math.max(0, imagePositions[index].width);
               }
             },
             duration: 0.5,
@@ -319,7 +337,7 @@ window.addEventListener("load", () => {
               if (matchingBlock) matchingBlock.classList.remove("active");
               if (prevBlock) prevBlock.classList.add("active");
             }
-          }, isFirst ? "<" : "+=0.1");
+          }, positionParam);
         }
 
         if (matchingBlock) {
@@ -350,6 +368,7 @@ window.addEventListener("load", () => {
   }
 
   window.addEventListener("resize", () => {
+    calculateImagePositions();
     meraClones = buildMeraClones();
     ScrollTrigger.refresh();
   });

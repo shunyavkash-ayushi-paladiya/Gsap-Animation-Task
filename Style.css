@@ -188,6 +188,7 @@ img {
 .hero-border-item {
   margin-top: 26px;
   position: relative;
+  overflow: hidden;
 }
 
 .hero-border-overlay {
