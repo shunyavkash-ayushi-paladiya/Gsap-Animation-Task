@@ -10,24 +10,23 @@ window.addEventListener("load", () => {
   const heroImgContent = document.querySelector(".hero-img-content");
   const heroContentItems = document.querySelector(".hero-content-items");
   const heroOverlays = document.querySelector(".hero-overlays");
+  
+  // Both border elements retrieved here
+  const heroBorderOverlay = document.querySelector(".hero-border-overlay");
+  const heroBorderOverlay2 = document.querySelector(".hero-border-overlay-2");
+  
+  const contentItems = document.querySelectorAll(".hero-content-item");
 
-  // Safety break check
   if (!section || !wrap || !title1 || !title2 || !description1 || !heroImgContent) {
     return;
   }
 
-  // --- IMAGE WIDTH LOGGER ---
-  // Gathers image elements and outputs data to console prior to GSAP layout transforms.
   const heroImages = heroImgContent.querySelectorAll(".hero-img");
   console.log("%c--- HERO IMAGES WIDTH REPORT ---", "color: #00dafd; font-weight: bold;");
   heroImages.forEach((img, index) => {
     const srcName = img.getAttribute("src") || `Image ${index + 1}`;
-    const layoutWidth = img.getBoundingClientRect().width;
-    console.log(
-      `Image ${index + 1} (${srcName}):\n` +
-      `  -> Natural Asset Width = ${img.naturalWidth}px\n` +
-      `  -> Current Rendered Width = ${layoutWidth}px`
-    );
+    const layoutWidth = img.offsetWidth; 
+    console.log(`Image ${index + 1} (${srcName}): Current Rendered Width = ${layoutWidth}px`);
   });
   console.log("%c--------------------------------", "color: #00dafd; font-weight: bold;");
 
@@ -151,13 +150,15 @@ window.addEventListener("load", () => {
   let meraClones = buildMeraClones();
   const lettersByColumn = getLettersByColumn();
 
-  // Initialization States
   gsap.set(title1, { opacity: 0, y: 0 }); 
   gsap.set(title2, { opacity: 0, y: 150 });     
   gsap.set(description1, { opacity: 0, y: 0 }); 
   if (description2) gsap.set(description2, { opacity: 0, xPercent: -50, y: 50 }); 
   if (heroContentItems) gsap.set(heroContentItems, { opacity: 0 });
   if (heroOverlays) gsap.set(heroOverlays, { opacity: 0 });
+  
+  if (heroBorderOverlay) gsap.set(heroBorderOverlay, { width: 0 });
+  if (heroBorderOverlay2) gsap.set(heroBorderOverlay2, { width: 0 });
 
   gsap.set(heroImgContent, {
     opacity: 0,
@@ -166,7 +167,6 @@ window.addEventListener("load", () => {
     transformOrigin: "center center",
   });
 
-  // Master Scroll Timeline Setup
   const tl = gsap.timeline({
     scrollTrigger: {
       trigger: section,
@@ -182,14 +182,12 @@ window.addEventListener("load", () => {
   const totalColumns = lettersByColumn.length;
   const titleFadeDuration = 0.3; 
 
-  // STEP 1: Smoothly fade in .hero-title (opacity 0 to 1)
   tl.to(title1, {
     opacity: 1,
     duration: titleFadeDuration,
     ease: "power1.out"
   }, 0);
 
-  // STEP 2: Start word-hide animation (column by column)
   lettersByColumn.forEach((letters, index) => {
     tl.to(letters, {
       opacity: 0,
@@ -199,7 +197,6 @@ window.addEventListener("load", () => {
     }, titleFadeDuration); 
   });
 
-  // Highlight remaining standalone acronym letters
   tl.to(firstLetters, {
     color: "#00dafd",
     duration: 0.2,
@@ -209,7 +206,6 @@ window.addEventListener("load", () => {
   tl.set(meraClones, { opacity: 1 });
   tl.set(firstLetters, { opacity: 0 });
 
-  // Slide clones to center alignment
   tl.to(meraClones, {
     left: (i, el) => Number(el.dataset.targetLeft),
     top: (i, el) => Number(el.dataset.targetTop),
@@ -217,7 +213,6 @@ window.addEventListener("load", () => {
     ease: "power2.inOut",
   });
 
-  // STEP 3: Show hero-img-content
   tl.to(heroImgContent, {
     opacity: 1,
     yPercent: 0,
@@ -226,7 +221,6 @@ window.addEventListener("load", () => {
     ease: "power2.inOut",
   });
 
-  // STEP 4: Show descriptions
   tl.to(description1, {
     opacity: 1,
     duration: 0.4,
@@ -243,7 +237,6 @@ window.addEventListener("load", () => {
 
   const finalMoveDuration = 0.55;
 
-  // STEP 5: Transform layout elements positions (Vertical structural shifting)
   tl.to(description1, {
     y: -40, 
     duration: finalMoveDuration,
@@ -271,7 +264,6 @@ window.addEventListener("load", () => {
     ease: "power2.inOut",
   }, "<");
 
-  // STEP 6: Reveal auxiliary content pieces
   if (heroContentItems) {
     tl.to(heroContentItems, {
       opacity: 1,
@@ -280,13 +272,81 @@ window.addEventListener("load", () => {
     }, "<");
   }
 
-  // STEP 7: Fade in overlays (opacity 0 to 1) 
   if (heroOverlays) {
     tl.to(heroOverlays, {
       opacity: 1,
       duration: 0.5,
       ease: "power1.inOut"
     }, "-=0.2");
+
+    if (heroImages.length > 0) {
+      const fifthImage = heroImages[4]; 
+
+      heroImages.forEach((img, index) => {
+        const matchingBlock = contentItems[index];
+        const prevBlock = contentItems[index - 1]; 
+        const isFirst = index === 0;
+
+        const currentBorderTarget = index < 4 ? heroBorderOverlay : heroBorderOverlay2;
+
+        if (currentBorderTarget) {
+          tl.to(currentBorderTarget, {
+            // FIXED CALCULATION METHOD USING VIEWPORT RECTS
+            width: () => {
+              // Extract the relative parent border container bounds
+              const parentContainer = currentBorderTarget.parentElement;
+              if (!parentContainer) return 0;
+
+              const parentRect = parentContainer.getBoundingClientRect();
+              const imgRect = img.getBoundingClientRect();
+
+              if (index < 4) {
+                // Measure directly from left boundary of parent to right edge of current image
+                return imgRect.right - parentRect.left;
+              } else {
+                // Measure from the start position of the fifth image to the right edge of current image
+                const startRect = fifthImage ? fifthImage.getBoundingClientRect() : imgRect;
+                return imgRect.right - startRect.left;
+              }
+            },
+            duration: 0.5,
+            ease: "power1.inOut",
+            onStart: () => {
+              if (matchingBlock) matchingBlock.classList.add("active");
+              if (prevBlock) prevBlock.classList.remove("active");
+            },
+            onReverseComplete: () => {
+              if (matchingBlock) matchingBlock.classList.remove("active");
+              if (prevBlock) prevBlock.classList.add("active");
+            }
+          }, isFirst ? "<" : "+=0.1");
+        }
+
+        if (matchingBlock) {
+          const titleText = matchingBlock.querySelector(".hero-content-title");
+          const descriptionText = matchingBlock.querySelector(".hero-content-description");
+
+          if (titleText) {
+            tl.to(titleText, { color: "#00dafd", duration: 0.5, ease: "power1.inOut" }, "<");
+          }
+          if (descriptionText) {
+            tl.to(descriptionText, { color: "#ffffff", duration: 0.5, ease: "power1.inOut" }, "<");
+          }
+        }
+
+        if (prevBlock) {
+          const prevTitle = prevBlock.querySelector(".hero-content-title");
+          const prevDesc = prevBlock.querySelector(".hero-content-description");
+          
+          if (prevTitle) {
+            tl.to(prevTitle, { color: "#8a8a8a", duration: 0.4, ease: "power1.inOut" }, "<");
+          }
+          if (prevDesc) {
+            tl.to(prevDesc, { color: "#8a8a8a", duration: 0.4, ease: "power1.inOut" }, "<");
+          }
+        }
+      });
+    }
   }
 
   window.addEventListener("resize", () => {
