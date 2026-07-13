@@ -11,11 +11,9 @@ window.addEventListener("load", () => {
   const heroContentItems = document.querySelector(".hero-content-items");
   const heroOverlays = document.querySelector(".hero-overlays");
   
-  // Target overlays
   const heroBorderOverlay = document.querySelector(".hero-border-overlay");
   const heroBorderOverlay2 = document.querySelector(".hero-border-overlay-2");
   
-  // Parent wrapper container
   const borderWrapper = document.querySelector(".hero-content-item-wrapper");
   const contentItems = document.querySelectorAll(".hero-content-item");
 
@@ -25,14 +23,12 @@ window.addEventListener("load", () => {
 
   const heroImages = heroImgContent.querySelectorAll(".hero-img");
 
-  // Transform-Safe Coordinate Pre-calculations
   let imagePositions = [];
 
   function calculateImagePositions() {
     imagePositions = [];
     if (!borderWrapper || heroImages.length === 0) return;
 
-    // Temporarily remove active timeline transforms to get pristine measurements
     const originalTransform = heroImgContent.style.transform;
     heroImgContent.style.transform = "none";
 
@@ -47,11 +43,9 @@ window.addEventListener("load", () => {
       });
     });
 
-    // Restore transforms smoothly
     heroImgContent.style.transform = originalTransform;
   }
 
-  // Run initial calculation before any GSAP properties distort the layout
   calculateImagePositions();
 
   function splitTitle(el) {
@@ -316,14 +310,9 @@ window.addEventListener("load", () => {
           tl.to(currentBorderTarget, {
             width: () => {
               if (!borderWrapper) return 0;
-
               if (index < 4) {
-                // First overlay spans cumulatively from left across the first 4 images
                 return Math.max(0, Math.min(imagePositions[index].right, borderWrapper.offsetWidth));
               } else {
-                // FIXED: Animates width strictly based on layout metrics without altering position styles
-                // NOTE: Change this to 'imagePositions[index].right - imagePositions[3].right' 
-                // if your overlay-2 starts structural layout from the end of the 4th image.
                 return Math.max(0, imagePositions[index].width);
               }
             },
@@ -342,25 +331,41 @@ window.addEventListener("load", () => {
 
         if (matchingBlock) {
           const titleText = matchingBlock.querySelector(".hero-content-title");
-          const descriptionText = matchingBlock.querySelector(".hero-content-description");
+          
+          const descriptionText = matchingBlock.querySelector(".hero-item-description");
 
           if (titleText) {
             tl.to(titleText, { color: "#00dafd", duration: 0.5, ease: "power1.inOut" }, "<");
           }
+
           if (descriptionText) {
-            tl.to(descriptionText, { color: "#ffffff", duration: 0.5, ease: "power1.inOut" }, "<");
+            if (index === 3) {
+              tl.to(descriptionText, { color: "#ffffff", duration: 0.5, ease: "power1.inOut" }, "<");
+            } else if (index === 4) {
+              tl.to(descriptionText, { color: "#ffffff", duration: 0.5, ease: "power1.inOut" }, "<");
+              
+              const fourthDescription = contentItems[3]?.querySelector(".hero-item-description");
+              if (fourthDescription) {
+                tl.to(fourthDescription, { color: "#8a8a8a", duration: 0.5, ease: "power1.inOut" }, "<");
+              }
+            } else {
+              tl.to(descriptionText, { color: "#ffffff", duration: 0.5, ease: "power1.inOut" }, "<");
+            }
           }
         }
 
         if (prevBlock) {
           const prevTitle = prevBlock.querySelector(".hero-content-title");
-          const prevDesc = prevBlock.querySelector(".hero-content-description");
+          const prevDesc = prevBlock.querySelector(".hero-item-description");
           
           if (prevTitle) {
             tl.to(prevTitle, { color: "#8a8a8a", duration: 0.4, ease: "power1.inOut" }, "<");
           }
+          
           if (prevDesc) {
-            tl.to(prevDesc, { color: "#8a8a8a", duration: 0.4, ease: "power1.inOut" }, "<");
+            if (index !== 4) { 
+              tl.to(prevDesc, { color: "#8a8a8a", duration: 0.4, ease: "power1.inOut" }, "<");
+            }
           }
         }
       });
