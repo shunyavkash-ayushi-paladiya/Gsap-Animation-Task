@@ -11,11 +11,16 @@ window.addEventListener("load", () => {
   const heroContentItems = document.querySelector(".hero-content-items");
   const heroOverlays = document.querySelector(".hero-overlays");
   
+  const heroImgOverlay1 = document.querySelector(".hero-img-overlay-1");
+  
   const heroBorderOverlay = document.querySelector(".hero-border-overlay");
   const heroBorderOverlay2 = document.querySelector(".hero-border-overlay-2");
   
   const borderWrapper = document.querySelector(".hero-content-item-wrapper");
   const contentItems = document.querySelectorAll(".hero-content-item");
+
+  const itemDesc1 = document.querySelector(".hero-item-description:not(.hero-item-description-v2)");
+  const itemDesc2 = document.querySelector(".hero-item-description-v2");
 
   if (!section || !wrap || !title1 || !title2 || !description1 || !heroImgContent) {
     return;
@@ -33,13 +38,16 @@ window.addEventListener("load", () => {
     heroImgContent.style.transform = "none";
 
     const wrapperRect = borderWrapper.getBoundingClientRect();
+    const imgContentRect = heroImgContent.getBoundingClientRect(); 
     
     heroImages.forEach((img) => {
       const rect = img.getBoundingClientRect();
       imagePositions.push({
         left: rect.left - wrapperRect.left,
         right: rect.right - wrapperRect.left,
-        width: rect.width
+        width: rect.width, 
+        imgLeft: rect.left - imgContentRect.left, 
+        imgRight: rect.right - imgContentRect.left 
       });
     });
 
@@ -167,6 +175,7 @@ window.addEventListener("load", () => {
   let meraClones = buildMeraClones();
   const lettersByColumn = getLettersByColumn();
 
+  // Clean initialization layout state
   gsap.set(title1, { opacity: 0, y: 0 }); 
   gsap.set(title2, { opacity: 0, y: 150 });      
   gsap.set(description1, { opacity: 0, y: 0 }); 
@@ -176,6 +185,14 @@ window.addEventListener("load", () => {
   
   if (heroBorderOverlay) gsap.set(heroBorderOverlay, { width: 0 });
   if (heroBorderOverlay2) gsap.set(heroBorderOverlay2, { width: 0 });
+  
+  // Define strict transformation origins
+  if (heroImgOverlay1) {
+    gsap.set(heroImgOverlay1, { scaleX: 0, x: 0, transformOrigin: "left center" }); 
+  }
+
+  if (itemDesc1) gsap.set(itemDesc1, { color: "#8a8a8a" });
+  if (itemDesc2) gsap.set(itemDesc2, { color: "#8a8a8a" });
 
   gsap.set(heroImgContent, {
     opacity: 0,
@@ -184,6 +201,7 @@ window.addEventListener("load", () => {
     transformOrigin: "center center",
   });
 
+  // Timeline Setup matching the scrolling timeline parameters
   const tl = gsap.timeline({
     scrollTrigger: {
       trigger: section,
@@ -199,6 +217,7 @@ window.addEventListener("load", () => {
   const totalColumns = lettersByColumn.length;
   const titleFadeDuration = 0.3; 
 
+  // --- 1. TITLE REVEAL AND SPLIT ---
   tl.to(title1, {
     opacity: 1,
     duration: titleFadeDuration,
@@ -230,6 +249,7 @@ window.addEventListener("load", () => {
     ease: "power2.inOut",
   });
 
+  // --- 2. LAYOUT AND ASSEMBLY REVEAL (Matches Demo Delay Sequence) ---
   tl.to(heroImgContent, {
     opacity: 1,
     yPercent: 0,
@@ -289,6 +309,7 @@ window.addEventListener("load", () => {
     }, "<");
   }
 
+  // --- 3. SYNCHRONIZED COMPONENT HIGHLIGHTS (LEFT TO RIGHT SLIDE) ---
   if (heroOverlays) {
     tl.to(heroOverlays, {
       opacity: 1,
@@ -297,75 +318,77 @@ window.addEventListener("load", () => {
     }, "-=0.2");
 
     if (heroImages.length > 0) {
+      const baseOverlayWidth = heroImgOverlay1 ? (heroImgOverlay1.offsetWidth || 1) : 1;
+
       heroImages.forEach((img, index) => {
         const matchingBlock = contentItems[index];
         const prevBlock = contentItems[index - 1]; 
         const isFirst = index === 0;
 
         const currentBorderTarget = index < 4 ? heroBorderOverlay : heroBorderOverlay2;
+        const stepLabel = `step_${index}`;
+        
+        tl.add(stepLabel, isFirst ? "<" : "+=0.15");
 
-        if (currentBorderTarget && imagePositions[index]) {
-          const positionParam = isFirst ? "<" : "+=0.1";
+        if (imagePositions[index]) {
+          // Dynamic scale positioning handling Left -> Right flow cleanly without layout shifts
+          if (heroImgOverlay1) {
+            const targetScaleX = imagePositions[index].width / baseOverlayWidth;
 
-          tl.to(currentBorderTarget, {
-            width: () => {
-              if (!borderWrapper) return 0;
-              if (index < 4) {
-                return Math.max(0, Math.min(imagePositions[index].right, borderWrapper.offsetWidth));
-              } else {
-                return Math.max(0, imagePositions[index].width);
-              }
-            },
-            duration: 0.5,
-            ease: "power1.inOut",
-            onStart: () => {
-              if (matchingBlock) matchingBlock.classList.add("active");
-              if (prevBlock) prevBlock.classList.remove("active");
-            },
-            onReverseComplete: () => {
-              if (matchingBlock) matchingBlock.classList.remove("active");
-              if (prevBlock) prevBlock.classList.add("active");
-            }
-          }, positionParam);
-        }
-
-        if (matchingBlock) {
-          const titleText = matchingBlock.querySelector(".hero-content-title");
-          
-          const descriptionText = matchingBlock.querySelector(".hero-item-description");
-
-          if (titleText) {
-            tl.to(titleText, { color: "#00dafd", duration: 0.5, ease: "power1.inOut" }, "<");
+            tl.to(heroImgOverlay1, {
+              x: imagePositions[index].imgLeft,  
+              scaleX: targetScaleX,
+              transformOrigin: "left center",
+              duration: 0.65,
+              ease: "power2.inOut"
+            }, stepLabel); 
           }
 
-          if (descriptionText) {
-            if (index === 3) {
-              tl.to(descriptionText, { color: "#ffffff", duration: 0.5, ease: "power1.inOut" }, "<");
-            } else if (index === 4) {
-              tl.to(descriptionText, { color: "#ffffff", duration: 0.5, ease: "power1.inOut" }, "<");
-              
-              const fourthDescription = contentItems[3]?.querySelector(".hero-item-description");
-              if (fourthDescription) {
-                tl.to(fourthDescription, { color: "#8a8a8a", duration: 0.5, ease: "power1.inOut" }, "<");
+          // Border overlay sync logic
+          if (currentBorderTarget) {
+            tl.to(currentBorderTarget, {
+              width: () => {
+                if (!borderWrapper) return 0;
+                if (index < 4) {
+                  return Math.max(0, Math.min(imagePositions[index].right, borderWrapper.offsetWidth));
+                } else {
+                  return Math.max(0, imagePositions[index].width);
+                }
+              },
+              duration: 0.65,
+              ease: "power2.inOut",
+              onStart: () => {
+                if (matchingBlock) matchingBlock.classList.add("active");
+                if (prevBlock) prevBlock.classList.remove("active");
+              },
+              onReverseComplete: () => {
+                if (matchingBlock) matchingBlock.classList.remove("active");
+                if (prevBlock) prevBlock.classList.add("active");
               }
-            } else {
-              tl.to(descriptionText, { color: "#ffffff", duration: 0.5, ease: "power1.inOut" }, "<");
-            }
+            }, stepLabel);
+          }
+        }
+
+        // Font state triggers matching the demo color shifts
+        if (matchingBlock) {
+          const titleText = matchingBlock.querySelector(".hero-content-title");
+          if (titleText) {
+            tl.to(titleText, { color: "#00dafd", duration: 0.4, ease: "power1.inOut" }, stepLabel);
+          }
+
+          if (index < 4) {
+            if (itemDesc1) tl.to(itemDesc1, { color: "#ffffff", duration: 0.4, ease: "power1.inOut" }, stepLabel);
+            if (itemDesc2) tl.to(itemDesc2, { color: "#8a8a8a", duration: 0.4, ease: "power1.inOut" }, stepLabel);
+          } else if (index === 4) {
+            if (itemDesc1) tl.to(itemDesc1, { color: "#8a8a8a", duration: 0.4, ease: "power1.inOut" }, stepLabel);
+            if (itemDesc2) tl.to(itemDesc2, { color: "#ffffff", duration: 0.4, ease: "power1.inOut" }, stepLabel);
           }
         }
 
         if (prevBlock) {
           const prevTitle = prevBlock.querySelector(".hero-content-title");
-          const prevDesc = prevBlock.querySelector(".hero-item-description");
-          
           if (prevTitle) {
-            tl.to(prevTitle, { color: "#8a8a8a", duration: 0.4, ease: "power1.inOut" }, "<");
-          }
-          
-          if (prevDesc) {
-            if (index !== 4) { 
-              tl.to(prevDesc, { color: "#8a8a8a", duration: 0.4, ease: "power1.inOut" }, "<");
-            }
+            tl.to(prevTitle, { color: "#8a8a8a", duration: 0.4, ease: "power1.inOut" }, stepLabel);
           }
         }
       });
