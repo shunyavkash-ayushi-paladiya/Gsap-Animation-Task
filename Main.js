@@ -11,7 +11,7 @@ window.addEventListener("load", () => {
   const heroContentItems = document.querySelector(".hero-content-items");
   const heroOverlays = document.querySelector(".hero-overlays");
   
-  const heroImgOverlay1 = document.querySelector(".hero-img-overlay-1");
+  const heroImgOverlay = document.querySelector(".hero-img-overlay");
   
   const heroBorderOverlay = document.querySelector(".hero-border-overlay");
   const heroBorderOverlay2 = document.querySelector(".hero-border-overlay-2");
@@ -34,7 +34,6 @@ window.addEventListener("load", () => {
     imagePositions = [];
     if (!borderWrapper || heroImages.length === 0) return;
 
-    // Temporarily reset layout states to measure clean base values
     const originalTransform = heroImgContent.style.transform;
     heroImgContent.style.transform = "none";
 
@@ -47,7 +46,6 @@ window.addEventListener("load", () => {
         left: rect.left - wrapperRect.left,
         right: rect.right - wrapperRect.left,
         width: rect.width, 
-        // FIXED: Explicitly measure position relative to its actual immediate wrapper layout context
         imgLeft: rect.left - imgContentRect.left, 
         imgRight: rect.right - imgContentRect.left 
       });
@@ -182,22 +180,22 @@ window.addEventListener("load", () => {
   gsap.set(description1, { opacity: 0, y: 0 }); 
   if (description2) gsap.set(description2, { opacity: 0, xPercent: -50, y: 50 }); 
   if (heroContentItems) gsap.set(heroContentItems, { opacity: 0 });
-  if (heroOverlays) gsap.set(heroOverlays, { opacity: 0 });
+  
+  if (heroOverlays) {
+    gsap.set(heroOverlays, { 
+      opacity: 0,
+      position: "absolute",
+      top: 0,
+      left: 0,
+      width: "100%",
+      height: "100%",
+      pointerEvents: "none",
+      zIndex: 10
+    });
+  }
   
   if (heroBorderOverlay) gsap.set(heroBorderOverlay, { width: 0 });
   if (heroBorderOverlay2) gsap.set(heroBorderOverlay2, { width: 0 });
-  
-  // FIXED INITIALIZATION: Establish strict positional baseline overrides directly on the element
-  if (heroImgOverlay1) {
-    gsap.set(heroImgOverlay1, { 
-      position: "absolute",
-      left: 0,
-      x: 0,
-      width: 0,
-      scaleX: 1, 
-      transformOrigin: "left center" 
-    }); 
-  }
 
   if (itemDesc1) gsap.set(itemDesc1, { color: "#8a8a8a" });
   if (itemDesc2) gsap.set(itemDesc2, { color: "#8a8a8a" });
@@ -322,6 +320,9 @@ window.addEventListener("load", () => {
     }, "-=0.2");
 
     if (heroImages.length > 0) {
+      // Create a virtual tracker object to animate the transparent hole dimensions
+      let cutoutTracker = { x: 0, width: 0 };
+
       heroImages.forEach((img, index) => {
         const matchingBlock = contentItems[index];
         const prevBlock = contentItems[index - 1]; 
@@ -333,14 +334,23 @@ window.addEventListener("load", () => {
         tl.add(stepLabel, isFirst ? "<" : "+=0.15");
 
         if (imagePositions[index]) {
-          // FIXED TIMELINE ACTION: Animate direct geometric properties locally relative to the container grid system
-          if (heroImgOverlay1) {
-            tl.to(heroImgOverlay1, {
-              x: imagePositions[index].imgLeft,  
+          if (heroImgOverlay) {
+            // Animates the transparent cutout window dynamically
+            tl.to(cutoutTracker, {
+              x: imagePositions[index].imgLeft,
               width: imagePositions[index].width,
               duration: 0.65,
-              ease: "power2.inOut"
-            }, stepLabel); 
+              ease: "power2.inOut",
+              onUpdate: () => {
+                const x1 = cutoutTracker.x;
+                const x2 = cutoutTracker.x + cutoutTracker.width;
+                // Generates a donut clip-path (outer box with a dynamic inner transparent window)
+                heroImgOverlay.style.clipPath = `polygon(
+                  0% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 0%, 
+                  ${x1}px 0%, ${x1}px 100%, ${x2}px 100%, ${x2}px 0%, ${x1}px 0%
+                )`;
+              }
+            }, stepLabel);
           }
 
           // Synchronized Border logic
