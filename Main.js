@@ -27,6 +27,7 @@ window.addEventListener("load", () => {
   }
 
   const heroImages = heroImgContent.querySelectorAll(".hero-img");
+  const imgWrappers = heroImgContent.querySelectorAll(".hero-img-wrapper");
 
   let imagePositions = [];
 
@@ -189,7 +190,7 @@ window.addEventListener("load", () => {
       left: 0,
       width: "100%",
       height: "100%",
-      pointerEvents: "none",
+      pointerEvents: "none", 
       zIndex: 10
     });
   }
@@ -320,7 +321,6 @@ window.addEventListener("load", () => {
     }, "-=0.2");
 
     if (heroImages.length > 0) {
-      // Create a virtual tracker object to animate the transparent hole dimensions
       let cutoutTracker = { x: 0, width: 0 };
 
       heroImages.forEach((img, index) => {
@@ -335,7 +335,6 @@ window.addEventListener("load", () => {
 
         if (imagePositions[index]) {
           if (heroImgOverlay) {
-            // Animates the transparent cutout window dynamically
             tl.to(cutoutTracker, {
               x: imagePositions[index].imgLeft,
               width: imagePositions[index].width,
@@ -344,7 +343,6 @@ window.addEventListener("load", () => {
               onUpdate: () => {
                 const x1 = cutoutTracker.x;
                 const x2 = cutoutTracker.x + cutoutTracker.width;
-                // Generates a donut clip-path (outer box with a dynamic inner transparent window)
                 heroImgOverlay.style.clipPath = `polygon(
                   0% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 0%, 
                   ${x1}px 0%, ${x1}px 100%, ${x2}px 100%, ${x2}px 0%, ${x1}px 0%
@@ -353,7 +351,6 @@ window.addEventListener("load", () => {
             }, stepLabel);
           }
 
-          // Synchronized Border logic
           if (currentBorderTarget) {
             tl.to(currentBorderTarget, {
               width: () => {
@@ -378,7 +375,6 @@ window.addEventListener("load", () => {
           }
         }
 
-        // Typography changes
         if (matchingBlock) {
           const titleText = matchingBlock.querySelector(".hero-content-title");
           if (titleText) {
@@ -403,6 +399,36 @@ window.addEventListener("load", () => {
       });
     }
   }
+
+  imgWrappers.forEach((wrapper, index) => {
+    wrapper.style.cursor = "pointer";
+    wrapper.style.pointerEvents = "auto"; 
+
+    wrapper.addEventListener("click", () => {
+      const labelTime = tl.labels[`step_${index}`];
+      
+      if (labelTime !== undefined) {
+        const scrollST = tl.scrollTrigger;
+        const scrollStart = scrollST.start;
+        const scrollEnd = scrollST.end;
+        const totalDuration = tl.duration();
+        
+        const targetScroll = scrollStart + (labelTime / totalDuration) * (scrollEnd - scrollStart);
+        
+        gsap.killTweensOf(window);
+        
+        gsap.to(window, {
+          scrollTo: targetScroll,
+          duration: 0.8,
+          ease: "power2.out",
+          onUpdate: () => {
+            scrollST.scroll(window.scrollY);
+            scrollST.update();
+          }
+        });
+      }
+    });
+  });
 
   window.addEventListener("resize", () => {
     calculateImagePositions();
