@@ -1,4 +1,4 @@
-// Register both plugins at the top
+// Ensure BOTH plugins are registered at the top
 gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
 
 window.addEventListener("load", () => {
@@ -401,31 +401,31 @@ window.addEventListener("load", () => {
     }
   }
 
-  // FIXED CLICK HANDLER LOGIC
+  // FIXED: Adjusted to target the fully animated state (labelTime + animation duration)
   imgWrappers.forEach((wrapper, index) => {
     wrapper.style.cursor = "pointer";
     wrapper.style.pointerEvents = "auto"; 
 
-    wrapper.addEventListener("click", (e) => {
-      e.stopPropagation(); // Prevents click bubbles from breaking event execution
-
+    wrapper.addEventListener("click", () => {
       const labelTime = tl.labels[`step_${index}`];
       
       if (labelTime !== undefined) {
         const scrollST = tl.scrollTrigger;
-        const scrollStart = scrollST.start;
-        const scrollEnd = scrollST.end;
-        const totalDuration = tl.duration();
         
-        // Match up the scroll pixel count safely with the timeline label percentages
-        const targetScroll = scrollStart + (labelTime / totalDuration) * (scrollEnd - scrollStart);
+        // Offset by 0.65s (the individual transition step duration) 
+        // to snap straight to the finished layout for that step
+        const finalTweenTime = labelTime + 0.65;
+        const safeTime = Math.min(finalTweenTime, tl.duration());
         
+        const progress = safeTime / tl.duration();
+        const targetScroll = scrollST.start + progress * (scrollST.end - scrollST.start);
+        
+        // Safely kill running scrolls to overwrite smoothly
         gsap.killTweensOf(window);
         
-        // Utilize the ScrollToPlugin to cleanly shift views
         gsap.to(window, {
-          scrollTo: { y: targetScroll },
-          duration: 1,
+          scrollTo: { y: targetScroll, autoKill: false },
+          duration: 0.8,
           ease: "power2.out"
         });
       }
