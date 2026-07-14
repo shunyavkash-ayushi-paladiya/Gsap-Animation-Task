@@ -30,6 +30,7 @@ window.addEventListener("load", () => {
   const imgWrappers = heroImgContent.querySelectorAll(".hero-img-wrapper");
 
   let imagePositions = [];
+  let tl;
 
   function calculateImagePositions() {
     imagePositions = [];
@@ -55,9 +56,9 @@ window.addEventListener("load", () => {
     heroImgContent.style.transform = originalTransform;
   }
 
-  calculateImagePositions();
-
   function splitTitle(el) {
+    if (el.querySelectorAll(".word").length > 0) return;
+
     const text = el.textContent.trim();
     const parts = text.split(/(\s+)/);
     let firstLetterIndex = 0;
@@ -95,17 +96,16 @@ window.addEventListener("load", () => {
     });
   }
 
-  splitTitle(title1);
-
-  const firstLetters = gsap.utils.toArray(".first-letter", title1);
-
-  const cloneWrap = document.createElement("div");
-  cloneWrap.className = "mera-clone-wrap";
-  wrap.appendChild(cloneWrap);
+  let cloneWrap = wrap.querySelector(".mera-clone-wrap");
+  if (!cloneWrap) {
+    cloneWrap = document.createElement("div");
+    cloneWrap.className = "mera-clone-wrap";
+    wrap.appendChild(cloneWrap);
+  }
 
   function buildMeraClones() {
     cloneWrap.innerHTML = "";
-
+    const firstLetters = gsap.utils.toArray(".first-letter", title1);
     const wrapRect = wrap.getBoundingClientRect();
     const titleStyle = window.getComputedStyle(title1);
 
@@ -138,21 +138,27 @@ window.addEventListener("load", () => {
     const gap = 4;
 
     if (!clones.length) return clones;
+    updateMeraCloneTargets(clones, wrapRect, gap);
 
+    return clones;
+  }
+
+  function updateMeraCloneTargets(clones, wrapRect, gap) {
+    const currentWrapRect = wrapRect || wrap.getBoundingClientRect();
+    const calculatedGap = gap !== undefined ? gap : 4;
+    
     const totalWidth =
       clones.reduce((sum, clone) => sum + clone.offsetWidth, 0) +
-      gap * (clones.length - 1);
+      calculatedGap * (clones.length - 1);
 
-    let x = wrapRect.width / 2 - totalWidth / 2;
-    const y = wrapRect.height / 2 - clones[0].offsetHeight / 2;
+    let x = currentWrapRect.width / 2 - totalWidth / 2;
+    const y = currentWrapRect.height / 2 - clones[0].offsetHeight / 2;
 
     clones.forEach((clone) => {
       clone.dataset.targetLeft = x;
       clone.dataset.targetTop = y;
-      x += clone.offsetWidth + gap;
+      x += clone.offsetWidth + calculatedGap;
     });
-
-    return clones;
   }
 
   function getLettersByColumn() {
@@ -173,8 +179,11 @@ window.addEventListener("load", () => {
     return columns;
   }
 
+  splitTitle(title1);
+  calculateImagePositions();
   let meraClones = buildMeraClones();
   const lettersByColumn = getLettersByColumn();
+  const firstLetters = gsap.utils.toArray(".first-letter", title1);
 
   gsap.set(title1, { opacity: 0, y: 0 }); 
   gsap.set(title2, { opacity: 0, y: 150 });      
@@ -213,136 +222,138 @@ window.addEventListener("load", () => {
     transformOrigin: "center center",
   });
 
-  const tl = gsap.timeline({
-    scrollTrigger: {
-      trigger: section,
-      start: "top top",
-      end: "+=1800", 
-      pin: true,
-      scrub: 0.6,
-      invalidateOnRefresh: true,
-    },
-  });
+  function initTimeline() {
+    if (tl) tl.kill(); 
 
-  const stepDuration = 0.035; 
-  const totalColumns = lettersByColumn.length;
-  const titleFadeDuration = 0.3; 
+    tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: section,
+        start: "top top",
+        end: "+=1800", 
+        pin: true,
+        scrub: 0.6,
+        invalidateOnRefresh: true,
+      },
+    });
 
-  tl.to(title1, {
-    opacity: 1,
-    duration: titleFadeDuration,
-    ease: "power1.out"
-  }, 0);
+    const stepDuration = 0.035; 
+    const totalColumns = lettersByColumn.length;
+    const titleFadeDuration = 0.3; 
 
-  lettersByColumn.forEach((letters, index) => {
-    tl.to(letters, {
-      opacity: 0,
-      duration: stepDuration,
+    tl.to(title1, {
+      opacity: 1,
+      duration: titleFadeDuration,
+      ease: "power1.out"
+    }, 0);
+
+    lettersByColumn.forEach((letters, index) => {
+      tl.to(letters, {
+        opacity: 0,
+        duration: stepDuration,
+        ease: "none",
+        delay: index * stepDuration, 
+      }, titleFadeDuration); 
+    });
+
+    tl.to(firstLetters, {
+      color: "#00dafd",
+      duration: 0.2,
       ease: "none",
-      delay: index * stepDuration, 
-    }, titleFadeDuration); 
-  });
+    }, titleFadeDuration + (totalColumns * stepDuration) + 0.1);
 
-  tl.to(firstLetters, {
-    color: "#00dafd",
-    duration: 0.2,
-    ease: "none",
-  }, titleFadeDuration + (totalColumns * stepDuration) + 0.1);
+    tl.set(meraClones, { opacity: 1 });
+    tl.set(firstLetters, { opacity: 0 });
 
-  tl.set(meraClones, { opacity: 1 });
-  tl.set(firstLetters, { opacity: 0 });
+    tl.to(meraClones, {
+      left: (i, el) => Number(el.dataset.targetLeft),
+      top: (i, el) => Number(el.dataset.targetTop),
+      duration: 0.5,
+      ease: "power2.inOut",
+    });
 
-  tl.to(meraClones, {
-    left: (i, el) => Number(el.dataset.targetLeft),
-    top: (i, el) => Number(el.dataset.targetTop),
-    duration: 0.5,
-    ease: "power2.inOut",
-  });
+    tl.to(heroImgContent, {
+      opacity: 1,
+      yPercent: 0,
+      scale: 1,
+      duration: 0.65,
+      ease: "power2.inOut",
+    });
 
-  tl.to(heroImgContent, {
-    opacity: 1,
-    yPercent: 0,
-    scale: 1,
-    duration: 0.65,
-    ease: "power2.inOut",
-  });
-
-  tl.to(description1, {
-    opacity: 1,
-    duration: 0.4,
-    ease: "power1.out",
-  });
-
-  if (description2) {
-    tl.to(description2, {
+    tl.to(description1, {
       opacity: 1,
       duration: 0.4,
       ease: "power1.out",
-    }, "<"); 
-  }
+    });
 
-  const finalMoveDuration = 0.55;
+    if (description2) {
+      tl.to(description2, {
+        opacity: 1,
+        duration: 0.4,
+        ease: "power1.out",
+      }, "<"); 
+    }
 
-  tl.to(description1, {
-    y: -40, 
-    duration: finalMoveDuration,
-    ease: "power2.inOut",
-  });
+    const finalMoveDuration = 0.55;
 
-  if (description2) {
-    tl.to(description2, {
-      y: 0,
+    tl.to(description1, {
+      y: -40, 
+      duration: finalMoveDuration,
+      ease: "power2.inOut",
+    });
+
+    if (description2) {
+      tl.to(description2, {
+        y: 0,
+        duration: finalMoveDuration,
+        ease: "power2.inOut",
+      }, "<");
+    }
+
+    tl.to([title1, cloneWrap], {
+      y: -70, 
       duration: finalMoveDuration,
       ease: "power2.inOut",
     }, "<");
-  }
 
-  tl.to([title1, cloneWrap], {
-    y: -70, 
-    duration: finalMoveDuration,
-    ease: "power2.inOut",
-  }, "<");
-
-  tl.to(title2, {
-    opacity: 1,
-    y: 0, 
-    duration: finalMoveDuration,
-    ease: "power2.inOut",
-  }, "<");
-
-  if (heroContentItems) {
-    tl.to(heroContentItems, {
+    tl.to(title2, {
       opacity: 1,
-      duration: 0.4,
-      ease: "power1.out"
+      y: 0, 
+      duration: finalMoveDuration,
+      ease: "power2.inOut",
     }, "<");
-  }
 
-  if (heroOverlays) {
-    tl.to(heroOverlays, {
-      opacity: 1,
-      duration: 0.5,
-      ease: "power1.inOut"
-    }, "-=0.2");
+    if (heroContentItems) {
+      tl.to(heroContentItems, {
+        opacity: 1,
+        duration: 0.4,
+        ease: "power1.out"
+      }, "<");
+    }
 
-    if (heroImages.length > 0) {
-      let cutoutTracker = { x: 0, width: 0 };
+    if (heroOverlays) {
+      tl.to(heroOverlays, {
+        opacity: 1,
+        duration: 0.5,
+        ease: "power1.inOut"
+      }, "-=0.2");
 
-      heroImages.forEach((img, index) => {
-        const matchingBlock = contentItems[index];
-        const prevBlock = contentItems[index - 1]; 
-        const isFirst = index === 0;
+      if (heroImages.length > 0) {
+        let cutoutTracker = { x: 0, width: 0 };
 
-        const currentBorderTarget = index < 4 ? heroBorderOverlay : heroBorderOverlay2;
-        const stepLabel = `step_${index}`;
-        
-        tl.add(stepLabel, isFirst ? "<" : "+=0.15");
+        heroImages.forEach((img, index) => {
+          const matchingBlock = contentItems[index];
+          const prevBlock = contentItems[index - 1]; 
+          const isFirst = index === 0;
 
-        if (imagePositions[index]) {
+          const currentBorderTarget = index < 4 ? heroBorderOverlay : heroBorderOverlay2;
+          const stepLabel = `step_${index}`;
+          
+          tl.add(stepLabel, isFirst ? "<" : "+=0.15");
+
           if (heroImgOverlay) {
             tl.to(cutoutTracker, {
-              x: imagePositions[index].imgLeft,
-              width: imagePositions[index].width,
+              x: () => imagePositions[index] ? imagePositions[index].imgLeft : 0,
+              width: () => imagePositions[index] ? imagePositions[index].width : 0,
               duration: 0.65,
               ease: "power2.inOut",
               onUpdate: () => {
@@ -359,7 +370,7 @@ window.addEventListener("load", () => {
           if (currentBorderTarget) {
             tl.to(currentBorderTarget, {
               width: () => {
-                if (!borderWrapper) return 0;
+                if (!borderWrapper || !imagePositions[index]) return 0;
                 if (index < 4) {
                   return Math.max(0, Math.min(imagePositions[index].right, borderWrapper.offsetWidth));
                 } else {
@@ -378,42 +389,44 @@ window.addEventListener("load", () => {
               }
             }, stepLabel);
           }
-        }
 
-        if (matchingBlock) {
-          const titleText = matchingBlock.querySelector(".hero-content-title");
-          if (titleText) {
-            tl.to(titleText, { color: "#00dafd", duration: 0.4, ease: "power1.inOut" }, stepLabel);
+          if (matchingBlock) {
+            const titleText = matchingBlock.querySelector(".hero-content-title");
+            if (titleText) {
+              tl.to(titleText, { color: "#00dafd", duration: 0.4, ease: "power1.inOut" }, stepLabel);
+            }
+
+            const contentDescText = matchingBlock.querySelector(".hero-content-description");
+            if (contentDescText) {
+              tl.to(contentDescText, { color: "#ffffff", duration: 0.4, ease: "power1.inOut" }, stepLabel);
+            }
+
+            if (index < 4) {
+              if (itemDesc1) tl.to(itemDesc1, { color: "#ffffff", duration: 0.4, ease: "power1.inOut" }, stepLabel);
+              if (itemDesc2) tl.to(itemDesc2, { color: "#8a8a8a", duration: 0.4, ease: "power1.inOut" }, stepLabel);
+            } else if (index === 4) {
+              if (itemDesc1) tl.to(itemDesc1, { color: "#8a8a8a", duration: 0.4, ease: "power1.inOut" }, stepLabel);
+              if (itemDesc2) tl.to(itemDesc2, { color: "#ffffff", duration: 0.4, ease: "power1.inOut" }, stepLabel);
+            }
           }
 
-          const contentDescText = matchingBlock.querySelector(".hero-content-description");
-          if (contentDescText) {
-            tl.to(contentDescText, { color: "#ffffff", duration: 0.4, ease: "power1.inOut" }, stepLabel);
-          }
+          if (prevBlock) {
+            const prevTitle = prevBlock.querySelector(".hero-content-title");
+            if (prevTitle) {
+              tl.to(prevTitle, { color: "#8a8a8a", duration: 0.4, ease: "power1.inOut" }, stepLabel);
+            }
 
-          if (index < 4) {
-            if (itemDesc1) tl.to(itemDesc1, { color: "#ffffff", duration: 0.4, ease: "power1.inOut" }, stepLabel);
-            if (itemDesc2) tl.to(itemDesc2, { color: "#8a8a8a", duration: 0.4, ease: "power1.inOut" }, stepLabel);
-          } else if (index === 4) {
-            if (itemDesc1) tl.to(itemDesc1, { color: "#8a8a8a", duration: 0.4, ease: "power1.inOut" }, stepLabel);
-            if (itemDesc2) tl.to(itemDesc2, { color: "#ffffff", duration: 0.4, ease: "power1.inOut" }, stepLabel);
+            const prevDescText = prevBlock.querySelector(".hero-content-description");
+            if (prevDescText) {
+              tl.to(prevDescText, { color: "#8a8a8a", duration: 0.4, ease: "power1.inOut" }, stepLabel);
+            }
           }
-        }
-
-        if (prevBlock) {
-          const prevTitle = prevBlock.querySelector(".hero-content-title");
-          if (prevTitle) {
-            tl.to(prevTitle, { color: "#8a8a8a", duration: 0.4, ease: "power1.inOut" }, stepLabel);
-          }
-
-          const prevDescText = prevBlock.querySelector(".hero-content-description");
-          if (prevDescText) {
-            tl.to(prevDescText, { color: "#8a8a8a", duration: 0.4, ease: "power1.inOut" }, stepLabel);
-          }
-        }
-      });
+        });
+      }
     }
   }
+
+  initTimeline();
 
   imgWrappers.forEach((wrapper, index) => {
     wrapper.style.cursor = "pointer";
@@ -443,7 +456,28 @@ window.addEventListener("load", () => {
 
   window.addEventListener("resize", () => {
     calculateImagePositions();
-    meraClones = buildMeraClones();
+    
+    const clones = gsap.utils.toArray(".mera-clone");
+    const currentWrapRect = wrap.getBoundingClientRect();
+    if (clones.length) {
+      const titleStyle = window.getComputedStyle(title1);
+      
+      clones.forEach((clone, i) => {
+        const origRect = firstLetters[i].getBoundingClientRect();
+        gsap.set(clone, {
+          fontSize: titleStyle.fontSize,
+          fontFamily: titleStyle.fontFamily,
+          fontWeight: titleStyle.fontWeight,
+          lineHeight: titleStyle.lineHeight,
+          letterSpacing: titleStyle.letterSpacing,
+          left: origRect.left - currentWrapRect.left,
+          top: origRect.top - currentWrapRect.top,
+        });
+      });
+
+      updateMeraCloneTargets(clones, currentWrapRect, 4);
+    }
+    
     ScrollTrigger.refresh();
   });
 });

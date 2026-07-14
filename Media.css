@@ -1,16 +1,19 @@
-@media screen and (max-width:991px) and (min-width:767px) {
-   .hero-title{
-    font-size: 48px;
-   }
-
+@media screen and (max-width:767px){
    .container{
-    padding: 0 16px;
+      padding: 0px 16px;
    }
 }
 
-@media screen and (max-width:767px) and (min-width:320px) {
+@media screen and (max-width:575px){
    .hero-title{
-    font-size: 34px;
-    line-height: 1.2;
+      font-size: 28px;
+   }
+
+   .hero-description{
+      font-size: 18px;
+   }
+
+   .hero-description-2{
+      font-size: 16x;
    }
 }
