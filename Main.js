@@ -1,4 +1,5 @@
-gsap.registerPlugin(ScrollTrigger);
+// Register both plugins at the top
+gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
 
 window.addEventListener("load", () => {
   const section = document.querySelector(".hero-section");
@@ -400,11 +401,14 @@ window.addEventListener("load", () => {
     }
   }
 
+  // FIXED CLICK HANDLER LOGIC
   imgWrappers.forEach((wrapper, index) => {
     wrapper.style.cursor = "pointer";
     wrapper.style.pointerEvents = "auto"; 
 
-    wrapper.addEventListener("click", () => {
+    wrapper.addEventListener("click", (e) => {
+      e.stopPropagation(); // Prevents click bubbles from breaking event execution
+
       const labelTime = tl.labels[`step_${index}`];
       
       if (labelTime !== undefined) {
@@ -413,18 +417,16 @@ window.addEventListener("load", () => {
         const scrollEnd = scrollST.end;
         const totalDuration = tl.duration();
         
+        // Match up the scroll pixel count safely with the timeline label percentages
         const targetScroll = scrollStart + (labelTime / totalDuration) * (scrollEnd - scrollStart);
         
         gsap.killTweensOf(window);
         
+        // Utilize the ScrollToPlugin to cleanly shift views
         gsap.to(window, {
-          scrollTo: targetScroll,
-          duration: 0.8,
-          ease: "power2.out",
-          onUpdate: () => {
-            scrollST.scroll(window.scrollY);
-            scrollST.update();
-          }
+          scrollTo: { y: targetScroll },
+          duration: 1,
+          ease: "power2.out"
         });
       }
     });
