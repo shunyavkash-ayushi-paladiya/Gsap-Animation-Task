@@ -175,7 +175,6 @@ window.addEventListener("load", () => {
   let meraClones = buildMeraClones();
   const lettersByColumn = getLettersByColumn();
 
-  // Clean initialization layout state
   gsap.set(title1, { opacity: 0, y: 0 }); 
   gsap.set(title2, { opacity: 0, y: 150 });      
   gsap.set(description1, { opacity: 0, y: 0 }); 
@@ -186,9 +185,16 @@ window.addEventListener("load", () => {
   if (heroBorderOverlay) gsap.set(heroBorderOverlay, { width: 0 });
   if (heroBorderOverlay2) gsap.set(heroBorderOverlay2, { width: 0 });
   
-  // Define strict transformation origins
+  // FIXED BASELINE RESET: Force positional independence directly into the overlay element
   if (heroImgOverlay1) {
-    gsap.set(heroImgOverlay1, { scaleX: 0, x: 0, transformOrigin: "left center" }); 
+    gsap.set(heroImgOverlay1, { 
+      position: "absolute",
+      left: 0,
+      x: 0,
+      width: 0,
+      scaleX: 1, // Completely clears scaling errors
+      transformOrigin: "left center" 
+    }); 
   }
 
   if (itemDesc1) gsap.set(itemDesc1, { color: "#8a8a8a" });
@@ -201,7 +207,6 @@ window.addEventListener("load", () => {
     transformOrigin: "center center",
   });
 
-  // Timeline Setup matching the scrolling timeline parameters
   const tl = gsap.timeline({
     scrollTrigger: {
       trigger: section,
@@ -217,7 +222,6 @@ window.addEventListener("load", () => {
   const totalColumns = lettersByColumn.length;
   const titleFadeDuration = 0.3; 
 
-  // --- 1. TITLE REVEAL AND SPLIT ---
   tl.to(title1, {
     opacity: 1,
     duration: titleFadeDuration,
@@ -249,7 +253,6 @@ window.addEventListener("load", () => {
     ease: "power2.inOut",
   });
 
-  // --- 2. LAYOUT AND ASSEMBLY REVEAL (Matches Demo Delay Sequence) ---
   tl.to(heroImgContent, {
     opacity: 1,
     yPercent: 0,
@@ -309,7 +312,6 @@ window.addEventListener("load", () => {
     }, "<");
   }
 
-  // --- 3. SYNCHRONIZED COMPONENT HIGHLIGHTS (LEFT TO RIGHT SLIDE) ---
   if (heroOverlays) {
     tl.to(heroOverlays, {
       opacity: 1,
@@ -318,8 +320,6 @@ window.addEventListener("load", () => {
     }, "-=0.2");
 
     if (heroImages.length > 0) {
-      const baseOverlayWidth = heroImgOverlay1 ? (heroImgOverlay1.offsetWidth || 1) : 1;
-
       heroImages.forEach((img, index) => {
         const matchingBlock = contentItems[index];
         const prevBlock = contentItems[index - 1]; 
@@ -331,20 +331,17 @@ window.addEventListener("load", () => {
         tl.add(stepLabel, isFirst ? "<" : "+=0.15");
 
         if (imagePositions[index]) {
-          // Dynamic scale positioning handling Left -> Right flow cleanly without layout shifts
+          // FIXED SLIDE ENGINE: Explicitly map exact physical dimensions and positions
           if (heroImgOverlay1) {
-            const targetScaleX = imagePositions[index].width / baseOverlayWidth;
-
             tl.to(heroImgOverlay1, {
               x: imagePositions[index].imgLeft,  
-              scaleX: targetScaleX,
-              transformOrigin: "left center",
+              width: imagePositions[index].width,
               duration: 0.65,
               ease: "power2.inOut"
             }, stepLabel); 
           }
 
-          // Border overlay sync logic
+          // Synchronized Border logic
           if (currentBorderTarget) {
             tl.to(currentBorderTarget, {
               width: () => {
@@ -369,7 +366,7 @@ window.addEventListener("load", () => {
           }
         }
 
-        // Font state triggers matching the demo color shifts
+        // Typography changes
         if (matchingBlock) {
           const titleText = matchingBlock.querySelector(".hero-content-title");
           if (titleText) {
