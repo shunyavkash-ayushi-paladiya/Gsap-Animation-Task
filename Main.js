@@ -1,4 +1,3 @@
-// Ensure BOTH plugins are registered at the top
 gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
 
 window.addEventListener("load", () => {
@@ -202,6 +201,11 @@ window.addEventListener("load", () => {
   if (itemDesc1) gsap.set(itemDesc1, { color: "#8a8a8a" });
   if (itemDesc2) gsap.set(itemDesc2, { color: "#8a8a8a" });
 
+  contentItems.forEach(item => {
+    const desc = item.querySelector(".hero-content-description");
+    if (desc) gsap.set(desc, { color: "#8a8a8a" });
+  });
+
   gsap.set(heroImgContent, {
     opacity: 0,
     yPercent: 70,
@@ -382,6 +386,11 @@ window.addEventListener("load", () => {
             tl.to(titleText, { color: "#00dafd", duration: 0.4, ease: "power1.inOut" }, stepLabel);
           }
 
+          const contentDescText = matchingBlock.querySelector(".hero-content-description");
+          if (contentDescText) {
+            tl.to(contentDescText, { color: "#ffffff", duration: 0.4, ease: "power1.inOut" }, stepLabel);
+          }
+
           if (index < 4) {
             if (itemDesc1) tl.to(itemDesc1, { color: "#ffffff", duration: 0.4, ease: "power1.inOut" }, stepLabel);
             if (itemDesc2) tl.to(itemDesc2, { color: "#8a8a8a", duration: 0.4, ease: "power1.inOut" }, stepLabel);
@@ -396,12 +405,16 @@ window.addEventListener("load", () => {
           if (prevTitle) {
             tl.to(prevTitle, { color: "#8a8a8a", duration: 0.4, ease: "power1.inOut" }, stepLabel);
           }
+
+          const prevDescText = prevBlock.querySelector(".hero-content-description");
+          if (prevDescText) {
+            tl.to(prevDescText, { color: "#8a8a8a", duration: 0.4, ease: "power1.inOut" }, stepLabel);
+          }
         }
       });
     }
   }
 
-  // FIXED: Adjusted to target the fully animated state (labelTime + animation duration)
   imgWrappers.forEach((wrapper, index) => {
     wrapper.style.cursor = "pointer";
     wrapper.style.pointerEvents = "auto"; 
@@ -411,16 +424,12 @@ window.addEventListener("load", () => {
       
       if (labelTime !== undefined) {
         const scrollST = tl.scrollTrigger;
-        
-        // Offset by 0.65s (the individual transition step duration) 
-        // to snap straight to the finished layout for that step
         const finalTweenTime = labelTime + 0.65;
         const safeTime = Math.min(finalTweenTime, tl.duration());
         
         const progress = safeTime / tl.duration();
         const targetScroll = scrollST.start + progress * (scrollST.end - scrollST.start);
         
-        // Safely kill running scrolls to overwrite smoothly
         gsap.killTweensOf(window);
         
         gsap.to(window, {
