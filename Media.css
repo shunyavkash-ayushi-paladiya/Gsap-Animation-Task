@@ -2,6 +2,20 @@
    .container{
       padding: 0px 16px;
    }
+
+   .hero-description-content{
+      margin-top: 18px;
+   }
+
+   .hero-title, .mera-clone{
+      font-size: 54px;
+   }
+}
+
+@media screen and (min-width:576px) and (max-width:768px){
+   .hero-description{
+      font-size: 22px;
+   }
 }
 
 @media screen and (max-width:575px){
@@ -14,6 +28,6 @@
    }
 
    .hero-description-2{
-      font-size: 16x;
+      font-size: 16px;
    }
 }

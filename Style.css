@@ -27,6 +27,7 @@ img {
   min-height: 120vh;
   background-color: #000;
   padding-block: 50px;
+  overflow: hidden;
 }
 
 .hero-contents{
@@ -34,7 +35,6 @@ img {
   display: flex;
   flex-direction: column;
   height: 100vh;
-   overflow: hidden;
 }
 
 .hero-content{
