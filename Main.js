@@ -34,6 +34,7 @@ window.addEventListener("load", () => {
     imagePositions = [];
     if (!borderWrapper || heroImages.length === 0) return;
 
+    // Temporarily reset layout states to measure clean base values
     const originalTransform = heroImgContent.style.transform;
     heroImgContent.style.transform = "none";
 
@@ -46,6 +47,7 @@ window.addEventListener("load", () => {
         left: rect.left - wrapperRect.left,
         right: rect.right - wrapperRect.left,
         width: rect.width, 
+        // FIXED: Explicitly measure position relative to its actual immediate wrapper layout context
         imgLeft: rect.left - imgContentRect.left, 
         imgRight: rect.right - imgContentRect.left 
       });
@@ -185,14 +187,14 @@ window.addEventListener("load", () => {
   if (heroBorderOverlay) gsap.set(heroBorderOverlay, { width: 0 });
   if (heroBorderOverlay2) gsap.set(heroBorderOverlay2, { width: 0 });
   
-  // FIXED BASELINE RESET: Force positional independence directly into the overlay element
+  // FIXED INITIALIZATION: Establish strict positional baseline overrides directly on the element
   if (heroImgOverlay1) {
     gsap.set(heroImgOverlay1, { 
       position: "absolute",
       left: 0,
       x: 0,
       width: 0,
-      scaleX: 1, // Completely clears scaling errors
+      scaleX: 1, 
       transformOrigin: "left center" 
     }); 
   }
@@ -331,7 +333,7 @@ window.addEventListener("load", () => {
         tl.add(stepLabel, isFirst ? "<" : "+=0.15");
 
         if (imagePositions[index]) {
-          // FIXED SLIDE ENGINE: Explicitly map exact physical dimensions and positions
+          // FIXED TIMELINE ACTION: Animate direct geometric properties locally relative to the container grid system
           if (heroImgOverlay1) {
             tl.to(heroImgOverlay1, {
               x: imagePositions[index].imgLeft,  

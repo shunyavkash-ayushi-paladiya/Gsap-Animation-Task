@@ -160,12 +160,6 @@ img {
   background-color: #00000000;
 }
 
-.hero-img-overlay-2 {
-  width: 100%;
-  height: 100%;
-  background-color: #000000a6;
-}
-
 .hero-content-items {
   margin-top: 40px;
   display: flex;
