@@ -40,7 +40,6 @@ window.addEventListener("load", () => {
     const originalStyle = heroImgContent.getAttribute("style") || "";
     const originalContentItemsStyle = heroContentItems ? heroContentItems.getAttribute("style") || "" : "";
     
-    // Force layout states to capture static coordinates accurately at 1500px
     gsap.set(heroImgContent, { clearProps: "transform,scale,x,y" });
     if (isMobileLayout) {
       gsap.set(heroImgContent, { width: "1500px" });
@@ -208,7 +207,6 @@ window.addEventListener("load", () => {
     let meraClones = buildMeraClones(firstLetters);
     const lettersByColumn = getLettersByColumn();
 
-    // Reset layout properties initially
     gsap.set(title1, { opacity: 0, y: 0 }); 
     gsap.set(title2, { opacity: 0, y: 150 });      
     gsap.set(description1, { opacity: 0, y: 0 }); 
@@ -217,7 +215,7 @@ window.addEventListener("load", () => {
       gsap.set(heroContentItems, { 
         opacity: 0, 
         x: 0,
-        width: isMobileLayout ? "100%" : "auto" // Start normal, widen later
+        width: isMobileLayout ? "100%" : "auto"
       });
     }
 
@@ -244,7 +242,6 @@ window.addEventListener("load", () => {
       if (desc) gsap.set(desc, { color: "#8a8a8a" });
     });
 
-    // Start heroImgContent centered, un-stretched and hidden
     gsap.set(heroImgContent, {
       opacity: 0,
       yPercent: 70,
@@ -258,7 +255,7 @@ window.addEventListener("load", () => {
       scrollTrigger: {
         trigger: section,
         start: "top top",
-        end: "+=3200", // Slightly lengthened to accommodate the perfect step-by-step sequence
+        end: "+=3200", 
         pin: true,
         scrub: 0.6,
         invalidateOnRefresh: true,
@@ -269,14 +266,12 @@ window.addEventListener("load", () => {
     const totalColumns = lettersByColumn.length;
     const titleFadeDuration = 0.3; 
 
-    // --- STEP 1: Show Hero Title ---
     tl.to(title1, {
       opacity: 1,
       duration: titleFadeDuration,
       ease: "power1.out"
     }, 0);
 
-    // --- STEP 2: MeRA Letter Animation ---
     lettersByColumn.forEach((letters, index) => {
       tl.to(letters, {
         opacity: 0,
@@ -302,7 +297,6 @@ window.addEventListener("load", () => {
       ease: "power2.inOut",
     });
 
-    // --- STEP 3: Show Hero Description ---
     tl.to(description1, {
       opacity: 1,
       duration: 0.4,
@@ -317,7 +311,6 @@ window.addEventListener("load", () => {
       }, "<"); 
     }
 
-    // --- STEP 4: Hero Image Entrance (translateY + scale up) ---
     tl.to(heroImgContent, {
       opacity: 1,
       yPercent: 0,
@@ -326,7 +319,6 @@ window.addEventListener("load", () => {
       ease: "power2.inOut",
     });
 
-    // --- STEP 5: Transform Titles and Description upward ---
     const finalMoveDuration = 0.55;
 
     tl.to(description1, {
@@ -356,7 +348,6 @@ window.addEventListener("load", () => {
       ease: "power2.inOut",
     }, "<");
 
-    // --- STEP 6: Show hero-content-items (Opacity 0 to 1) ---
     if (heroContentItems) {
       tl.to(heroContentItems, {
         opacity: 1,
@@ -365,7 +356,6 @@ window.addEventListener("load", () => {
       }, "<");
     }
 
-    // --- STEP 7: Expand width of tracks to 1500px ---
     if (isMobileLayout) {
       tl.to([heroImgContent, heroContentItems], {
         width: "1500px",
@@ -374,7 +364,6 @@ window.addEventListener("load", () => {
       });
     }
 
-    // --- STEP 8: Start horizontal translateX matching and clip-path tracking ---
     if (heroOverlays) {
       tl.to(heroOverlays, {
         opacity: 1,
@@ -395,7 +384,6 @@ window.addEventListener("load", () => {
           
           tl.add(stepLabel, isFirst ? "<" : "+=0.2");
 
-          // Exact camera tracking behavior mirroring the horizontal viewport sliding sequence
           if (isMobileLayout) {
             tl.to([heroImgContent, heroContentItems], {
               x: () => {
