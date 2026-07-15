@@ -37,13 +37,14 @@ window.addEventListener("load", () => {
     imagePositions = [];
     if (!borderWrapper || heroImages.length === 0) return;
 
-    // Cache layout states safely
     const originalStyle = heroImgContent.getAttribute("style") || "";
+    const originalContentItemsStyle = heroContentItems ? heroContentItems.getAttribute("style") || "" : "";
     
-    // Explicitly force layout states to capture authentic dimensions before building mapping arrays
+    // Force layout states to capture static coordinates accurately at 1500px
     gsap.set(heroImgContent, { clearProps: "transform,scale,x,y" });
     if (isMobileLayout) {
-      gsap.set([heroImgContent, heroContentItems], { width: "1500px" });
+      gsap.set(heroImgContent, { width: "1500px" });
+      if (heroContentItems) gsap.set(heroContentItems, { width: "1500px" });
     }
 
     const wrapperRect = borderWrapper.getBoundingClientRect();
@@ -53,8 +54,6 @@ window.addEventListener("load", () => {
       const rect = img.getBoundingClientRect();
       const pctLeft = ((rect.left - imgContentRect.left) / imgContentRect.width) * 100;
       const pctWidth = (rect.width / imgContentRect.width) * 100;
-
-      // Absolute layout math tracking exact offset values relative to structural parent element
       const imageCenterOffset = (rect.left - imgContentRect.left) + (rect.width / 2);
       
       imagePositions.push({
@@ -67,8 +66,10 @@ window.addEventListener("load", () => {
       });
     });
 
-    // Revert target properties instantly to avoid layout flickering
     heroImgContent.setAttribute("style", originalStyle);
+    if (heroContentItems && isMobileLayout) {
+      heroContentItems.setAttribute("style", originalContentItemsStyle);
+    }
   }
 
   function splitTitle(el) {
@@ -207,11 +208,18 @@ window.addEventListener("load", () => {
     let meraClones = buildMeraClones(firstLetters);
     const lettersByColumn = getLettersByColumn();
 
+    // Reset layout properties initially
     gsap.set(title1, { opacity: 0, y: 0 }); 
     gsap.set(title2, { opacity: 0, y: 150 });      
     gsap.set(description1, { opacity: 0, y: 0 }); 
     if (description2) gsap.set(description2, { opacity: 0, xPercent: -50, y: 50 }); 
-    if (heroContentItems) gsap.set(heroContentItems, { opacity: 0, x: 0 });
+    if (heroContentItems) {
+      gsap.set(heroContentItems, { 
+        opacity: 0, 
+        x: 0,
+        width: isMobileLayout ? "100%" : "auto" // Start normal, widen later
+      });
+    }
 
     if (heroOverlays) {
       gsap.set(heroOverlays, { 
@@ -236,11 +244,13 @@ window.addEventListener("load", () => {
       if (desc) gsap.set(desc, { color: "#8a8a8a" });
     });
 
+    // Start heroImgContent centered, un-stretched and hidden
     gsap.set(heroImgContent, {
       opacity: 0,
       yPercent: 70,
-      scale: isMobileLayout ? 1 : 0.5, // Matches the non-scaled horizontal sliding entrance from the video clip
+      scale: isMobileLayout ? 0.7 : 0.5, 
       x: 0,
+      width: isMobileLayout ? "100%" : "auto", 
       transformOrigin: "center center",
     });
 
@@ -248,7 +258,7 @@ window.addEventListener("load", () => {
       scrollTrigger: {
         trigger: section,
         start: "top top",
-        end: "+=2500", 
+        end: "+=3200", // Slightly lengthened to accommodate the perfect step-by-step sequence
         pin: true,
         scrub: 0.6,
         invalidateOnRefresh: true,
@@ -259,12 +269,14 @@ window.addEventListener("load", () => {
     const totalColumns = lettersByColumn.length;
     const titleFadeDuration = 0.3; 
 
+    // --- STEP 1: Show Hero Title ---
     tl.to(title1, {
       opacity: 1,
       duration: titleFadeDuration,
       ease: "power1.out"
     }, 0);
 
+    // --- STEP 2: MeRA Letter Animation ---
     lettersByColumn.forEach((letters, index) => {
       tl.to(letters, {
         opacity: 0,
@@ -290,21 +302,7 @@ window.addEventListener("load", () => {
       ease: "power2.inOut",
     });
 
-    tl.to(heroImgContent, {
-      opacity: 1,
-      yPercent: 0,
-      duration: 0.65,
-      ease: "power2.inOut",
-    });
-
-    if (!isMobileLayout) {
-      tl.to(heroImgContent, {
-        scale: 1,
-        duration: 0.65,
-        ease: "power2.inOut",
-      }, "<");
-    }
-
+    // --- STEP 3: Show Hero Description ---
     tl.to(description1, {
       opacity: 1,
       duration: 0.4,
@@ -319,6 +317,16 @@ window.addEventListener("load", () => {
       }, "<"); 
     }
 
+    // --- STEP 4: Hero Image Entrance (translateY + scale up) ---
+    tl.to(heroImgContent, {
+      opacity: 1,
+      yPercent: 0,
+      scale: 1,
+      duration: 0.65,
+      ease: "power2.inOut",
+    });
+
+    // --- STEP 5: Transform Titles and Description upward ---
     const finalMoveDuration = 0.55;
 
     tl.to(description1, {
@@ -348,6 +356,7 @@ window.addEventListener("load", () => {
       ease: "power2.inOut",
     }, "<");
 
+    // --- STEP 6: Show hero-content-items (Opacity 0 to 1) ---
     if (heroContentItems) {
       tl.to(heroContentItems, {
         opacity: 1,
@@ -356,21 +365,16 @@ window.addEventListener("load", () => {
       }, "<");
     }
 
+    // --- STEP 7: Expand width of tracks to 1500px ---
     if (isMobileLayout) {
-      // Force dimensions natively onto horizontal targets to ensure scaling stays isolated
-      gsap.set([heroImgContent, heroContentItems], { width: "1500px" });
-      
-      // Compute starting camera position centered around element 1
       tl.to([heroImgContent, heroContentItems], {
-        x: () => {
-          if (!imagePositions[0]) return 0;
-          return (window.innerWidth / 2) - imagePositions[0].centerOffset;
-        },
-        duration: 0.4,
-        ease: "power2.out"
-      }, "<");
+        width: "1500px",
+        duration: 0.5,
+        ease: "power2.inOut"
+      });
     }
 
+    // --- STEP 8: Start horizontal translateX matching and clip-path tracking ---
     if (heroOverlays) {
       tl.to(heroOverlays, {
         opacity: 1,
