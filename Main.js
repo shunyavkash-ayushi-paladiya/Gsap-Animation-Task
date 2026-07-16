@@ -31,12 +31,13 @@ window.addEventListener("load", () => {
   let imagePositions = [];
   let tl;
   let mm = gsap.matchMedia();
+  let isMobileLayout = false;
 
   function getMobileTrackWidth() {
     return window.innerWidth <= 575 ? "1200px" : "1500px";
   }
 
-  function calculateImagePositions(isMobileLayout) {
+  function calculateImagePositions() {
     imagePositions = [];
     if (!borderWrapper || heroImages.length === 0) return;  
 
@@ -203,13 +204,25 @@ window.addEventListener("load", () => {
     isDesktop: "(min-width: 993px)",
     isMobile: "(max-width: 992px)"
   }, (context) => {
-    const isMobileLayout = context.conditions.isMobile;
+    isMobileLayout = context.conditions.isMobile;
     
-    calculateImagePositions(isMobileLayout);
+    calculateImagePositions();
     
     const firstLetters = gsap.utils.toArray(".first-letter", title1);
     let meraClones = buildMeraClones(firstLetters);
     const lettersByColumn = getLettersByColumn();
+
+    const handleResize = () => {
+      calculateImagePositions();
+
+      const wrapRect = wrap.getBoundingClientRect();
+      const clones = gsap.utils.toArray(".mera-clone");
+      if (clones.length) {
+        updateMeraCloneTargets(clones, wrapRect, 4);
+      }
+    };
+
+    ScrollTrigger.addEventListener("resize", handleResize);
 
     gsap.set(title1, { opacity: 0, y: 0 }); 
     gsap.set(title2, { opacity: 0, y: 150 });      
@@ -461,6 +474,7 @@ window.addEventListener("load", () => {
     }
     
     return () => {
+      ScrollTrigger.removeEventListener("resize", handleResize);
       if (tl) tl.kill();
     };
   });
