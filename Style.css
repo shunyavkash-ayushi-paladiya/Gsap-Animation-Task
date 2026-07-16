@@ -29,7 +29,7 @@ img {
 .hero-section {
   min-height: 120vh;
   background-color: #000;
-  padding-block: 50px;
+  padding-block: 20px;
   overflow: hidden;
 }
 
@@ -181,11 +181,11 @@ img {
 }
 
 .max-w-80 {
-  width: 80%;
+  width: 82%;
 }
 
 .max-w-20 {
-  width: 16%;
+  width: 15%;
 }
 
 .hero-item-description {
