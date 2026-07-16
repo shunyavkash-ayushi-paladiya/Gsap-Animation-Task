@@ -173,10 +173,6 @@ img {
   );
 }
 
-.hero-img-overlay-1 {
-  display: none;
-}
-
 .hero-content-items {
   margin-top: 40px;
   display: flex;

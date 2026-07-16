@@ -1,56 +1,84 @@
-@media screen and (max-width: 1380px) and (min-width: 1025px){
-   .hero-title{
-      font-size: 50px;
-   }
+@media screen and (max-width: 1380px) and (min-width: 1025px) {
+  .hero-title {
+    font-size: 50px;
+  }
 }
-
 
 @media screen and (max-width: 1380px) and (min-width: 992px) {
-   .hero-item-description{
-      font-size: 14px;
-   }
-
-   .hero-content-title{
-      font-size: 14px;
-   }
-
-   .hero-content-description{
-      font-size: 14px;
-   }
-
-   .hero-description{
-      font-size: 26px;
-   }
-
-   .hero-description-2 {
-    font-size: 18px;
-   }
-
-   .hero-description-content{
-      margin-top: 38px;
-   }
-}
-
-@media screen and (max-width: 1024px) and (min-width: 992px){
-   .hero-title{
-      font-size: 48px;
-   }
-}
-
-@media screen and (max-width: 991px) and (min-width: 320px){
-   .hero-title , .mera-clone{
-      font-size: 36px;
-   }
-
-   .hero-description-content{
-      margin-top: 28px;
-   }
-
-   .hero-description{
-      font-size: 22px;
-   }
-
-   .hero-description-2 {
+  .hero-item-description {
     font-size: 14px;
-   }
+  }
+
+  .hero-content-title {
+    font-size: 14px;
+  }
+
+  .hero-content-description {
+    font-size: 14px;
+  }
+
+  .hero-description {
+    font-size: 26px;
+  }
+
+  .hero-description-2 {
+    font-size: 18px;
+  }
+
+  .hero-description-content {
+    margin-top: 38px;
+  }
+}
+
+@media screen and (max-width: 1024px) and (min-width: 992px) {
+  .hero-title {
+    font-size: 48px;
+  }
+}
+
+@media screen and (max-width: 991px) and (min-width: 576px) {
+  .hero-title,
+  .mera-clone {
+    font-size: 36px;
+  }
+
+  .hero-description-content {
+    margin-top: 28px;
+  }
+
+  .hero-description {
+    font-size: 22px;
+  }
+
+  .hero-description-2 {
+    font-size: 14px;
+  }
+}
+
+@media screen and (max-width: 575px) and (min-width: 320px) {
+  .hero-title,
+  .mera-clone {
+    font-size: 25px;
+  }
+
+  .hero-description {
+    font-size: 14px;
+  }
+
+  .hero-description-2 {
+    font-size: 10px;
+  }
+
+  .hero-description-content {
+    margin-top: 0;
+  }
+
+  .hero-content-title {
+    font-size: 14px;
+  }
+
+  .hero-content-description {
+    font-size: 14px;
+    margin-top: 8px;
+  }
 }

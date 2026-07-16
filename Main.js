@@ -12,7 +12,6 @@ window.addEventListener("load", () => {
   const heroOverlays = document.querySelector(".hero-overlays");
   
   const heroImgOverlay = document.querySelector(".hero-img-overlay");
-  
   const heroBorderOverlay = document.querySelector(".hero-border-overlay");
   const heroBorderOverlay2 = document.querySelector(".hero-border-overlay-2");
   
@@ -33,17 +32,22 @@ window.addEventListener("load", () => {
   let tl;
   let mm = gsap.matchMedia();
 
+  function getMobileTrackWidth() {
+    return window.innerWidth <= 575 ? "1200px" : "1500px";
+  }
+
   function calculateImagePositions(isMobileLayout) {
     imagePositions = [];
-    if (!borderWrapper || heroImages.length === 0) return;
+    if (!borderWrapper || heroImages.length === 0) return;  
 
     const originalStyle = heroImgContent.getAttribute("style") || "";
     const originalContentItemsStyle = heroContentItems ? heroContentItems.getAttribute("style") || "" : "";
     
     gsap.set(heroImgContent, { clearProps: "transform,scale,x,y" });
     if (isMobileLayout) {
-      gsap.set(heroImgContent, { width: "1500px" });
-      if (heroContentItems) gsap.set(heroContentItems, { width: "1500px" });
+      const targetWidth = getMobileTrackWidth();
+      gsap.set(heroImgContent, { width: targetWidth });
+      if (heroContentItems) gsap.set(heroContentItems, { width: targetWidth });
     }
 
     const wrapperRect = borderWrapper.getBoundingClientRect();
@@ -210,12 +214,16 @@ window.addEventListener("load", () => {
     gsap.set(title1, { opacity: 0, y: 0 }); 
     gsap.set(title2, { opacity: 0, y: 150 });      
     gsap.set(description1, { opacity: 0, y: 0 }); 
-    if (description2) gsap.set(description2, { opacity: 0, xPercent: -50, y: 50 }); 
+    
+    if (description2) {
+      gsap.set(description2, { opacity: 0, y: 50 }); 
+    }
+    
     if (heroContentItems) {
       gsap.set(heroContentItems, { 
         opacity: 0, 
         x: 0,
-        width: isMobileLayout ? "100%" : "auto"
+        width: isMobileLayout ? "100%" : "auto" 
       });
     }
 
@@ -244,7 +252,7 @@ window.addEventListener("load", () => {
 
     gsap.set(heroImgContent, {
       opacity: 0,
-      yPercent: 70,
+      yPercent: 70, 
       scale: isMobileLayout ? 0.7 : 0.5, 
       x: 0,
       width: isMobileLayout ? "100%" : "auto", 
@@ -255,7 +263,7 @@ window.addEventListener("load", () => {
       scrollTrigger: {
         trigger: section,
         start: "top top",
-        end: "+=3200", 
+        end: "+=3600", 
         pin: true,
         scrub: 0.6,
         invalidateOnRefresh: true,
@@ -320,48 +328,30 @@ window.addEventListener("load", () => {
     });
 
     const finalMoveDuration = 0.55;
-
-    tl.to(description1, {
-      y: -40, 
-      duration: finalMoveDuration,
-      ease: "power2.inOut",
-    });
-
+    tl.to(description1, { y: -40, duration: finalMoveDuration, ease: "power2.inOut" });
+    
     if (description2) {
-      tl.to(description2, {
-        y: 0,
-        duration: finalMoveDuration,
-        ease: "power2.inOut",
-      }, "<");
+      tl.to(description2, { y: 0, duration: finalMoveDuration, ease: "power2.inOut" }, "<");
     }
+    
+    tl.to([title1, cloneWrap], { y: -70, duration: finalMoveDuration, ease: "power2.inOut" }, "<");
+    tl.to(title2, { opacity: 1, y: 0, duration: finalMoveDuration, ease: "power2.inOut" }, "<");
 
-    tl.to([title1, cloneWrap], {
-      y: -70, 
-      duration: finalMoveDuration,
-      ease: "power2.inOut",
-    }, "<");
-
-    tl.to(title2, {
-      opacity: 1,
-      y: 0, 
-      duration: finalMoveDuration,
-      ease: "power2.inOut",
-    }, "<");
+    if (isMobileLayout) {
+      tl.to(heroImgContent, {
+        width: getMobileTrackWidth, 
+        duration: 0.6,
+        ease: "power2.inOut"
+      });
+    }
 
     if (heroContentItems) {
       tl.to(heroContentItems, {
         opacity: 1,
-        duration: 0.4,
-        ease: "power1.out"
-      }, "<");
-    }
-
-    if (isMobileLayout) {
-      tl.to([heroImgContent, heroContentItems], {
-        width: "1500px",
+        width: isMobileLayout ? getMobileTrackWidth : "auto",
         duration: 0.5,
         ease: "power2.inOut"
-      });
+      }, isMobileLayout ? "-=0.3" : "<");
     }
 
     if (heroOverlays) {
@@ -369,7 +359,7 @@ window.addEventListener("load", () => {
         opacity: 1,
         duration: 0.5,
         ease: "power1.inOut"
-      }, "-=0.2");
+      }, "-=0.1");
 
       if (heroImages.length > 0) {
         let cutoutTracker = { leftPct: 0, rightPct: 0 };
@@ -469,6 +459,10 @@ window.addEventListener("load", () => {
         });
       }
     }
+    
+    return () => {
+      if (tl) tl.kill();
+    };
   });
 
   imgWrappers.forEach((wrapper, index) => {
@@ -493,32 +487,5 @@ window.addEventListener("load", () => {
         });
       }
     });
-  });
-
-  window.addEventListener("resize", () => {
-    const isMobileLayout = window.innerWidth <= 992;
-    calculateImagePositions(isMobileLayout);
-    
-    const clones = gsap.utils.toArray(".mera-clone");
-    const firstLetters = gsap.utils.toArray(".first-letter", title1);
-    const currentWrapRect = wrap.getBoundingClientRect();
-    if (clones.length && firstLetters.length) {
-      const titleStyle = window.getComputedStyle(title1);
-      clones.forEach((clone, i) => {
-        if(!firstLetters[i]) return;
-        const origRect = firstLetters[i].getBoundingClientRect();
-        gsap.set(clone, {
-          fontSize: titleStyle.fontSize,
-          fontFamily: titleStyle.fontFamily,
-          fontWeight: titleStyle.fontWeight,
-          lineHeight: titleStyle.lineHeight,
-          letterSpacing: titleStyle.letterSpacing,
-          left: origRect.left - currentWrapRect.left,
-          top: origRect.top - currentWrapRect.top,
-        });
-      });
-      updateMeraCloneTargets(clones, currentWrapRect, 4);
-    }
-    ScrollTrigger.refresh();
   });
 });
