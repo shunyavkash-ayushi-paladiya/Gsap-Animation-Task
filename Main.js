@@ -37,6 +37,9 @@ window.addEventListener("load", () => {
   let isMobileLayout = false;
 
   function getMobileTrackWidth() {
+    if (window.innerWidth <= 375) {
+      return "1000px";
+    }
     return window.innerWidth <= 575 ? "1200px" : "1500px";
   }
 
@@ -79,15 +82,10 @@ window.addEventListener("load", () => {
     }
   }
 
-  /**
-   * Refactored splitTitle function to handle responsive wrapping natively
-   * and resolve the non-wrapping issue on small viewports.
-   */
   function splitTitle(el) {
     if (el.querySelectorAll(".word").length > 0) return;
 
     const text = el.textContent.trim();
-    // Splits text into words and spaces
     const parts = text.split(/(\s+)/);
     let firstLetterIndex = 0;
     const meraLetters = ["M", "e", "R", "A"];
@@ -95,7 +93,6 @@ window.addEventListener("load", () => {
     el.innerHTML = "";
 
     parts.forEach((part) => {
-      // 1. Handle spaces cleanly using standard spaces (replaces blocking &nbsp;)
       if (/^\s+$/.test(part)) {
         const space = document.createElement("span");
         space.className = "space";
@@ -104,13 +101,11 @@ window.addEventListener("load", () => {
         return;
       }
 
-      // 2. Wrap words inside helper elements to enforce unified block wrapping
       const word = document.createElement("span");
       word.className = "word";
       word.style.display = "inline-block";
       word.style.whiteSpace = "nowrap";
 
-      // 3. Separate first letter for acronym/animation targets
       const firstLetterSpan = document.createElement("span");
       firstLetterSpan.className = "char first-letter";
       firstLetterSpan.dataset.acronym = meraLetters[firstLetterIndex] || part[0];
@@ -119,7 +114,6 @@ window.addEventListener("load", () => {
       word.appendChild(firstLetterSpan);
       firstLetterIndex++;
 
-      // 4. Wrap the rest of the word
       if (part.length > 1) {
         const restSpan = document.createElement("span");
         restSpan.className = "char-rest";
@@ -215,7 +209,8 @@ window.addEventListener("load", () => {
     const targetHeight = heroContent.offsetHeight; 
     
     heroContent.classList.add("active");
-    gsap.set(heroContent, { height: startHeight, overflow: "hidden" });
+    
+    gsap.set(heroContent, { height: startHeight });
 
     const handleResize = () => {
       calculateImagePositions();
@@ -229,7 +224,7 @@ window.addEventListener("load", () => {
     ScrollTrigger.addEventListener("resize", handleResize);
 
     gsap.set(title1, { opacity: 0, y: 0 }); 
-    gsap.set(title2, { opacity: 0, y: 150 });      
+    gsap.set(title2, { opacity: 0, y: 150 });       
     gsap.set(description1, { opacity: 0, y: 0 }); 
     
     if (description2) {
@@ -310,10 +305,11 @@ window.addEventListener("load", () => {
     }, 0);
 
     tl.to(".char-rest", {
-      "--position": "0%",
+    "--position": "0%",
       duration: 0.5,
       ease: "power1.inOut"
     }, titleFadeDuration + 0.1);
+    
 
     tl.to(firstLetters, {
       color: "#00dafd",
@@ -392,7 +388,7 @@ window.addEventListener("load", () => {
     if (heroContentItems) {
       tl.to(heroContentItems, {
         opacity: 1,
-        width: isMobileLayout ? getMobileTrackWidth : "auto",
+        width: isMobileLayout ? getMobileTrackWidth : "auto", 
         duration: 0.5,
         ease: "power2.inOut"
       }, isMobileLayout ? ">-=0.3" : "<");
@@ -475,7 +471,7 @@ window.addEventListener("load", () => {
               },
               onReverseComplete: () => {
                 if (matchingBlock) matchingBlock.classList.remove("active");
-                if (prevBlock) prevBlock.classList.add("active");
+                if (prevBlock) prevBlock.classList.add("active"); 
               }
             }, stepLabel);
           }
