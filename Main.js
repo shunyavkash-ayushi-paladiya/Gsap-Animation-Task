@@ -196,22 +196,13 @@ window.addEventListener("load", () => {
     const firstLetters = gsap.utils.toArray(".first-letter", title1);
     let meraClones = buildMeraClones(firstLetters);
 
-    // ==========================================
-    // પર્ફેક્ટ સ્મૂધ હાઇટ કંટ્રોલ લોજિક
-    // ==========================================
     const startHeight = 945; 
-    const targetHeight = 371; 
-
-    // એનિમેશન શરૂ થાય તે પહેલાં હાઇટને પિક્સલ પર લોક કરો
+    
+    heroContent.classList.remove("active");
+    const targetHeight = heroContent.offsetHeight; 
+    
     heroContent.classList.add("active");
-    gsap.set(heroContent, { 
-      height: startHeight, 
-      overflow: "hidden",
-      display: "flex",
-      flexDirection: "column",
-      justifyContent: "center" // કન્ટેન્ટને વચ્ચે રાખવા માટે જેથી ઝટકો ન લાગે
-    });
-    // ==========================================
+    gsap.set(heroContent, { height: startHeight, overflow: "hidden" });
 
     const handleResize = () => {
       calculateImagePositions();
@@ -224,7 +215,6 @@ window.addEventListener("load", () => {
 
     ScrollTrigger.addEventListener("resize", handleResize);
 
-    // Initial States સેટ કરો
     gsap.set(title1, { opacity: 0, y: 0 }); 
     gsap.set(title2, { opacity: 0, y: 150 });      
     gsap.set(description1, { opacity: 0, y: 0 }); 
@@ -254,6 +244,18 @@ window.addEventListener("load", () => {
       });
     }
     
+    if (heroImgOverlay) {
+      gsap.set(heroImgOverlay, { opacity: 0 });
+      if (imagePositions[0]) {
+        const x1 = imagePositions[0].imgPctLeft;
+        const x2 = imagePositions[0].imgPctRight;
+        heroImgOverlay.style.clipPath = `polygon(
+          0% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 0%, 
+          ${x1}% 0%, ${x1}% 100%, ${x2}% 100%, ${x2}% 0%, ${x1}% 0%
+        )`;
+      }
+    }
+
     if (heroBorderOverlay) gsap.set(heroBorderOverlay, { width: 0 });
     if (heroBorderOverlay2) gsap.set(heroBorderOverlay2, { width: 0 });
     if (itemDesc1) gsap.set(itemDesc1, { color: "#66666682" });
@@ -264,7 +266,6 @@ window.addEventListener("load", () => {
       if (desc) gsap.set(desc, { color: "#66666682" });
     });
 
-    // શરૂઆતમાં મશીનરી ઇમેજ નીચે છુપાયેલી રહેશે
     gsap.set(heroImgContent, {
       opacity: 0,
       yPercent: 70, 
@@ -289,32 +290,27 @@ window.addEventListener("load", () => {
 
     const titleFadeDuration = 0.3; 
 
-    // 1. Reveal first title
     tl.to(title1, {
       opacity: 1,
       duration: titleFadeDuration,
       ease: "power1.out"
     }, 0);
 
-    // 2. Linear Wipe Effect
     tl.to(".char-rest", {
       "--position": "0%",
       duration: 0.5,
       ease: "power1.inOut"
     }, titleFadeDuration + 0.1);
 
-    // 3. Color transition to cyan
     tl.to(firstLetters, {
       color: "#00dafd",
       duration: 0.2,
       ease: "none",
     }, ">");
 
-    // 4. Swap to clones
     tl.set(meraClones, { opacity: 1 });
     tl.set(firstLetters, { opacity: 0 });
 
-    // 5. MeRA Joint એનિમેશન
     tl.to(meraClones, {
       left: (i, el) => Number(el.dataset.targetLeft),
       top: (i, el) => Number(el.dataset.targetTop),
@@ -322,22 +318,17 @@ window.addEventListener("load", () => {
       ease: "power2.inOut",
     }, ">");
 
-    // 6. [સુધારેલો ભાગ]: અહીં હાઇટ ઘટવાની સાથે નીચેનું કન્ટેન્ટ અચાનક ઝટકો ન મારે એટલે 
-    // આપણે `height` ઘટાડવાની સાથે-સાથે `heroContent` ની અંદરની સરાઉન્ડિંગ સ્પેસ (padding/margin) ને પણ સ્મૂધલી સેટ કરીશું.
     tl.to(heroContent, {
       height: targetHeight, 
-      paddingTop: "20px", // જરૂરિયાત મુજબ એડજસ્ટ કરી શકો છો
-      paddingBottom: "20px",
-      duration: 0.5,
+      duration: 1.15,
       ease: "power2.inOut"
     }, "<");
 
-    // 7. એકવાર હાઇટ સ્મૂધલી 371px પર સેટ થઈ જાય, પછી જ `.active` ક્લાસ હટશે
     tl.to(heroContent, {
-      duration: 0.02,
+      duration: 0.01,
       onStart: () => {
         heroContent.classList.remove("active");
-        gsap.set(heroContent, { clearProps: "height,paddingTop,paddingBottom" });
+        gsap.set(heroContent, { clearProps: "height" });
       },
       onReverseComplete: () => {
         heroContent.classList.add("active");
@@ -345,14 +336,13 @@ window.addEventListener("load", () => {
       }
     }, ">");
 
-    // 8. મશીનરી લેઆઉટ એનિમેશન (હવે તે એકદમ સ્મૂધલી નીચેથી ઉપર સ્લાઇડ થશે)
     tl.to(heroImgContent, {
       opacity: 1,
       yPercent: 0,
       scale: 1,
       duration: 0.65,
       ease: "power2.inOut",
-    }, ">-=0.1"); // સહેજ વહેલું શરૂ થશે જેથી ગેપ ન લાગે
+    }, ">");
 
     tl.to(description1, {
       opacity: 1,
@@ -402,8 +392,19 @@ window.addEventListener("load", () => {
         ease: "power1.inOut"
       }, "-=0.1");
 
+      if (heroImgOverlay) {
+        tl.to(heroImgOverlay, {
+          opacity: 1,
+          duration: 0.4,
+          ease: "power1.inOut"
+        }, ">-=0.3"); 
+      }
+
       if (heroImages.length > 0) {
-        let cutoutTracker = { leftPct: 0, rightPct: 0 };
+        let cutoutTracker = { 
+          leftPct: imagePositions[0] ? imagePositions[0].imgPctLeft : 0, 
+          rightPct: imagePositions[0] ? imagePositions[0].imgPctRight : 0 
+        };
 
         heroImages.forEach((img, index) => {
           const matchingBlock = contentItems[index];

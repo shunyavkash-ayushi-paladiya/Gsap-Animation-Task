@@ -66,9 +66,8 @@ img {
 
 .hero-content.active {
   position: absolute;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  left: 50%;
+  top: 0%;
+  left: 0%;
   width: 100%;
   height: 100%;
 }
@@ -153,6 +152,7 @@ img {
   inset: 0;
   pointer-events: none;
   z-index: 10;
+  transition: all 0.3s ease-in-out;
 }
 
 .hero-img-overlay {
