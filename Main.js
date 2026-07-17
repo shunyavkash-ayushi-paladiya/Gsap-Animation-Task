@@ -320,6 +320,7 @@ window.addEventListener("load", () => {
     tl.set(meraClones, { opacity: 1 });
     tl.set(firstLetters, { opacity: 0 });
 
+    // 1. Joint the "MeRA" word first
     tl.to(meraClones, {
       left: (i, el) => Number(el.dataset.targetLeft),
       top: (i, el) => Number(el.dataset.targetTop),
@@ -327,11 +328,12 @@ window.addEventListener("load", () => {
       ease: "power2.inOut",
     }, ">");
 
+    // 2. Reduce the container height AFTER "MeRA" finishes joining (changed from "<" to ">")
     tl.to(heroContent, {
       height: targetHeight, 
       duration: 1.15,
       ease: "power2.inOut"
-    }, "<");
+    }, ">");
 
     tl.to(heroContent, {
       duration: 0.01,
