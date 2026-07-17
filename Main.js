@@ -79,10 +79,15 @@ window.addEventListener("load", () => {
     }
   }
 
+  /**
+   * Refactored splitTitle function to handle responsive wrapping natively
+   * and resolve the non-wrapping issue on small viewports.
+   */
   function splitTitle(el) {
     if (el.querySelectorAll(".word").length > 0) return;
 
     const text = el.textContent.trim();
+    // Splits text into words and spaces
     const parts = text.split(/(\s+)/);
     let firstLetterIndex = 0;
     const meraLetters = ["M", "e", "R", "A"];
@@ -90,27 +95,35 @@ window.addEventListener("load", () => {
     el.innerHTML = "";
 
     parts.forEach((part) => {
+      // 1. Handle spaces cleanly using standard spaces (replaces blocking &nbsp;)
       if (/^\s+$/.test(part)) {
         const space = document.createElement("span");
         space.className = "space";
-        space.innerHTML = "&nbsp;";
+        space.innerHTML = " "; 
         el.appendChild(space);
         return;
       }
 
+      // 2. Wrap words inside helper elements to enforce unified block wrapping
       const word = document.createElement("span");
       word.className = "word";
+      word.style.display = "inline-block";
+      word.style.whiteSpace = "nowrap";
 
+      // 3. Separate first letter for acronym/animation targets
       const firstLetterSpan = document.createElement("span");
       firstLetterSpan.className = "char first-letter";
       firstLetterSpan.dataset.acronym = meraLetters[firstLetterIndex] || part[0];
       firstLetterSpan.textContent = part[0];
+      firstLetterSpan.style.display = "inline-block";
       word.appendChild(firstLetterSpan);
       firstLetterIndex++;
 
+      // 4. Wrap the rest of the word
       if (part.length > 1) {
         const restSpan = document.createElement("span");
         restSpan.className = "char-rest";
+        restSpan.style.display = "inline-block";
         restSpan.textContent = part.slice(1);
         word.appendChild(restSpan);
       }
