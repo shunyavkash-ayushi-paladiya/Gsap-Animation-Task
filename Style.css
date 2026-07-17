@@ -4,7 +4,11 @@
   box-sizing: border-box;
 }
 
-body{
+:root {
+  --position: 100%;
+}
+
+body {
   font-family: "Manrope", sans-serif;
 }
 
@@ -60,6 +64,15 @@ img {
   text-align: center;
 }
 
+.hero-content.active {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  left: 50%;
+  width: 100%;
+  height: 100%;
+}
+
 .hero-title-content {
   position: relative;
   overflow: hidden;
@@ -72,18 +85,8 @@ img {
   color: white;
 }
 
-.word {
-  display: inline-block;
-  white-space: nowrap;
-}
-
-.char {
-  display: inline-block;
-  will-change: opacity, transform, color;
-}
-
-.space {
-  display: inline-block;
+.hero-title span {
+  mask-image: linear-gradient(90deg, black var(--position), transparent 0%);
 }
 
 .mera-clone-wrap {
@@ -116,7 +119,7 @@ img {
 .hero-description-content {
   position: relative;
   overflow: hidden;
-  margin-top: 48px;
+  margin-top: 18px;
 }
 
 .hero-description {
@@ -157,7 +160,7 @@ img {
   inset: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.65);
+  background-color: rgba(0, 0, 0, 0.9);
   z-index: 1;
   clip-path: polygon(
     0% 0%,
@@ -194,7 +197,7 @@ img {
   line-height: 1;
   letter-spacing: 1px;
   text-transform: uppercase;
-  color: #666666;
+  color: #66666682;
 }
 
 .hero-border-item {
@@ -248,7 +251,7 @@ img {
   font-weight: 700;
   line-height: 1.3;
   letter-spacing: 1%;
-  color: #666666;
+  color: #66666682;
   min-height: 42px;
 }
 
@@ -256,6 +259,6 @@ img {
   font-size: 16px;
   font-weight: 500;
   line-height: 1.1;
-  color: #666666;
+  color: #66666682;
   margin-top: 14px;
 }

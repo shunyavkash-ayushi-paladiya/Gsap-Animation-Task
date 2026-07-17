@@ -21,7 +21,10 @@ window.addEventListener("load", () => {
   const itemDesc1 = document.querySelector(".hero-item-description:not(.hero-item-description-v2)");
   const itemDesc2 = document.querySelector(".hero-item-description-v2");
 
-  if (!section || !wrap || !title1 || !title2 || !description1 || !heroImgContent) {
+  const heroContent = document.querySelector(".hero-content");
+
+  if (!section || !wrap || !title1 || !title2 || !description1 || !heroImgContent || !heroContent) {
+    console.warn("Hero animation skipped: Core DOM elements missing.");
     return;
   }
 
@@ -98,19 +101,19 @@ window.addEventListener("load", () => {
       const word = document.createElement("span");
       word.className = "word";
 
-      Array.from(part).forEach((letter, index) => {
-        const span = document.createElement("span");
-        span.className = "char";
+      const firstLetterSpan = document.createElement("span");
+      firstLetterSpan.className = "char first-letter";
+      firstLetterSpan.dataset.acronym = meraLetters[firstLetterIndex] || part[0];
+      firstLetterSpan.textContent = part[0];
+      word.appendChild(firstLetterSpan);
+      firstLetterIndex++;
 
-        if (index === 0) {
-          span.classList.add("first-letter");
-          span.dataset.acronym = meraLetters[firstLetterIndex] || letter;
-          firstLetterIndex++;
-        }
-
-        span.textContent = letter;
-        word.appendChild(span);
-      });
+      if (part.length > 1) {
+        const restSpan = document.createElement("span");
+        restSpan.className = "char-rest";
+        restSpan.textContent = part.slice(1);
+        word.appendChild(restSpan);
+      }
 
       el.appendChild(word);
     });
@@ -182,24 +185,6 @@ window.addEventListener("load", () => {
     });
   }
 
-  function getLettersByColumn() {
-    const words = gsap.utils.toArray(".word", title1);
-    const columns = [];
-
-    words.forEach((word) => {
-      const letters = gsap.utils
-        .toArray(".char:not(.first-letter)", word)
-        .reverse();
-
-      letters.forEach((letter, index) => {
-        if (!columns[index]) columns[index] = [];
-        columns[index].push(letter);
-      });
-    });
-
-    return columns;
-  }
-
   mm.add({
     isDesktop: "(min-width: 993px)",
     isMobile: "(max-width: 992px)"
@@ -210,11 +195,26 @@ window.addEventListener("load", () => {
     
     const firstLetters = gsap.utils.toArray(".first-letter", title1);
     let meraClones = buildMeraClones(firstLetters);
-    const lettersByColumn = getLettersByColumn();
+
+    // ==========================================
+    // પર્ફેક્ટ સ્મૂધ હાઇટ કંટ્રોલ લોજિક
+    // ==========================================
+    const startHeight = 945; 
+    const targetHeight = 371; 
+
+    // એનિમેશન શરૂ થાય તે પહેલાં હાઇટને પિક્સલ પર લોક કરો
+    heroContent.classList.add("active");
+    gsap.set(heroContent, { 
+      height: startHeight, 
+      overflow: "hidden",
+      display: "flex",
+      flexDirection: "column",
+      justifyContent: "center" // કન્ટેન્ટને વચ્ચે રાખવા માટે જેથી ઝટકો ન લાગે
+    });
+    // ==========================================
 
     const handleResize = () => {
       calculateImagePositions();
-
       const wrapRect = wrap.getBoundingClientRect();
       const clones = gsap.utils.toArray(".mera-clone");
       if (clones.length) {
@@ -224,6 +224,7 @@ window.addEventListener("load", () => {
 
     ScrollTrigger.addEventListener("resize", handleResize);
 
+    // Initial States સેટ કરો
     gsap.set(title1, { opacity: 0, y: 0 }); 
     gsap.set(title2, { opacity: 0, y: 150 });      
     gsap.set(description1, { opacity: 0, y: 0 }); 
@@ -255,14 +256,15 @@ window.addEventListener("load", () => {
     
     if (heroBorderOverlay) gsap.set(heroBorderOverlay, { width: 0 });
     if (heroBorderOverlay2) gsap.set(heroBorderOverlay2, { width: 0 });
-    if (itemDesc1) gsap.set(itemDesc1, { color: "#8a8a8a" });
-    if (itemDesc2) gsap.set(itemDesc2, { color: "#8a8a8a" });
+    if (itemDesc1) gsap.set(itemDesc1, { color: "#66666682" });
+    if (itemDesc2) gsap.set(itemDesc2, { color: "#66666682" });
 
     contentItems.forEach(item => {
       const desc = item.querySelector(".hero-content-description");
-      if (desc) gsap.set(desc, { color: "#8a8a8a" });
+      if (desc) gsap.set(desc, { color: "#66666682" });
     });
 
+    // શરૂઆતમાં મશીનરી ઇમેજ નીચે છુપાયેલી રહેશે
     gsap.set(heroImgContent, {
       opacity: 0,
       yPercent: 70, 
@@ -272,6 +274,8 @@ window.addEventListener("load", () => {
       transformOrigin: "center center",
     });
 
+    gsap.set(".char-rest", { "--position": "100%" });
+
     tl = gsap.timeline({
       scrollTrigger: {
         trigger: section,
@@ -279,50 +283,82 @@ window.addEventListener("load", () => {
         end: "+=3600", 
         pin: true,
         scrub: 0.6,
-        invalidateOnRefresh: true,
+        invalidateOnRefresh: true
       },
     });
 
-    const stepDuration = 0.035; 
-    const totalColumns = lettersByColumn.length;
     const titleFadeDuration = 0.3; 
 
+    // 1. Reveal first title
     tl.to(title1, {
       opacity: 1,
       duration: titleFadeDuration,
       ease: "power1.out"
     }, 0);
 
-    lettersByColumn.forEach((letters, index) => {
-      tl.to(letters, {
-        opacity: 0,
-        duration: stepDuration,
-        ease: "none",
-        delay: index * stepDuration, 
-      }, titleFadeDuration); 
-    });
+    // 2. Linear Wipe Effect
+    tl.to(".char-rest", {
+      "--position": "0%",
+      duration: 0.5,
+      ease: "power1.inOut"
+    }, titleFadeDuration + 0.1);
 
+    // 3. Color transition to cyan
     tl.to(firstLetters, {
       color: "#00dafd",
       duration: 0.2,
       ease: "none",
-    }, titleFadeDuration + (totalColumns * stepDuration) + 0.1);
+    }, ">");
 
+    // 4. Swap to clones
     tl.set(meraClones, { opacity: 1 });
     tl.set(firstLetters, { opacity: 0 });
 
+    // 5. MeRA Joint એનિમેશન
     tl.to(meraClones, {
       left: (i, el) => Number(el.dataset.targetLeft),
       top: (i, el) => Number(el.dataset.targetTop),
       duration: 0.5,
       ease: "power2.inOut",
-    });
+    }, ">");
+
+    // 6. [સુધારેલો ભાગ]: અહીં હાઇટ ઘટવાની સાથે નીચેનું કન્ટેન્ટ અચાનક ઝટકો ન મારે એટલે 
+    // આપણે `height` ઘટાડવાની સાથે-સાથે `heroContent` ની અંદરની સરાઉન્ડિંગ સ્પેસ (padding/margin) ને પણ સ્મૂધલી સેટ કરીશું.
+    tl.to(heroContent, {
+      height: targetHeight, 
+      paddingTop: "20px", // જરૂરિયાત મુજબ એડજસ્ટ કરી શકો છો
+      paddingBottom: "20px",
+      duration: 0.5,
+      ease: "power2.inOut"
+    }, "<");
+
+    // 7. એકવાર હાઇટ સ્મૂધલી 371px પર સેટ થઈ જાય, પછી જ `.active` ક્લાસ હટશે
+    tl.to(heroContent, {
+      duration: 0.02,
+      onStart: () => {
+        heroContent.classList.remove("active");
+        gsap.set(heroContent, { clearProps: "height,paddingTop,paddingBottom" });
+      },
+      onReverseComplete: () => {
+        heroContent.classList.add("active");
+        gsap.set(heroContent, { height: targetHeight });
+      }
+    }, ">");
+
+    // 8. મશીનરી લેઆઉટ એનિમેશન (હવે તે એકદમ સ્મૂધલી નીચેથી ઉપર સ્લાઇડ થશે)
+    tl.to(heroImgContent, {
+      opacity: 1,
+      yPercent: 0,
+      scale: 1,
+      duration: 0.65,
+      ease: "power2.inOut",
+    }, ">-=0.1"); // સહેજ વહેલું શરૂ થશે જેથી ગેપ ન લાગે
 
     tl.to(description1, {
       opacity: 1,
       duration: 0.4,
       ease: "power1.out",
-    });
+    }, ">-=0.25"); 
 
     if (description2) {
       tl.to(description2, {
@@ -332,16 +368,8 @@ window.addEventListener("load", () => {
       }, "<"); 
     }
 
-    tl.to(heroImgContent, {
-      opacity: 1,
-      yPercent: 0,
-      scale: 1,
-      duration: 0.65,
-      ease: "power2.inOut",
-    });
-
     const finalMoveDuration = 0.55;
-    tl.to(description1, { y: -40, duration: finalMoveDuration, ease: "power2.inOut" });
+    tl.to(description1, { y: -40, duration: finalMoveDuration, ease: "power2.inOut" }, ">");
     
     if (description2) {
       tl.to(description2, { y: 0, duration: finalMoveDuration, ease: "power2.inOut" }, "<");
@@ -355,7 +383,7 @@ window.addEventListener("load", () => {
         width: getMobileTrackWidth, 
         duration: 0.6,
         ease: "power2.inOut"
-      });
+      }, ">");
     }
 
     if (heroContentItems) {
@@ -364,7 +392,7 @@ window.addEventListener("load", () => {
         width: isMobileLayout ? getMobileTrackWidth : "auto",
         duration: 0.5,
         ease: "power2.inOut"
-      }, isMobileLayout ? "-=0.3" : "<");
+      }, isMobileLayout ? ">-=0.3" : "<");
     }
 
     if (heroOverlays) {
@@ -451,9 +479,9 @@ window.addEventListener("load", () => {
 
             if (index < 4) {
               if (itemDesc1) tl.to(itemDesc1, { color: "#ffffff", duration: 0.4, ease: "power1.inOut" }, stepLabel);
-              if (itemDesc2) tl.to(itemDesc2, { color: "#8a8a8a", duration: 0.4, ease: "power1.inOut" }, stepLabel);
+              if (itemDesc2) tl.to(itemDesc2, { color: "#66666682", duration: 0.4, ease: "power1.inOut" }, stepLabel);
             } else if (index === 4) {
-              if (itemDesc1) tl.to(itemDesc1, { color: "#8a8a8a", duration: 0.4, ease: "power1.inOut" }, stepLabel);
+              if (itemDesc1) tl.to(itemDesc1, { color: "#66666682", duration: 0.4, ease: "power1.inOut" }, stepLabel);
               if (itemDesc2) tl.to(itemDesc2, { color: "#ffffff", duration: 0.4, ease: "power1.inOut" }, stepLabel);
             }
           }
@@ -461,12 +489,12 @@ window.addEventListener("load", () => {
           if (prevBlock) {
             const prevTitle = prevBlock.querySelector(".hero-content-title");
             if (prevTitle) {
-              tl.to(prevTitle, { color: "#8a8a8a", duration: 0.4, ease: "power1.inOut" }, stepLabel);
+              tl.to(prevTitle, { color: "#66666682", duration: 0.4, ease: "power1.inOut" }, stepLabel);
             }
 
             const prevDescText = prevBlock.querySelector(".hero-content-description");
             if (prevDescText) {
-              tl.to(prevDescText, { color: "#8a8a8a", duration: 0.4, ease: "power1.inOut" }, stepLabel);
+              tl.to(prevDescText, { color: "#66666682", duration: 0.4, ease: "power1.inOut" }, stepLabel);
             }
           }
         });
