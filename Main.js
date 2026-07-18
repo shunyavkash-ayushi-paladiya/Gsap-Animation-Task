@@ -50,7 +50,7 @@ window.addEventListener("load", () => {
     const originalStyle = heroImgContent.getAttribute("style") || "";
     const originalContentItemsStyle = heroContentItems ? heroContentItems.getAttribute("style") || "" : "";
     
-    gsap.set(heroImgContent, { clearProps: "transform,scale,x,y,yPercent" });
+    gsap.set(heroImgContent, { clearProps: "transform,scale,x,y" });
     if (isMobileLayout) {
       const targetWidth = getMobileTrackWidth();
       gsap.set(heroImgContent, { width: targetWidth });
@@ -204,10 +204,7 @@ window.addEventListener("load", () => {
     let meraClones = buildMeraClones(firstLetters);
 
     const startHeight = 945; 
-    
-    heroContent.classList.remove("active");
     const targetHeight = heroContent.offsetHeight; 
-    heroContent.classList.add("active");
     
     gsap.set(heroContent, { height: startHeight });
 
@@ -241,6 +238,7 @@ window.addEventListener("load", () => {
     if (heroOverlays) {
       gsap.set(heroOverlays, { 
         opacity: 0,
+        y: 30,
         position: "absolute",
         top: 0,
         left: 0,
@@ -263,8 +261,21 @@ window.addEventListener("load", () => {
       }
     }
 
-    if (heroBorderOverlay) gsap.set(heroBorderOverlay, { width: 0 });
+    if (contentItems[0]) {
+      contentItems[0].classList.add("active");
+    }
+
+    if (heroBorderOverlay) {
+      gsap.set(heroBorderOverlay, { 
+        opacity: 0, 
+        width: () => {
+          if (!borderWrapper || !imagePositions[0]) return 0;
+          return Math.max(0, Math.min(imagePositions[0].right, borderWrapper.offsetWidth));
+        }
+      });
+    }
     if (heroBorderOverlay2) gsap.set(heroBorderOverlay2, { width: 0 });
+
     if (itemDesc1) gsap.set(itemDesc1, { color: "#66666682" });
     if (itemDesc2) gsap.set(itemDesc2, { color: "#66666682" });
 
@@ -275,7 +286,7 @@ window.addEventListener("load", () => {
 
     gsap.set(heroImgContent, {
       opacity: 0,
-      yPercent: 150, 
+      y: 300, 
       scale: isMobileLayout ? 0.7 : 0.5, 
       x: 0,
       width: isMobileLayout ? "100%" : "auto", 
@@ -323,6 +334,13 @@ window.addEventListener("load", () => {
       top: (i, el) => Number(el.dataset.targetTop),
       duration: 0.5,
       ease: "power2.inOut",
+      // Removes 'active' class when joint word is complete forward, restores it on reverse
+      onComplete: () => {
+        wrap.classList.remove("active");
+      },
+      onReverseComplete: () => {
+        wrap.classList.add("active");
+      }
     }, ">");
 
     tl.to(heroContent, {
@@ -331,35 +349,23 @@ window.addEventListener("load", () => {
       ease: "power2.inOut"
     }, ">");
 
-    // 1. Establish an explicit label right where the container animation wraps up
-    tl.addLabel("imgStart", "-=0.75");
+    tl.to(heroImgContent, {
+      opacity: 1,
+      y: 0, 
+      scale: 1,
+      duration: 1.15, 
+      ease: "power2.inOut",
+    }, "<"); 
 
-    // 2. Animate the images entering up from the bottom
-    tl.fromTo(heroImgContent, 
-      {
-        opacity: 0,
-        yPercent: 150, 
-      },
-      {
-        opacity: 1,
-        yPercent: 0, 
-        scale: 1,
-        duration: 1.0, // Fixed 1-second reference window
-        ease: "power3.out", 
-      }, 
-      "imgStart"
-    ); 
-
-    // 3. Exact 90% execution block (0.9s delay appended to the start label)
     tl.to(heroContent, {
       duration: 0.01,
       onStart: () => {
-        heroContent.classList.remove("active");
+        gsap.set(heroContent, { clearProps: "height" });
       },
       onReverseComplete: () => {
-        heroContent.classList.add("active");
+        gsap.set(heroContent, { height: targetHeight });
       }
-    }, "imgStart+=0.9");
+    }, ">");
 
     tl.to(description1, {
       opacity: 1,
@@ -403,18 +409,21 @@ window.addEventListener("load", () => {
     }
 
     if (heroOverlays) {
+      tl.add("overlaysEntry", "-=0.1");
+
       tl.to(heroOverlays, {
         opacity: 1,
-        duration: 0.5,
-        ease: "power1.inOut"
-      }, "-=0.1");
+        y: 0,
+        duration: 0.8,
+        ease: "power2.out"
+      }, "overlaysEntry");
 
       if (heroImgOverlay) {
         tl.to(heroImgOverlay, {
           opacity: 1,
-          duration: 0.4,
-          ease: "power1.inOut"
-        }, ">-=0.3"); 
+          duration: 0.6,
+          ease: "power2.inOut"
+        }, "overlaysEntry+=0.2"); 
       }
 
       if (heroImages.length > 0) {
@@ -431,7 +440,7 @@ window.addEventListener("load", () => {
           const currentBorderTarget = index < 4 ? heroBorderOverlay : heroBorderOverlay2;
           const stepLabel = `step_${index}`;
           
-          tl.add(stepLabel, isFirst ? "<" : "+=0.2");
+          tl.add(stepLabel, isFirst ? ">" : "+=0.2");
 
           if (isMobileLayout) {
             tl.to([heroImgContent, heroContentItems], {
@@ -439,16 +448,16 @@ window.addEventListener("load", () => {
                 if (!imagePositions[index]) return 0;
                 return (window.innerWidth / 2) - imagePositions[index].centerOffset;
               },
-              duration: 0.7,
+              duration: 0.8,
               ease: "power2.inOut"
             }, stepLabel);
           }
 
-          if (heroImgOverlay) {
+          if (heroImgOverlay && !isFirst) {
             tl.to(cutoutTracker, {
               leftPct: () => imagePositions[index] ? imagePositions[index].imgPctLeft : 0,
               rightPct: () => imagePositions[index] ? imagePositions[index].imgPctRight : 0,
-              duration: 0.7,
+              duration: 0.8,
               ease: "power2.inOut",
               onUpdate: () => {
                 const x1 = cutoutTracker.leftPct;
@@ -462,57 +471,66 @@ window.addEventListener("load", () => {
           }
 
           if (currentBorderTarget) {
-            tl.to(currentBorderTarget, {
-              width: () => {
-                if (!borderWrapper || !imagePositions[index]) return 0;
-                if (index < 4) {
-                  return Math.max(0, Math.min(imagePositions[index].right, borderWrapper.offsetWidth));
-                } else {
-                  return Math.max(0, imagePositions[index].width);
+            if (isFirst) {
+              tl.to(currentBorderTarget, {
+                opacity: 1,
+                duration: 0.8,
+                ease: "power2.inOut"
+              }, stepLabel);
+            } else {
+              tl.to(currentBorderTarget, {
+                opacity: 1, 
+                width: () => {
+                  if (!borderWrapper || !imagePositions[index]) return 0;
+                  if (index < 4) {
+                    return Math.max(0, Math.min(imagePositions[index].right, borderWrapper.offsetWidth));
+                  } else {
+                    return Math.max(0, imagePositions[index].width);
+                  }
+                },
+                duration: 0.8,
+                ease: "power2.inOut",
+                onStart: () => {
+                  if (matchingBlock) matchingBlock.classList.add("active");
+                  if (prevBlock) prevBlock.classList.remove("active");
+                },
+                onReverseComplete: () => {
+                  if (matchingBlock) matchingBlock.classList.remove("active");
+                  if (prevBlock) prevBlock.classList.add("active"); 
                 }
-              },
-              duration: 0.7,
-              ease: "power2.inOut",
-              onStart: () => {
-                if (matchingBlock) matchingBlock.classList.add("active");
-                if (prevBlock) prevBlock.classList.remove("active");
-              },
-              onReverseComplete: () => {
-                if (matchingBlock) matchingBlock.classList.remove("active");
-                if (prevBlock) prevBlock.classList.add("active"); 
-              }
-            }, stepLabel);
+              }, stepLabel);
+            }
           }
 
           if (matchingBlock) {
             const titleText = matchingBlock.querySelector(".hero-content-title");
             if (titleText) {
-              tl.to(titleText, { color: "#00dafd", duration: 0.4, ease: "power1.inOut" }, stepLabel);
+              tl.to(titleText, { color: "#00dafd", duration: 0.4, ease: "power2.inOut" }, stepLabel);
             }
 
             const contentDescText = matchingBlock.querySelector(".hero-content-description");
             if (contentDescText) {
-              tl.to(contentDescText, { color: "#ffffff", duration: 0.4, ease: "power1.inOut" }, stepLabel);
+              tl.to(contentDescText, { color: "#ffffff", duration: 0.4, ease: "power2.inOut" }, stepLabel);
             }
 
             if (index < 4) {
-              if (itemDesc1) tl.to(itemDesc1, { color: "#ffffff", duration: 0.4, ease: "power1.inOut" }, stepLabel);
-              if (itemDesc2) tl.to(itemDesc2, { color: "#66666682", duration: 0.4, ease: "power1.inOut" }, stepLabel);
+              if (itemDesc1) tl.to(itemDesc1, { color: "#ffffff", duration: 0.4, ease: "power2.inOut" }, stepLabel);
+              if (itemDesc2) tl.to(itemDesc2, { color: "#66666682", duration: 0.4, ease: "power2.inOut" }, stepLabel);
             } else if (index === 4) {
-              if (itemDesc1) tl.to(itemDesc1, { color: "#66666682", duration: 0.4, ease: "power1.inOut" }, stepLabel);
-              if (itemDesc2) tl.to(itemDesc2, { color: "#ffffff", duration: 0.4, ease: "power1.inOut" }, stepLabel);
+              if (itemDesc1) tl.to(itemDesc1, { color: "#66666682", duration: 0.4, ease: "power2.inOut" }, stepLabel);
+              if (itemDesc2) tl.to(itemDesc2, { color: "#ffffff", duration: 0.4, ease: "power2.inOut" }, stepLabel);
             }
           }
 
           if (prevBlock) {
             const prevTitle = prevBlock.querySelector(".hero-content-title");
             if (prevTitle) {
-              tl.to(prevTitle, { color: "#66666682", duration: 0.4, ease: "power1.inOut" }, stepLabel);
+              tl.to(prevTitle, { color: "#66666682", duration: 0.4, ease: "power2.inOut" }, stepLabel);
             }
 
             const prevDescText = prevBlock.querySelector(".hero-content-description");
             if (prevDescText) {
-              tl.to(prevDescText, { color: "#66666682", duration: 0.4, ease: "power1.inOut" }, stepLabel);
+              tl.to(prevDescText, { color: "#66666682", duration: 0.4, ease: "power2.inOut" }, stepLabel);
             }
           }
         });
@@ -548,4 +566,4 @@ window.addEventListener("load", () => {
       }
     });
   });
-}); 
+});

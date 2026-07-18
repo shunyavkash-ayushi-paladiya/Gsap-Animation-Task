@@ -64,12 +64,14 @@ img {
   text-align: center;
 }
 
-.hero-content.active {
+.hero-title-content.active {
   position: absolute;
   top: 0%;
   left: 0%;
   width: 100%;
   height: 100%;
+  display: flex;
+  align-items: center;
 }
 
 .hero-title-content {
@@ -176,6 +178,7 @@ img {
     0px 0%,
     0px 0%
   );
+  transition: all ease-in-out;
 }
 
 .hero-content-items {
@@ -200,6 +203,7 @@ img {
   letter-spacing: 1px;
   text-transform: uppercase;
   color: #66666682;
+  transition: all 0.3s ease-in-out;
 }
 
 .hero-border-item {
@@ -216,6 +220,7 @@ img {
   background: linear-gradient(to right, #3349ef, #92ddce);
   z-index: 1;
   height: 100%;
+  transition: all 0.1s ease-in-out;
 }
 
 .hero-border-overlay-2 {
@@ -255,6 +260,7 @@ img {
   letter-spacing: 1%;
   color: #66666682;
   min-height: 42px;
+  transition: all 0.3s ease-in-out;
 }
 
 .hero-content-description {
@@ -263,4 +269,5 @@ img {
   line-height: 1.1;
   color: #66666682;
   margin-top: 14px;
+  transition: all 0.3s ease-in-out;
 }
