@@ -50,7 +50,7 @@ window.addEventListener("load", () => {
     const originalStyle = heroImgContent.getAttribute("style") || "";
     const originalContentItemsStyle = heroContentItems ? heroContentItems.getAttribute("style") || "" : "";
     
-    gsap.set(heroImgContent, { clearProps: "transform,scale,x,y" });
+    gsap.set(heroImgContent, { clearProps: "transform,scale,x,y,yPercent" });
     if (isMobileLayout) {
       const targetWidth = getMobileTrackWidth();
       gsap.set(heroImgContent, { width: targetWidth });
@@ -207,7 +207,6 @@ window.addEventListener("load", () => {
     
     heroContent.classList.remove("active");
     const targetHeight = heroContent.offsetHeight; 
-    
     heroContent.classList.add("active");
     
     gsap.set(heroContent, { height: startHeight });
@@ -276,11 +275,11 @@ window.addEventListener("load", () => {
 
     gsap.set(heroImgContent, {
       opacity: 0,
-      yPercent: 70, 
+      yPercent: 150, 
       scale: isMobileLayout ? 0.7 : 0.5, 
       x: 0,
       width: isMobileLayout ? "100%" : "auto", 
-      transformOrigin: "center center",
+      transformOrigin: "center bottom" 
     });
 
     gsap.set(".char-rest", { "--position": "100%" });
@@ -305,12 +304,11 @@ window.addEventListener("load", () => {
     }, 0);
 
     tl.to(".char-rest", {
-    "--position": "0%",
+      "--position": "0%",
       duration: 0.5,
       ease: "power1.inOut"
     }, titleFadeDuration + 0.1);
     
-
     tl.to(firstLetters, {
       color: "#00dafd",
       duration: 0.2,
@@ -320,7 +318,6 @@ window.addEventListener("load", () => {
     tl.set(meraClones, { opacity: 1 });
     tl.set(firstLetters, { opacity: 0 });
 
-    // 1. Joint the "MeRA" word first
     tl.to(meraClones, {
       left: (i, el) => Number(el.dataset.targetLeft),
       top: (i, el) => Number(el.dataset.targetTop),
@@ -328,32 +325,41 @@ window.addEventListener("load", () => {
       ease: "power2.inOut",
     }, ">");
 
-    // 2. Reduce the container height AFTER "MeRA" finishes joining (changed from "<" to ">")
     tl.to(heroContent, {
       height: targetHeight, 
       duration: 1.15,
       ease: "power2.inOut"
     }, ">");
 
+    // 1. Establish an explicit label right where the container animation wraps up
+    tl.addLabel("imgStart", "-=0.75");
+
+    // 2. Animate the images entering up from the bottom
+    tl.fromTo(heroImgContent, 
+      {
+        opacity: 0,
+        yPercent: 150, 
+      },
+      {
+        opacity: 1,
+        yPercent: 0, 
+        scale: 1,
+        duration: 1.0, // Fixed 1-second reference window
+        ease: "power3.out", 
+      }, 
+      "imgStart"
+    ); 
+
+    // 3. Exact 90% execution block (0.9s delay appended to the start label)
     tl.to(heroContent, {
       duration: 0.01,
       onStart: () => {
         heroContent.classList.remove("active");
-        gsap.set(heroContent, { clearProps: "height" });
       },
       onReverseComplete: () => {
         heroContent.classList.add("active");
-        gsap.set(heroContent, { height: targetHeight });
       }
-    }, ">");
-
-    tl.to(heroImgContent, {
-      opacity: 1,
-      yPercent: 0,
-      scale: 1,
-      duration: 0.65,
-      ease: "power2.inOut",
-    }, ">");
+    }, "imgStart+=0.9");
 
     tl.to(description1, {
       opacity: 1,
@@ -542,4 +548,4 @@ window.addEventListener("load", () => {
       }
     });
   });
-});
+}); 
