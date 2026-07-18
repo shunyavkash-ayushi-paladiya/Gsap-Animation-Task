@@ -64,9 +64,9 @@ img {
   text-align: center;
 }
 
-/* .hero-img-2{
+.hero-img-2{
   filter: drop-shadow(0px -6px 30px rgb(0 218 253 / 50%));;
-} */
+}
 
 .hero-title-content.active {
   position: absolute;
