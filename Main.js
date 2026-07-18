@@ -426,7 +426,7 @@ window.addEventListener("load", () => {
       ease: "power2.inOut",
     }, "<"); 
 
-    tl.to(description1, { opacity: 1, duration: 0.4, ease: "power1.out" }, ">-=0.25"); 
+    tl.to(description1, { opacity: 1, duration: 0.4, ease: "power1.out" }, ">+=0.2"); 
 
     if (description2) {
       tl.to(description2, { opacity: 1, duration: 0.4, ease: "power1.out" }, "<"); 
@@ -460,6 +460,16 @@ window.addEventListener("load", () => {
         tl.to(heroImgOverlay, { opacity: 1, duration: 0.6, ease: "power2.inOut" }, "overlaysEntry+=0.2"); 
       }
 
+      tl.add("overlaysActiveStart", "overlaysEntry+=0.2");
+
+      const firstTitle = contentItems[0]?.querySelector(".hero-content-title");
+      const firstDesc = contentItems[0]?.querySelector(".hero-content-description");
+      
+      if (firstTitle) tl.to(firstTitle, { color: "#00dafd", duration: 0.4, ease: "power2.inOut" }, "overlaysActiveStart");
+      if (firstDesc) tl.to(firstDesc, { color: "#ffffff", duration: 0.4, ease: "power2.inOut" }, "overlaysActiveStart");
+      if (itemDesc1) tl.to(itemDesc1, { color: "#ffffff", duration: 0.4, ease: "power2.inOut" }, "overlaysActiveStart");
+      if (heroBorderOverlay) tl.to(heroBorderOverlay, { opacity: 1, duration: 0.4, ease: "power2.inOut" }, "overlaysActiveStart");
+
       if (heroImages.length > 0) {
         let cutoutTracker = { 
           leftPct: imagePositions[0] ? imagePositions[0].imgPctLeft : 0, 
@@ -473,7 +483,7 @@ window.addEventListener("load", () => {
           const currentBorderTarget = index < 4 ? heroBorderOverlay : heroBorderOverlay2;
           const stepLabel = `step_${index}`;
           
-          tl.add(stepLabel, isFirst ? ">" : "+=0.2");
+          tl.add(stepLabel, isFirst ? "overlaysActiveStart" : "+=0.2");
 
           tl.call(() => {
             if (isShortDesktopLayout) {
@@ -508,7 +518,7 @@ window.addEventListener("load", () => {
             }, stepLabel);
           }
 
-          if (currentBorderTarget) {
+          if (currentBorderTarget && !isFirst) {
             tl.to(currentBorderTarget, {
               opacity: 1, 
               width: () => {
@@ -540,7 +550,7 @@ window.addEventListener("load", () => {
             }, stepLabel);
           }
 
-          if (matchingBlock) {
+          if (matchingBlock && !isFirst) {
             const titleText = matchingBlock.querySelector(".hero-content-title");
             if (titleText) {
               tl.to(titleText, { 
