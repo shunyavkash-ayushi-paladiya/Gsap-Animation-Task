@@ -2,7 +2,7 @@ gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
 
 window.addEventListener("load", () => {
   const section = document.querySelector(".hero-section");
-  const wrap = document.querySelector(".hero-title-content");
+  const wrap = document.querySelector(".hero-title-content"); // This is your 'wrap'
   const title1 = document.querySelector(".hero-title:not(.hero-title-2)");
   const title2 = document.querySelector(".hero-title-2");
   const description1 = document.querySelector(".hero-description:not(.hero-description-2)");
@@ -149,13 +149,15 @@ window.addEventListener("load", () => {
 
       cloneWrap.appendChild(clone);
 
+      // UPDATED: Changed position styling strategy to use dynamic CSS centering instead of fixed top coordinate.
       gsap.set(clone, {
         position: "absolute",
         display: "inline-block",
         opacity: 0,
         whiteSpace: "nowrap",
         left: rect.left - wrapRect.left,
-        top: rect.top - wrapRect.top,
+        top: "50%",
+        yPercent: -50, // This keeps it vertically centered dynamically regardless of container height changes
         color: "#00dafd",
         fontSize: titleStyle.fontSize,
         fontFamily: titleStyle.fontFamily,
@@ -183,11 +185,10 @@ window.addEventListener("load", () => {
       calculatedGap * (clones.length - 1);
 
     let x = currentWrapRect.width / 2 - totalWidth / 2;
-    const y = currentWrapRect.height / 2 - clones[0].offsetHeight / 2;
+    // UPDATED: Removed hardcoded y target because CSS transforms are now handling vertical adjustments.
 
     clones.forEach((clone) => {
       clone.dataset.targetLeft = x;
-      clone.dataset.targetTop = y;
       x += clone.offsetWidth + calculatedGap;
     });
   }
@@ -203,10 +204,17 @@ window.addEventListener("load", () => {
     const firstLetters = gsap.utils.toArray(".first-letter", title1);
     let meraClones = buildMeraClones(firstLetters);
 
-    const startHeight = 945; 
-    const targetHeight = heroContent.offsetHeight; 
+    // --- SYNCHRONIZED HEIGHT RECONFIGURATIONS ---
+    const naturalWrapHeight = wrap.offsetHeight; 
+    const naturalTitleHeight = title1.offsetHeight;
     
-    gsap.set(heroContent, { height: startHeight });
+    // Set targets so wrap matches the target height of title1 perfectly
+    const targetTitleHeight = naturalTitleHeight * 0.8; 
+    const targetWrapHeight = targetTitleHeight; 
+
+    // Set initial natural heights explicitly
+    gsap.set(wrap, { height: naturalWrapHeight });
+    gsap.set(title1, { height: naturalTitleHeight, overflow: "hidden" }); 
 
     const handleResize = () => {
       calculateImagePositions();
@@ -238,7 +246,7 @@ window.addEventListener("load", () => {
     if (heroOverlays) {
       gsap.set(heroOverlays, { 
         opacity: 0,
-        y: 30,
+        y: 30, 
         position: "absolute",
         top: 0,
         left: 0,
@@ -329,12 +337,11 @@ window.addEventListener("load", () => {
     tl.set(meraClones, { opacity: 1 });
     tl.set(firstLetters, { opacity: 0 });
 
+    // UPDATED: Removed 'top' parameter animation completely since the CSS rules keep it naturally layout-aligned.
     tl.to(meraClones, {
       left: (i, el) => Number(el.dataset.targetLeft),
-      top: (i, el) => Number(el.dataset.targetTop),
       duration: 0.5,
       ease: "power2.inOut",
-      // Removes 'active' class when joint word is complete forward, restores it on reverse
       onComplete: () => {
         wrap.classList.remove("active");
       },
@@ -343,11 +350,18 @@ window.addEventListener("load", () => {
       }
     }, ">");
 
-    tl.to(heroContent, {
-      height: targetHeight, 
+    // --- HEIGHT REDUCTION PARALLEL TRANSITION ---
+    tl.to(wrap, {
+      height: targetWrapHeight, 
       duration: 1.15,
       ease: "power2.inOut"
     }, ">");
+
+    tl.to(title1, {
+      height: targetTitleHeight,
+      duration: 1.15,
+      ease: "power2.inOut"
+    }, "<");
 
     tl.to(heroImgContent, {
       opacity: 1,
@@ -356,16 +370,6 @@ window.addEventListener("load", () => {
       duration: 1.15, 
       ease: "power2.inOut",
     }, "<"); 
-
-    tl.to(heroContent, {
-      duration: 0.01,
-      onStart: () => {
-        gsap.set(heroContent, { clearProps: "height" });
-      },
-      onReverseComplete: () => {
-        gsap.set(heroContent, { height: targetHeight });
-      }
-    }, ">");
 
     tl.to(description1, {
       opacity: 1,
