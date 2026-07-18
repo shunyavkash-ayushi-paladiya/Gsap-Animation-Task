@@ -264,7 +264,7 @@ img {
   letter-spacing: 1%;
   color: #66666682;
   min-height: 42px;
-  transition: all 0.3s ease-in-out;
+  transition: all 0.2s ease-in-out;
 }
 
 .hero-content-description {
@@ -273,5 +273,5 @@ img {
   line-height: 1.1;
   color: #66666682;
   margin-top: 14px;
-  transition: all 0.3s ease-in-out;
+  transition: all 0.2s ease-in-out;
 }
