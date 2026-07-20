@@ -21,10 +21,6 @@
   .hero-description {
     font-size: 26px;
   }
-
-  .hero-description-2 {
-    font-size: 18px;
-  }
 }
 
 @media screen and (max-width: 1024px) and (min-width: 992px) {
@@ -44,8 +40,12 @@
     font-size: 22px;
   }
 
-  .hero-content {
-    margin-bottom: 30px;
+  .hero-content-title {
+    font-size: 14px;
+  }
+
+  .hero-content-description {
+    font-size: 14px;
   }
 }
 
@@ -70,5 +70,17 @@
 
   .hero-content {
     margin-bottom: 160px;
+  }
+}
+
+@media screen and (min-width: 320px) and (max-width: 991px){
+  .hero-content {
+    margin-bottom: 30px;
+  }
+}
+
+@media screen and (min-width: 320px) and (max-width: 991px) and (min-height: 700px) {
+  .hero-content {
+    margin-bottom: 30px;
   }
 }

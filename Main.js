@@ -1,12 +1,28 @@
 gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
 
+const lenis = new Lenis({
+  duration: 1.2, 
+  easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+  smoothWheel: true,
+  wheelMultiplier: 0.8, 
+  touchMultiplier: 2.0,
+});
+
+lenis.on("scroll", ScrollTrigger.update);
+
+gsap.ticker.add((time) => {
+  lenis.raf(time * 1000);
+});
+
+gsap.ticker.lagSmoothing(0);
+
 window.addEventListener("load", () => {
   const section = document.querySelector(".hero-section");
   const wrap = document.querySelector(".hero-title-content");
   const title1 = document.querySelector(".hero-title:not(.hero-title-2)");
   const title2 = document.querySelector(".hero-title-2");
   const description1 = document.querySelector(
-    ".hero-description:not(.hero-description-2)",
+    ".hero-description:not(.hero-description-2)"
   );
   const description2 = document.querySelector(".hero-description-2");
   const heroImgContent = document.querySelector(".hero-img-content");
@@ -21,7 +37,7 @@ window.addEventListener("load", () => {
   const contentItems = document.querySelectorAll(".hero-content-item");
 
   const itemDesc1 = document.querySelector(
-    ".hero-item-description:not(.hero-item-description-v2)",
+    ".hero-item-description:not(.hero-item-description-v2)"
   );
   const itemDesc2 = document.querySelector(".hero-item-description-v2");
 
@@ -52,13 +68,13 @@ window.addEventListener("load", () => {
 
   function getImgContentTargetWidth() {
     if (window.innerWidth <= 375) return "1000px";
-    if (window.innerWidth <= 575) return "1200px";
-    return "1500px"; 
+    if (window.innerWidth <= 767) return "1200px";
+    return "1500px";
   }
 
   function getContentItemsWidth() {
     if (window.innerWidth <= 375) return "1000px";
-    if (window.innerWidth <= 575) return "1200px";
+    if (window.innerWidth <= 768) return "1200px";
     return "1500px";
   }
 
@@ -287,7 +303,7 @@ window.addEventListener("load", () => {
       if (index < 4) {
         const targetWidth = Math.max(
           0,
-          Math.min(imagePositions[index].right, borderWrapper.offsetWidth),
+          Math.min(imagePositions[index].right, borderWrapper.offsetWidth)
         );
         gsap.to(heroBorderOverlay, {
           opacity: 1,
@@ -303,7 +319,7 @@ window.addEventListener("load", () => {
       } else {
         const maxOverlay1Width = Math.max(
           0,
-          Math.min(imagePositions[3].right, borderWrapper.offsetWidth),
+          Math.min(imagePositions[3].right, borderWrapper.offsetWidth)
         );
         const targetWidth2 = Math.max(0, imagePositions[index].width);
 
@@ -352,6 +368,9 @@ window.addEventListener("load", () => {
       const naturalWrapHeight = wrap.offsetHeight;
       const naturalTitleHeight = title1.offsetHeight;
 
+      // Initial console log for hero-title height on load/matchMedia run
+      console.log("Initial hero-title height:", title1.offsetHeight);
+
       const targetTitleHeight = naturalTitleHeight * 0.8;
       const targetWrapHeight = targetTitleHeight;
 
@@ -360,6 +379,9 @@ window.addEventListener("load", () => {
 
       const handleResize = () => {
         calculateImagePositions();
+
+        // Console log hero-title height on every window resize
+        console.log("hero-title height on resize:", title1.offsetHeight);
 
         const wrapRect = wrap.getBoundingClientRect();
         const clones = gsap.utils.toArray(".mera-clone");
@@ -427,7 +449,7 @@ window.addEventListener("load", () => {
             if (!borderWrapper || !imagePositions[0]) return 0;
             return Math.max(
               0,
-              Math.min(imagePositions[0].right, borderWrapper.offsetWidth),
+              Math.min(imagePositions[0].right, borderWrapper.offsetWidth)
             );
           },
         });
@@ -456,7 +478,8 @@ window.addEventListener("load", () => {
       const totalSteps = heroImages.length;
       const scrollDistancePerStep = isShortDesktopLayout ? 300 : 700;
       const baseIntroDistance = isShortDesktopLayout ? 800 : 1200;
-      const dynamicEndScroll = baseIntroDistance + (totalSteps * scrollDistancePerStep);
+      const dynamicEndScroll =
+        baseIntroDistance + totalSteps * scrollDistancePerStep;
 
       tl = gsap.timeline({
         scrollTrigger: {
@@ -474,7 +497,7 @@ window.addEventListener("load", () => {
       tl.to(
         title1,
         { opacity: 1, duration: titleFadeDuration, ease: "power1.out" },
-        0,
+        0
       );
 
       tl.to(
@@ -484,7 +507,7 @@ window.addEventListener("load", () => {
           duration: 0.5,
           ease: "power1.inOut",
         },
-        titleFadeDuration + 0.1,
+        titleFadeDuration + 0.1
       );
 
       tl.to(
@@ -494,7 +517,7 @@ window.addEventListener("load", () => {
           duration: 0.2,
           ease: "none",
         },
-        ">",
+        ">"
       );
 
       tl.set(meraClones, { opacity: 1 });
@@ -509,18 +532,18 @@ window.addEventListener("load", () => {
           onComplete: () => wrap.classList.remove("active"),
           onReverseComplete: () => wrap.classList.add("active"),
         },
-        ">",
+        ">"
       );
 
       tl.to(
         wrap,
         { height: targetWrapHeight, duration: 1.15, ease: "power2.inOut" },
-        ">",
+        ">"
       );
       tl.to(
         title1,
         { height: targetTitleHeight, duration: 1.15, ease: "power2.inOut" },
-        "<",
+        "<"
       );
 
       if (isMobileLayout) {
@@ -532,7 +555,7 @@ window.addEventListener("load", () => {
             duration: 0.8,
             ease: "power2.inOut",
           },
-          ">",
+          ">"
         );
       } else {
         tl.to(
@@ -544,21 +567,21 @@ window.addEventListener("load", () => {
             duration: 1.15,
             ease: "power2.inOut",
           },
-          "<",
+          "<"
         );
       }
 
       tl.to(
         description1,
         { opacity: 1, duration: 0.4, ease: "power1.out" },
-        ">+=0.2",
+        ">+=0.2"
       );
 
       if (description2) {
         tl.to(
           description2,
           { opacity: 1, duration: 0.4, ease: "power1.out" },
-          "<",
+          "<"
         );
       }
 
@@ -567,7 +590,7 @@ window.addEventListener("load", () => {
       tl.to(
         description1,
         { y: 0, opacity: 0, duration: finalMoveDuration, ease: "power2.inOut" },
-        ">",
+        ">"
       );
 
       if (description2)
@@ -579,18 +602,18 @@ window.addEventListener("load", () => {
             duration: finalMoveDuration,
             ease: "power2.inOut",
           },
-          "<",
+          "<"
         );
 
       tl.to(
         [title1, cloneWrap],
         { y: -70, duration: finalMoveDuration, ease: "power2.inOut" },
-        "<",
+        "<"
       );
       tl.to(
         title2,
         { opacity: 1, y: 0, duration: finalMoveDuration, ease: "power2.inOut" },
-        "<",
+        "<"
       );
 
       if (isMobileLayout) {
@@ -602,7 +625,7 @@ window.addEventListener("load", () => {
             duration: 0.6,
             ease: "power2.inOut",
           },
-          ">",
+          ">"
         );
       }
 
@@ -616,7 +639,7 @@ window.addEventListener("load", () => {
             duration: 0.5,
             ease: "power2.inOut",
           },
-          isMobileLayout ? ">-=0.3" : "<",
+          isMobileLayout ? ">-=0.3" : "<"
         );
       }
 
@@ -625,49 +648,49 @@ window.addEventListener("load", () => {
         tl.to(
           heroOverlays,
           { opacity: 1, y: 0, duration: 0.8, ease: "power2.out" },
-          "overlaysEntry",
+          "overlaysEntry"
         );
 
         if (heroImgOverlay) {
           tl.to(
             heroImgOverlay,
             { opacity: 1, duration: 0.6, ease: "power2.inOut" },
-            "overlaysEntry+=0.2",
+            "overlaysEntry+=0.2"
           );
         }
 
         tl.add("overlaysActiveStart", "overlaysEntry+=0.2");
 
         const firstTitle = contentItems[0]?.querySelector(
-          ".hero-content-title",
+          ".hero-content-title"
         );
         const firstDesc = contentItems[0]?.querySelector(
-          ".hero-content-description",
+          ".hero-content-description"
         );
 
         if (firstTitle)
           tl.to(
             firstTitle,
             { color: "#00dafd", duration: 0.4, ease: "power2.inOut" },
-            "overlaysActiveStart",
+            "overlaysActiveStart"
           );
         if (firstDesc)
           tl.to(
             firstDesc,
             { color: "#ffffff", duration: 0.4, ease: "power2.inOut" },
-            "overlaysActiveStart",
+            "overlaysActiveStart"
           );
         if (itemDesc1)
           tl.to(
             itemDesc1,
             { color: "#ffffff", duration: 0.4, ease: "power2.inOut" },
-            "overlaysActiveStart",
+            "overlaysActiveStart"
           );
         if (heroBorderOverlay)
           tl.to(
             heroBorderOverlay,
             { opacity: 1, duration: 0.4, ease: "power2.inOut" },
-            "overlaysActiveStart",
+            "overlaysActiveStart"
           );
 
         if (heroImages.length > 0) {
@@ -698,7 +721,7 @@ window.addEventListener("load", () => {
                 if (prevWrapper) prevWrapper.classList.remove("active");
               },
               null,
-              stepLabel,
+              stepLabel
             );
 
             tl.call(
@@ -708,7 +731,7 @@ window.addEventListener("load", () => {
                 if (prevWrapper) prevWrapper.classList.add("active");
               },
               null,
-              `${stepLabel}-=0.01`,
+              `${stepLabel}-=0.01`
             );
 
             if (isLast) {
@@ -718,7 +741,7 @@ window.addEventListener("load", () => {
                   img.classList.add("hero-img-2");
                 },
                 null,
-                `${stepLabel}+=0.3`,
+                `${stepLabel}+=0.3`
               );
 
               tl.call(
@@ -727,7 +750,7 @@ window.addEventListener("load", () => {
                   img.classList.remove("hero-img-2");
                 },
                 null,
-                `${stepLabel}+=0.29`,
+                `${stepLabel}+=0.29`
               );
             }
 
@@ -738,7 +761,7 @@ window.addEventListener("load", () => {
                 }
               },
               null,
-              stepLabel,
+              stepLabel
             );
 
             if (isMobileLayout) {
@@ -755,7 +778,7 @@ window.addEventListener("load", () => {
                   duration: 0.8,
                   ease: "power2.inOut",
                 },
-                stepLabel,
+                stepLabel
               );
             }
 
@@ -786,7 +809,7 @@ window.addEventListener("load", () => {
                     )`;
                   },
                 },
-                stepLabel,
+                stepLabel
               );
             }
 
@@ -809,8 +832,8 @@ window.addEventListener("load", () => {
                               0,
                               Math.min(
                                 imagePositions[index].right,
-                                borderWrapper.offsetWidth,
-                              ),
+                                borderWrapper.offsetWidth
+                              )
                             )
                           : Math.max(0, imagePositions[index].width);
                       }
@@ -822,8 +845,8 @@ window.addEventListener("load", () => {
                           0,
                           Math.min(
                             imagePositions[index].right,
-                            borderWrapper.offsetWidth,
-                          ),
+                            borderWrapper.offsetWidth
+                          )
                         )
                       : Math.max(0, imagePositions[index].width);
                   },
@@ -840,13 +863,13 @@ window.addEventListener("load", () => {
                     if (prevBlock) prevBlock.classList.add("active");
                   },
                 },
-                stepLabel,
+                stepLabel
               );
             }
 
             if (matchingBlock && !isFirst) {
               const titleText = matchingBlock.querySelector(
-                ".hero-content-title",
+                ".hero-content-title"
               );
               if (titleText) {
                 tl.to(
@@ -860,12 +883,12 @@ window.addEventListener("load", () => {
                         isShortDesktopLayout ? titleText.style.color : c,
                     },
                   },
-                  stepLabel,
+                  stepLabel
                 );
               }
 
               const contentDescText = matchingBlock.querySelector(
-                ".hero-content-description",
+                ".hero-content-description"
               );
               if (contentDescText) {
                 tl.to(
@@ -879,7 +902,7 @@ window.addEventListener("load", () => {
                         isShortDesktopLayout ? contentDescText.style.color : c,
                     },
                   },
-                  stepLabel,
+                  stepLabel
                 );
               }
 
@@ -896,7 +919,7 @@ window.addEventListener("load", () => {
                           isShortDesktopLayout ? itemDesc1.style.color : c,
                       },
                     },
-                    stepLabel,
+                    stepLabel
                   );
                 if (itemDesc2)
                   tl.to(
@@ -910,7 +933,7 @@ window.addEventListener("load", () => {
                           isShortDesktopLayout ? itemDesc2.style.color : c,
                       },
                     },
-                    stepLabel,
+                    stepLabel
                   );
               } else if (index === 4) {
                 if (itemDesc1)
@@ -925,7 +948,7 @@ window.addEventListener("load", () => {
                           isShortDesktopLayout ? itemDesc1.style.color : c,
                       },
                     },
-                    stepLabel,
+                    stepLabel
                   );
                 if (itemDesc2)
                   tl.to(
@@ -939,7 +962,7 @@ window.addEventListener("load", () => {
                           isShortDesktopLayout ? itemDesc2.style.color : c,
                       },
                     },
-                    stepLabel,
+                    stepLabel
                   );
               }
             }
@@ -958,11 +981,11 @@ window.addEventListener("load", () => {
                         isShortDesktopLayout ? prevTitle.style.color : c,
                     },
                   },
-                  stepLabel,
+                  stepLabel
                 );
 
               const prevDescText = prevBlock.querySelector(
-                ".hero-content-description",
+                ".hero-content-description"
               );
               if (prevDescText)
                 tl.to(
@@ -976,7 +999,7 @@ window.addEventListener("load", () => {
                         isShortDesktopLayout ? prevDescText.style.color : c,
                     },
                   },
-                  stepLabel,
+                  stepLabel
                 );
             }
           });
@@ -1006,11 +1029,9 @@ window.addEventListener("load", () => {
               const targetScroll =
                 scrollST.start + progress * (scrollST.end - scrollST.start);
 
-              gsap.killTweensOf(window);
-              gsap.to(window, {
-                scrollTo: { y: targetScroll, autoKill: false },
-                duration: 0.8,
-                ease: "power2.out",
+              lenis.scrollTo(targetScroll, {
+                duration: 1.0,
+                easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
               });
             }
           }
@@ -1027,6 +1048,6 @@ window.addEventListener("load", () => {
         });
         if (tl) tl.kill();
       };
-    },
+    }
   );
 });
