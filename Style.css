@@ -28,6 +28,7 @@ img {
   max-width: 100%;
   display: block;
   -webkit-user-drag: none;
+  width: 100%;
 }
 
 .hero-section {
