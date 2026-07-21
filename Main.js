@@ -429,13 +429,6 @@ window.addEventListener("load", () => {
           pin: true,
           scrub: 0.6,
           invalidateOnRefresh: true,
-          // Added snapping so scrolling stops cleanly on active items
-          snap: {
-            snapTo: "labels",
-            duration: { min: 0.2, max: 0.6 },
-            delay: 0.1,
-            ease: "power1.inOut"
-          }
         },
       });
 
