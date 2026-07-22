@@ -47,8 +47,8 @@ img {
 }
 
 .hero-section {
-  min-height: 120vh;
   background-color: #000;
+  min-height: 100vh;
   padding-block: 50px;
   overflow: hidden;
 }
@@ -57,7 +57,7 @@ img {
   position: relative;
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  height: 100%;
 }
 
 .hero-content {
@@ -68,6 +68,7 @@ img {
   text-align: center;
   z-index: 2;
   pointer-events: none;
+  margin-bottom: auto;
 }
 
 .container {
@@ -266,8 +267,8 @@ img {
   justify-content: space-between;
 }
 
-.max-w-366 {
-  max-width: 366px;
+.max-w-380 {
+  max-width: 380px;
 }
 
 .max-w-266 {
@@ -276,6 +277,10 @@ img {
 
 .max-w-206 {
   max-width: 206px;
+}
+
+.max-w-228{
+  max-width: 228px;
 }
 
 .hero-content-title {
