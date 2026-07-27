@@ -9,11 +9,9 @@ const lenis = new Lenis({
 });
 
 lenis.on("scroll", ScrollTrigger.update);
-
 gsap.ticker.add((time) => {
   lenis.raf(time * 1000);
 });
-
 gsap.ticker.lagSmoothing(0);
 
 window.addEventListener("load", () => {
@@ -49,17 +47,25 @@ window.addEventListener("load", () => {
   let tl;
   let mm = gsap.matchMedia();
   let isMobileLayout = false;
+  let isTabletMobileLayout = false;
+  let isMediumMobileLayout = false;
   let isSmallMobileLayout = false;
   let isShortDesktopLayout = false;
   let activeIndex = 0;
   let isClickScrolling = false;
+
+  function getResponsiveTargetWidth() {
+    if (isSmallMobileLayout) return "265%";      
+    if (isMediumMobileLayout) return "150%";     
+    if (isTabletMobileLayout) return "120%";
+    return "auto";
+  }
 
   function calculateImagePositions() {
     imagePositions = [];
     itemOffsets = [];
     imgOffsetsMobile = [];
     itemCumulativeWidths = [];
-
     if (!borderWrapper || imgWrappers.length === 0) return;
 
     const originalImgStyle = heroImgContent.getAttribute("style") || "";
@@ -69,7 +75,7 @@ window.addEventListener("load", () => {
     gsap.set([heroImgContent, heroContentItems, heroOverlays], { clearProps: "transform,scale,x,y,width,height" });
 
     if (isMobileLayout) {
-      gsap.set(heroImgContent, { width: "100%" });
+      gsap.set(heroImgContent, { width: getResponsiveTargetWidth() });
     }
 
     const wrapperRect = borderWrapper.getBoundingClientRect();
@@ -120,7 +126,6 @@ window.addEventListener("load", () => {
         }
       }
     });
-
     contentItems.forEach((item, idx) => {
       if (item) {
         if (!enabled || idx === targetIndex) {
@@ -140,7 +145,6 @@ window.addEventListener("load", () => {
     const parts = text.split(/(\s+)/);
     let firstLetterIndex = 0;
     const meraLetters = ["M", "e", "R", "A"];
-
     el.innerHTML = "";
     parts.forEach((part) => {
       if (/^\s+$/.test(part)) {
@@ -171,7 +175,6 @@ window.addEventListener("load", () => {
         restSpan.textContent = part.slice(1);
         word.appendChild(restSpan);
       }
-
       el.appendChild(word);
     });
   }
@@ -196,7 +199,6 @@ window.addEventListener("load", () => {
       clone.className = "mera-clone";
       clone.textContent = letter.dataset.acronym;
       cloneWrap.appendChild(clone);
-
       gsap.set(clone, {
         position: "absolute",
         display: "inline-block",
@@ -226,7 +228,6 @@ window.addEventListener("load", () => {
     const calculatedGap = gap !== undefined ? gap : 4;
     const totalWidth = clones.reduce((sum, clone) => sum + clone.offsetWidth, 0) + calculatedGap * (clones.length - 1);
     let x = currentWrapRect.width / 2 - totalWidth / 2;
-
     clones.forEach((clone) => {
       clone.dataset.targetLeft = x;
       x += clone.offsetWidth + calculatedGap;
@@ -263,7 +264,6 @@ window.addEventListener("load", () => {
       const titleText = item.querySelector(".hero-content-title");
       const contentDescText = item.querySelector(".hero-content-description");
       item.classList.toggle("active", isCurrent);
-
       if (titleText) gsap.to(titleText, { color: isCurrent ? "#00dafd" : "#66666682", duration: duration * 0.5, overwrite: "auto" });
       if (contentDescText) gsap.to(contentDescText, { color: isCurrent ? "#ffffff" : "#66666682", duration: duration * 0.5, overwrite: "auto" });
     });
@@ -319,10 +319,14 @@ window.addEventListener("load", () => {
       isDesktop: "(min-width: 992px) and (min-height: 701px)",
       isShortDesktop: "(min-width: 992px) and (max-height: 700px)",
       isMobile: "(max-width: 991px)",
-      isSmallMobile: "(max-width: 575px)",
+      isTabletMobile: "(max-width: 991px) and (min-width: 768px)",
+      isMediumMobile: "(max-width: 767px) and (min-width: 480px)",
+      isSmallMobile: "(max-width: 479px)",
     },
     (context) => {
       isMobileLayout = context.conditions.isMobile;
+      isTabletMobileLayout = context.conditions.isTabletMobile;
+      isMediumMobileLayout = context.conditions.isMediumMobile;
       isSmallMobileLayout = context.conditions.isSmallMobile;
       isShortDesktopLayout = context.conditions.isShortDesktop;
 
@@ -370,9 +374,7 @@ window.addEventListener("load", () => {
           updateMeraCloneTargets(clones, wrapRect, 4);
         }
 
-        if (tl) {
-          tl.invalidate();
-        }
+        if (tl) tl.invalidate();
         ScrollTrigger.refresh();
       };
 
@@ -422,9 +424,7 @@ window.addEventListener("load", () => {
         gsap.set(heroBorderOverlay, {
           opacity: 0,
           width: () => {
-            if (isMobileLayout) {
-              return itemCumulativeWidths[0] || 0;
-            }
+            if (isMobileLayout) return itemCumulativeWidths[0] || 0;
             if (!borderWrapper || !imagePositions[0]) return 0;
             return Math.max(0, Math.min(imagePositions[0].right, borderWrapper.offsetWidth));
           },
@@ -440,7 +440,6 @@ window.addEventListener("load", () => {
         if (desc) gsap.set(desc, { color: "#66666682" });
       });
 
-      // Default start width for mobile is now strictly 100%
       gsap.set(heroImgContent, {
         opacity: 0,
         y: isMobileLayout ? 0 : 70,
@@ -470,7 +469,6 @@ window.addEventListener("load", () => {
       tl.to(title1, { opacity: 1, duration: titleFadeDuration, ease: "power1.out" }, 0);
       tl.to(".char-rest", { "--position": "0%", duration: 0.5, ease: "power1.inOut" }, titleFadeDuration + 0.1);
       tl.to(firstLetters, { color: "#00dafd", duration: 0.2, ease: "none" }, ">");
-
       tl.set(meraClones, { opacity: 1 });
       tl.set(firstLetters, { opacity: 0 });
 
@@ -513,12 +511,11 @@ window.addEventListener("load", () => {
       tl.to([title1, cloneWrap], { y: -70, duration: finalMoveDuration, ease: "power2.inOut" }, "<");
       tl.to(title2, { opacity: 1, y: 0, duration: finalMoveDuration, ease: "power2.inOut" }, "<");
 
-      // Here the element grows smoothly from 100% to 150% (or 120%) on scroll
       if (isMobileLayout) {
         tl.to(
           heroImgContent,
           {
-            width: isSmallMobileLayout ? "150%" : "120%",
+            width: () => getResponsiveTargetWidth(),
             x: () => startImgXMobile,
             duration: 0.8,
             ease: "power2.inOut",
@@ -744,7 +741,6 @@ window.addEventListener("load", () => {
             if (prevBlock) {
               const prevTitle = prevBlock.querySelector(".hero-content-title");
               if (prevTitle) tl.to(prevTitle, { color: "#66666682", modifiers: { color: (c) => (isShortDesktopLayout || isClickScrolling ? prevTitle.style.color : c) } }, stepLabel);
-
               const prevDescText = prevBlock.querySelector(".hero-content-description");
               if (prevDescText) tl.to(prevDescText, { color: "#66666682", modifiers: { color: (c) => (isShortDesktopLayout || isClickScrolling ? prevDescText.style.color : c) } }, stepLabel);
             }
@@ -766,7 +762,6 @@ window.addEventListener("load", () => {
           if (labelTime !== undefined) {
             isClickScrolling = true;
             animateToStepIndex(index, 0.8);
-
             const scrollST = tl.scrollTrigger;
             const stepOffset = index === 0 ? 0.5 : 0.8;
             const finalTweenTime = labelTime + stepOffset;
