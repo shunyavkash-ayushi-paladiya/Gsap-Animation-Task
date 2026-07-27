@@ -42,7 +42,6 @@ window.addEventListener("load", () => {
 
   const heroImages = heroImgContent.querySelectorAll(".hero-img");
   const imgWrappers = heroImgContent.querySelectorAll(".hero-img-wrapper");
-
   let imagePositions = [];
   let itemOffsets = [];
   let imgOffsetsMobile = [];
@@ -50,6 +49,7 @@ window.addEventListener("load", () => {
   let tl;
   let mm = gsap.matchMedia();
   let isMobileLayout = false;
+  let isSmallMobileLayout = false;
   let isShortDesktopLayout = false;
   let activeIndex = 0;
   let isClickScrolling = false;
@@ -96,7 +96,6 @@ window.addEventListener("load", () => {
 
     let accumX = 0;
     const gap = 25;
-
     contentItems.forEach((item) => {
       itemOffsets.push(-accumX);
       const itemWidth = item.getBoundingClientRect().width;
@@ -143,7 +142,6 @@ window.addEventListener("load", () => {
     const meraLetters = ["M", "e", "R", "A"];
 
     el.innerHTML = "";
-
     parts.forEach((part) => {
       if (/^\s+$/.test(part)) {
         const space = document.createElement("span");
@@ -219,7 +217,6 @@ window.addEventListener("load", () => {
     const clones = gsap.utils.toArray(".mera-clone");
     const gap = 4;
     if (!clones.length) return clones;
-
     updateMeraCloneTargets(clones, wrapRect, gap);
     return clones;
   }
@@ -265,8 +262,8 @@ window.addEventListener("load", () => {
       const isCurrent = idx === index;
       const titleText = item.querySelector(".hero-content-title");
       const contentDescText = item.querySelector(".hero-content-description");
-
       item.classList.toggle("active", isCurrent);
+
       if (titleText) gsap.to(titleText, { color: isCurrent ? "#00dafd" : "#66666682", duration: duration * 0.5, overwrite: "auto" });
       if (contentDescText) gsap.to(contentDescText, { color: isCurrent ? "#ffffff" : "#66666682", duration: duration * 0.5, overwrite: "auto" });
     });
@@ -274,7 +271,6 @@ window.addEventListener("load", () => {
     if (isMobileLayout) {
       const imgTargetX = imgOffsetsMobile[index] || 0;
       const contentTargetX = itemOffsets[index] || 0;
-
       gsap.to(heroImgContent, { x: imgTargetX, duration: duration, ease: "power2.inOut", overwrite: "auto" });
       if (heroContentItems) {
         gsap.to(heroContentItems, { x: contentTargetX, duration: duration, ease: "power2.inOut", overwrite: "auto" });
@@ -323,9 +319,11 @@ window.addEventListener("load", () => {
       isDesktop: "(min-width: 992px) and (min-height: 701px)",
       isShortDesktop: "(min-width: 992px) and (max-height: 700px)",
       isMobile: "(max-width: 991px)",
+      isSmallMobile: "(max-width: 575px)",
     },
     (context) => {
       isMobileLayout = context.conditions.isMobile;
+      isSmallMobileLayout = context.conditions.isSmallMobile;
       isShortDesktopLayout = context.conditions.isShortDesktop;
 
       calculateImagePositions();
@@ -351,8 +349,24 @@ window.addEventListener("load", () => {
         targetWrapHeight = heights.targetWrapHeight;
 
         const wrapRect = wrap.getBoundingClientRect();
+        const titleStyle = window.getComputedStyle(title1);
         const clones = gsap.utils.toArray(".mera-clone");
+
         if (clones.length) {
+          clones.forEach((clone, idx) => {
+            const letter = firstLetters[idx];
+            if (letter) {
+              const rect = letter.getBoundingClientRect();
+              gsap.set(clone, {
+                left: rect.left - wrapRect.left,
+                fontSize: titleStyle.fontSize,
+                fontFamily: titleStyle.fontFamily,
+                fontWeight: titleStyle.fontWeight,
+                lineHeight: titleStyle.lineHeight,
+                letterSpacing: titleStyle.letterSpacing,
+              });
+            }
+          });
           updateMeraCloneTargets(clones, wrapRect, 4);
         }
 
@@ -426,6 +440,7 @@ window.addEventListener("load", () => {
         if (desc) gsap.set(desc, { color: "#66666682" });
       });
 
+      // Default start width for mobile is now strictly 100%
       gsap.set(heroImgContent, {
         opacity: 0,
         y: isMobileLayout ? 0 : 70,
@@ -434,8 +449,6 @@ window.addEventListener("load", () => {
         width: isMobileLayout ? "100%" : "auto",
         transformOrigin: "center bottom",
       });
-
-      gsap.set(".char-rest", { "--position": "100%" });
 
       const totalSteps = heroImages.length;
       const scrollDistancePerStep = isShortDesktopLayout ? 300 : 700;
@@ -457,12 +470,19 @@ window.addEventListener("load", () => {
       tl.to(title1, { opacity: 1, duration: titleFadeDuration, ease: "power1.out" }, 0);
       tl.to(".char-rest", { "--position": "0%", duration: 0.5, ease: "power1.inOut" }, titleFadeDuration + 0.1);
       tl.to(firstLetters, { color: "#00dafd", duration: 0.2, ease: "none" }, ">");
+
       tl.set(meraClones, { opacity: 1 });
       tl.set(firstLetters, { opacity: 0 });
+
       tl.to(
         meraClones,
         {
-          left: (i, el) => Number(el.dataset.targetLeft),
+          left: (i, el) => {
+            const wrapRect = wrap.getBoundingClientRect();
+            const clones = gsap.utils.toArray(".mera-clone");
+            if (clones.length) updateMeraCloneTargets(clones, wrapRect, 4);
+            return Number(el.dataset.targetLeft);
+          },
           duration: 0.5,
           ease: "power2.inOut",
           onComplete: () => wrap.classList.remove("active"),
@@ -471,19 +491,10 @@ window.addEventListener("load", () => {
         ">"
       );
 
-      /* FIX APPLIED BELOW: Smoothly transition wrap height without stripping it on reverse */
-      tl.to(
-        wrap,
-        {
-          height: () => targetWrapHeight,
-          duration: 1.15,
-          ease: "power2.inOut",
-        },
-        ">"
-      );
+      tl.to(wrap, { height: () => targetWrapHeight, duration: 1.15, ease: "power2.inOut" }, ">");
 
       if (isMobileLayout) {
-        tl.to(heroImgContent, { opacity: 1, x: startImgXMobile, duration: 0.8, ease: "power2.inOut" }, ">");
+        tl.to(heroImgContent, { opacity: 1, x: () => startImgXMobile, duration: 0.8, ease: "power2.inOut" }, ">");
       } else {
         tl.to(heroImgContent, { opacity: 1, y: -36, scale: 1, duration: 1.15, ease: "power2.inOut" }, "<");
       }
@@ -502,21 +513,22 @@ window.addEventListener("load", () => {
       tl.to([title1, cloneWrap], { y: -70, duration: finalMoveDuration, ease: "power2.inOut" }, "<");
       tl.to(title2, { opacity: 1, y: 0, duration: finalMoveDuration, ease: "power2.inOut" }, "<");
 
+      // Here the element grows smoothly from 100% to 150% (or 120%) on scroll
       if (isMobileLayout) {
-        tl.to(heroImgContent, { width: "120%", x: startImgXMobile, duration: 0.8, ease: "power2.inOut" }, ">");
+        tl.to(
+          heroImgContent,
+          {
+            width: isSmallMobileLayout ? "150%" : "120%",
+            x: () => startImgXMobile,
+            duration: 0.8,
+            ease: "power2.inOut",
+          },
+          ">"
+        );
       }
 
       if (heroContentItems) {
-        tl.to(
-          heroContentItems,
-          {
-            opacity: 1,
-            x: 0,
-            duration: 0.5,
-            ease: "power2.inOut",
-          },
-          isMobileLayout ? ">-=0.3" : "<"
-        );
+        tl.to(heroContentItems, { opacity: 1, x: 0, duration: 0.5, ease: "power2.inOut" }, isMobileLayout ? ">-=0.3" : "<");
       }
 
       if (heroOverlays) {
@@ -555,7 +567,6 @@ window.addEventListener("load", () => {
 
         const firstTitle = contentItems[0]?.querySelector(".hero-content-title");
         const firstDesc = contentItems[0]?.querySelector(".hero-content-description");
-
         if (firstTitle) tl.to(firstTitle, { color: "#00dafd", duration: 0.2, ease: "power2.inOut" }, "overlaysActiveStart");
         if (firstDesc) tl.to(firstDesc, { color: "#ffffff", duration: 0.2, ease: "power2.inOut" }, "overlaysActiveStart");
         if (itemDesc1) tl.to(itemDesc1, { color: "#ffffff", duration: 0.2, ease: "power2.inOut" }, "overlaysActiveStart");
@@ -744,7 +755,6 @@ window.addEventListener("load", () => {
       tl.to({}, { duration: 1.0 });
 
       const clickHandlers = [];
-
       const handleItemClick = (index) => {
         if (!tl || index === activeIndex) return;
         calculateImagePositions();
