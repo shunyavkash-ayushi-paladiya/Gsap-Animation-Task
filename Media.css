@@ -40,10 +40,6 @@
     font-size: 22px;
   }
 
-  /* .hero-content-title {
-    font-size: 14px;
-  } */
-
   .hero-content-description {
     font-size: 14px;
   }
@@ -73,6 +69,10 @@
   .hero-border-item {
     margin-top: 30px;
   }
+
+  .hero-model{
+    flex-direction: column;
+  }
 }
 
 @media screen and (max-width: 991px) and (min-width: 768px) {
@@ -90,6 +90,85 @@
 
   .max-w-228 {
     max-width: 365px;
+  }
+
+  .hero-model-title {
+    font-size: 44px;
+  }
+
+  .hero-model-description-content {
+    margin-top: 40px;
+  }
+
+  .hero-process-description {
+    font-size: 20px;
+  }
+
+  .hero-model-content-title {
+    font-size: 20px;
+  }
+
+  .hero-process-chart-content {
+    margin-top: 40px;
+  }
+
+  .hero-process-chart-items{
+    gap: 44px;
+  }
+
+  .hero-process-item-title strong{
+    font-size: 22px;
+    margin-bottom: 12px;
+  }
+  
+  .hero-process-item-title{
+    font-size: 18px;
+  }
+
+  .hero-process-item-content {
+    padding-left: 14px;
+    padding-bottom: 12px;
+  }
+}
+
+@media screen and (max-width: 767px) and (min-width: 576px){
+
+  .hero-model-title {
+    font-size: 36px;
+  }
+
+  .hero-model-description-content {
+    margin-top: 30px;
+  }
+
+  .hero-process-description {
+    font-size: 18px;
+  }
+
+  .hero-model-content-title {
+    font-size: 18px;
+  }
+
+  .hero-process-chart-content {
+    margin-top: 30px;
+  }
+
+  .hero-process-chart-items{
+    gap: 34px;
+  }
+
+  .hero-process-item-title strong{
+    font-size: 22px;
+    margin-bottom: 12px;
+  }
+  
+  .hero-process-item-title{
+    font-size: 18px;
+  }
+
+  .hero-process-item-content {
+    padding-left: 14px;
+    padding-bottom: 12px;
   }
 }
 
@@ -114,6 +193,55 @@
 
   .section-title {
     font-size: 40px;
+  }
+
+  .hero-process-chart-items{
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .hero-model-title {
+    font-size: 30px;
+  }
+
+  .hero-model-description-content {
+    margin-top: 20px;
+  }
+
+  .hero-process-description {
+    font-size: 16px;
+  }
+
+  .hero-model-content-title {
+    font-size: 16px;
+    margin-top: 14px;
+  }
+
+  .hero-process-chart-content {
+    margin-top: 30px;
+  }
+
+  .hero-process-item-title strong{
+    font-size: 20px;
+    margin-bottom: 10px;
+  }
+  
+  .hero-process-item-title{
+    font-size: 16px;
+  }
+
+  .hero-process-item-content {
+    padding-left: 12px;
+    padding-bottom: 10px;
+    margin-top: 15px;
+  }
+
+  .close-modal-btn{
+    width: 40px;
+  }
+
+  .hero-model-img{
+    height: 540px;
   }
 }
 
