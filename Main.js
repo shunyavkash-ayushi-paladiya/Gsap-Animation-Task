@@ -1229,7 +1229,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let currentIndex = 0;
   let isFirstTransition = true;
   let autoplayTimer = null;
-  const AUTOPLAY_DELAY = 200;
+  const AUTOPLAY_DELAY = 2000;
 
   const totalSlides = Math.min(
     titles.length,
