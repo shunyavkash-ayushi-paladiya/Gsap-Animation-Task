@@ -37,7 +37,7 @@ img {
   width: 100%;
 }
 
-.relative{
+.relative {
   position: relative;
 }
 
@@ -46,8 +46,8 @@ img {
   display: flex;
   align-items: center;
   text-align: center;
-  background-color: azure;
-  /* background-color: brown; */
+  /* background-color: azure; */
+  background-color: brown;
 }
 
 .section-title {
@@ -176,6 +176,7 @@ img {
   width: 100%;
   border-top: none;
   border-left: none;
+  pointer-events: auto;
 }
 
 .hero-btn svg {
@@ -369,11 +370,24 @@ img {
   overflow: auto;
   transition: all 0.3s ease-in-out;
   padding-block: 50px;
+  overflow: hidden;
 }
 
 .hero-model-img-content {
-  padding-top: 48px;
+  justify-content: flex-end;
+  align-self: center;
+  align-items: flex-start;
+  padding-right: 6%;
   position: relative;
+}
+
+.hero-img-content-2{
+  pointer-events: none;
+  height: 754px;
+  margin-top: 65px;
+  transition: width .5s ease-in-out;
+  position: relative;
+  overflow: hidden;
 }
 
 .hero-model-title-content {
@@ -429,7 +443,14 @@ img {
 }
 
 .hero-model-img {
-  height: 730px;
+  height: 100%;
+  transition-property: left, filter;
+  transition-duration: 1s, .5s;
+  transition-timing-function: ease-in-out, ease-in-out;
+}
+
+.hero-model-img.show-filter{
+  filter: drop-shadow(-4px -4px 40px #00dafd66);
 }
 
 .hero-model-img-2 {
@@ -477,6 +498,12 @@ img {
 
 .hero-process-img {
   width: auto;
+}
+
+.hero-model-title-wrapper {
+  max-width: 880px;
+  padding-right: 30px;
+  width: 100%;
 }
 
 .hero-process-chart-content {
@@ -537,7 +564,7 @@ img {
   aspect-ratio: 1;
   position: absolute;
   top: 2%;
-  right: 2%;
+  right: 0%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -547,18 +574,23 @@ img {
   width: 80%;
 }
 
-.hero-model-arrows{
+.hero-model-arrows {
   display: flex;
   flex-direction: column;
   gap: 30px;
   position: absolute;
   top: 50%;
-  right: 2%;
+  right: 0%;
   transform: translateY(-50%);
   width: 50px;
 }
 
-.hero-model-arrow{
+.hero-model-arrow {
   color: #666666;
   cursor: pointer;
+  transition: all 0.3s ease-in-out;
+}
+
+.hero-model-arrow:hover {
+  color: #00dafd;
 }
