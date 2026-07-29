@@ -9,9 +9,11 @@ const lenis = new Lenis({
 });
 
 lenis.on("scroll", ScrollTrigger.update);
+
 gsap.ticker.add((time) => {
   lenis.raf(time * 1000);
 });
+
 gsap.ticker.lagSmoothing(0);
 
 window.addEventListener("load", () => {
@@ -36,6 +38,7 @@ window.addEventListener("load", () => {
   );
   const itemDesc2 = document.querySelector(".hero-item-description-v2");
   const heroContent = document.querySelector(".hero-content");
+  const heroBtns = document.querySelectorAll(".hero-btn");
 
   if (
     !section ||
@@ -161,6 +164,7 @@ window.addEventListener("load", () => {
         }
       }
     });
+
     contentItems.forEach((item, idx) => {
       if (item) {
         if (!enabled || idx === targetIndex) {
@@ -180,6 +184,7 @@ window.addEventListener("load", () => {
     const parts = text.split(/(\s+)/);
     let firstLetterIndex = 0;
     const meraLetters = ["M", "e", "R", "A"];
+
     el.innerHTML = "";
     parts.forEach((part) => {
       if (/^\s+$/.test(part)) {
@@ -202,6 +207,7 @@ window.addEventListener("load", () => {
       firstLetterSpan.textContent = part[0];
       firstLetterSpan.style.display = "inline-block";
       word.appendChild(firstLetterSpan);
+
       firstLetterIndex++;
 
       if (part.length > 1) {
@@ -211,6 +217,7 @@ window.addEventListener("load", () => {
         restSpan.textContent = part.slice(1);
         word.appendChild(restSpan);
       }
+
       el.appendChild(word);
     });
   }
@@ -235,6 +242,7 @@ window.addEventListener("load", () => {
       clone.className = "mera-clone";
       clone.textContent = letter.dataset.acronym;
       cloneWrap.appendChild(clone);
+
       gsap.set(clone, {
         position: "absolute",
         display: "inline-block",
@@ -256,6 +264,7 @@ window.addEventListener("load", () => {
     const clones = gsap.utils.toArray(".mera-clone");
     const gap = 4;
     if (!clones.length) return clones;
+
     updateMeraCloneTargets(clones, wrapRect, gap);
     return clones;
   }
@@ -266,7 +275,9 @@ window.addEventListener("load", () => {
     const totalWidth =
       clones.reduce((sum, clone) => sum + clone.offsetWidth, 0) +
       calculatedGap * (clones.length - 1);
+
     let x = currentWrapRect.width / 2 - totalWidth / 2;
+
     clones.forEach((clone) => {
       clone.dataset.targetLeft = x;
       x += clone.offsetWidth + calculatedGap;
@@ -302,13 +313,16 @@ window.addEventListener("load", () => {
       const isCurrent = idx === index;
       const titleText = item.querySelector(".hero-content-title");
       const contentDescText = item.querySelector(".hero-content-description");
+
       item.classList.toggle("active", isCurrent);
+
       if (titleText)
         gsap.to(titleText, {
           color: isCurrent ? "#00dafd" : "#66666682",
           duration: duration * 0.5,
           overwrite: "auto",
         });
+
       if (contentDescText)
         gsap.to(contentDescText, {
           color: isCurrent ? "#ffffff" : "#66666682",
@@ -320,12 +334,14 @@ window.addEventListener("load", () => {
     if (isMobileLayout) {
       const imgTargetX = imgOffsetsMobile[index] || 0;
       const contentTargetX = itemOffsets[index] || 0;
+
       gsap.to(heroImgContent, {
         x: imgTargetX,
         duration: duration,
         ease: "power2.inOut",
         overwrite: "auto",
       });
+
       if (heroContentItems) {
         gsap.to(heroContentItems, {
           x: contentTargetX,
@@ -393,6 +409,7 @@ window.addEventListener("load", () => {
             Math.min(imagePositions[3].right, borderWrapper.offsetWidth),
           );
           const targetWidth2 = Math.max(0, imagePositions[index].width);
+
           gsap.to(heroBorderOverlay, {
             opacity: 1,
             width: maxOverlay1Width,
@@ -417,6 +434,7 @@ window.addEventListener("load", () => {
         duration: duration * 0.5,
         overwrite: "auto",
       });
+
     if (itemDesc2)
       gsap.to(itemDesc2, {
         color: index === 4 ? "#ffffff" : "#66666682",
@@ -602,7 +620,6 @@ window.addEventListener("load", () => {
       );
       tl.set(meraClones, { opacity: 1 });
       tl.set(firstLetters, { opacity: 0 });
-
       tl.to(
         meraClones,
         {
@@ -619,7 +636,6 @@ window.addEventListener("load", () => {
         },
         ">",
       );
-
       tl.to(
         wrap,
         {
@@ -686,7 +702,6 @@ window.addEventListener("load", () => {
           "<",
         );
       }
-
       tl.to(
         [title1, cloneWrap],
         { y: -70, duration: finalMoveDuration, ease: "power2.inOut" },
@@ -727,7 +742,6 @@ window.addEventListener("load", () => {
           { opacity: 1, y: 0, duration: 0.8, ease: "power2.out" },
           "overlaysEntry",
         );
-
         tl.call(
           () => {
             if (isShortDesktopLayout || isClickScrolling) return;
@@ -737,7 +751,6 @@ window.addEventListener("load", () => {
           null,
           "overlaysEntry",
         );
-
         tl.call(
           () => {
             if (isShortDesktopLayout || isClickScrolling) return;
@@ -758,7 +771,6 @@ window.addEventListener("load", () => {
 
         tl.add("overlaysActiveStart", "overlaysEntry+=0.3");
         tl.set(heroOverlays, { opacity: 1, y: 0 }, "overlaysActiveStart");
-
         tl.call(
           () => {
             if (isClickScrolling) return;
@@ -767,7 +779,6 @@ window.addEventListener("load", () => {
           null,
           "overlaysActiveStart",
         );
-
         tl.call(
           () => {
             if (isClickScrolling) return;
@@ -783,24 +794,28 @@ window.addEventListener("load", () => {
         const firstDesc = contentItems[0]?.querySelector(
           ".hero-content-description",
         );
+
         if (firstTitle)
           tl.to(
             firstTitle,
             { color: "#00dafd", duration: 0.2, ease: "power2.inOut" },
             "overlaysActiveStart",
           );
+
         if (firstDesc)
           tl.to(
             firstDesc,
             { color: "#ffffff", duration: 0.2, ease: "power2.inOut" },
             "overlaysActiveStart",
           );
+
         if (itemDesc1)
           tl.to(
             itemDesc1,
             { color: "#ffffff", duration: 0.2, ease: "power2.inOut" },
             "overlaysActiveStart",
           );
+
         if (heroBorderOverlay)
           tl.to(
             heroBorderOverlay,
@@ -824,7 +839,6 @@ window.addEventListener("load", () => {
             const stepLabel = `step_${index}`;
 
             tl.add(stepLabel, isFirst ? "overlaysActiveStart" : "+=0.6");
-
             tl.call(
               () => {
                 if (isClickScrolling) return;
@@ -845,7 +859,6 @@ window.addEventListener("load", () => {
                 null,
                 stepLabel,
               );
-
               tl.call(
                 () => {
                   if (isShortDesktopLayout || isClickScrolling) return;
@@ -866,7 +879,6 @@ window.addEventListener("load", () => {
                 null,
                 `${stepLabel}+=0.3`,
               );
-
               tl.call(
                 () => {
                   if (isShortDesktopLayout || isClickScrolling) return;
@@ -1127,6 +1139,7 @@ window.addEventListener("load", () => {
                   },
                   stepLabel,
                 );
+
               const prevDescText = prevBlock.querySelector(
                 ".hero-content-description",
               );
@@ -1152,6 +1165,7 @@ window.addEventListener("load", () => {
       tl.to({}, { duration: 1.0 });
 
       const clickHandlers = [];
+
       const handleItemClick = (index) => {
         if (!tl || index === activeIndex) return;
         calculateImagePositions();
@@ -1163,6 +1177,7 @@ window.addEventListener("load", () => {
           if (labelTime !== undefined) {
             isClickScrolling = true;
             animateToStepIndex(index, 0.8);
+
             const scrollST = tl.scrollTrigger;
             const stepOffset = index === 0 ? 0.5 : 0.8;
             const finalTweenTime = labelTime + stepOffset;
@@ -1194,6 +1209,35 @@ window.addEventListener("load", () => {
         clickHandlers.push({ element: item, clickHandler });
       });
 
+      heroBtns.forEach((btn) => {
+        const btnHandler = (e) => {
+          e.stopPropagation();
+          const lastIndex = heroImages.length - 1;
+
+          const lastImg = heroImages[lastIndex];
+          if (lastImg) {
+            gsap.killTweensOf(lastImg);
+            lastImg.classList.remove("hero-img-2");
+          }
+
+          if (imgWrappers[lastIndex]) {
+            imgWrappers[lastIndex].classList.remove("active");
+          }
+
+          if (contentItems[lastIndex]) {
+            contentItems[lastIndex].classList.remove("active");
+          }
+
+          if (activeIndex === lastIndex) {
+            const fallbackIndex = Math.max(0, lastIndex - 1);
+            animateToStepIndex(fallbackIndex);
+          }
+        };
+
+        btn.addEventListener("click", btnHandler);
+        clickHandlers.push({ element: btn, clickHandler: btnHandler });
+      });
+
       return () => {
         window.removeEventListener("resize", handleResize);
         clickHandlers.forEach(({ element, clickHandler }) => {
@@ -1216,14 +1260,14 @@ document.addEventListener("DOMContentLoaded", () => {
   const imgContentContainer = document.querySelector(".hero-img-content-2");
 
   const mainHeader = document.querySelector(
-    ".hero-model-title:not(.hero-process-title)"
+    ".hero-model-title:not(.hero-process-title)",
   );
   const titles = Array.from(document.querySelectorAll(".hero-process-title"));
   const descriptions = Array.from(
-    document.querySelectorAll(".hero-model-content-title")
+    document.querySelectorAll(".hero-model-content-title"),
   );
   const charts = Array.from(
-    document.querySelectorAll(".hero-process-chart-items")
+    document.querySelectorAll(".hero-process-chart-items"),
   );
   const mainImgs = Array.from(document.querySelectorAll(".hero-model-img"));
 
@@ -1236,7 +1280,7 @@ document.addEventListener("DOMContentLoaded", () => {
     titles.length,
     descriptions.length,
     charts.length,
-    mainImgs.length
+    mainImgs.length,
   );
 
   const originalImgWidths = [];
@@ -1260,7 +1304,7 @@ document.addEventListener("DOMContentLoaded", () => {
               updateImageContainerWidth(index, 0);
             }
           },
-          { once: true }
+          { once: true },
         );
       }
     });
@@ -1387,7 +1431,9 @@ document.addEventListener("DOMContentLoaded", () => {
         delay: 0.1,
         ease: "power1.inOut",
         onStart: () => {
-          incomingTextElements.forEach((el) => (el.style.pointerEvents = "auto"));
+          incomingTextElements.forEach(
+            (el) => (el.style.pointerEvents = "auto"),
+          );
         },
       });
 
@@ -1497,7 +1543,7 @@ document.addEventListener("DOMContentLoaded", () => {
     setTimeout(() => {
       goToSlide(0);
       startAutoplay();
-    }, 1500); 
+    }, 1500);
   };
 
   const closeModal = () => {
@@ -1517,12 +1563,6 @@ document.addEventListener("DOMContentLoaded", () => {
   heroBtn?.addEventListener("click", (e) => {
     e.preventDefault();
     openModal();
-  });
-
-  modalSection?.addEventListener("click", (e) => {
-    if (e.target === modalSection) {
-      closeModal();
-    }
   });
 
   closeBtn?.addEventListener("click", closeModal);
