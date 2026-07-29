@@ -1216,19 +1216,18 @@ document.addEventListener("DOMContentLoaded", () => {
   const imgContentContainer = document.querySelector(".hero-img-content-2");
 
   const mainHeader = document.querySelector(
-    ".hero-model-title:not(.hero-process-title)",
+    ".hero-model-title:not(.hero-process-title)"
   );
   const titles = Array.from(document.querySelectorAll(".hero-process-title"));
   const descriptions = Array.from(
-    document.querySelectorAll(".hero-model-content-title"),
+    document.querySelectorAll(".hero-model-content-title")
   );
   const charts = Array.from(
-    document.querySelectorAll(".hero-process-chart-items"),
+    document.querySelectorAll(".hero-process-chart-items")
   );
   const mainImgs = Array.from(document.querySelectorAll(".hero-model-img"));
 
   let currentIndex = 0;
-  let isFirstTransition = true;
   let autoplayTimer = null;
   let filterTimer = null;
   const AUTOPLAY_DELAY = 3000;
@@ -1237,7 +1236,7 @@ document.addEventListener("DOMContentLoaded", () => {
     titles.length,
     descriptions.length,
     charts.length,
-    mainImgs.length,
+    mainImgs.length
   );
 
   const originalImgWidths = [];
@@ -1261,7 +1260,7 @@ document.addEventListener("DOMContentLoaded", () => {
               updateImageContainerWidth(index, 0);
             }
           },
-          { once: true },
+          { once: true }
         );
       }
     });
@@ -1311,7 +1310,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     mainImgs.forEach((img, idx) => {
       img.classList.remove("show-filter");
-
       if (idx === activeIndex) {
         img.classList.add("active");
       } else {
@@ -1328,8 +1326,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const resetSlideshow = () => {
     stopAutoplay();
-    currentIndex = 0;
-    isFirstTransition = true;
+    currentIndex = -1;
 
     storeOriginalImgWidths();
 
@@ -1342,12 +1339,8 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     [descriptions, charts].forEach((group) => {
-      group.forEach((item, idx) => {
-        if (idx === 0) {
-          gsap.set(item, { opacity: 1, pointerEvents: "auto" });
-        } else {
-          gsap.set(item, { opacity: 0, pointerEvents: "none" });
-        }
+      group.forEach((item) => {
+        gsap.set(item, { opacity: 0, pointerEvents: "none" });
       });
     });
 
@@ -1370,16 +1363,36 @@ document.addEventListener("DOMContentLoaded", () => {
     await updateImageContainerWidth(nextIndex, 0.4);
     updateContentHeight(nextIndex, 0.4);
 
-    if (isFirstTransition && mainHeader) {
-      gsap.to(mainHeader, {
-        opacity: 0,
+    if (currentIndex === -1) {
+      if (mainHeader) {
+        gsap.to(mainHeader, {
+          opacity: 0,
+          duration: 0.5,
+          ease: "power1.inOut",
+          onComplete: () => {
+            mainHeader.style.pointerEvents = "none";
+          },
+        });
+      }
+
+      const incomingTextElements = [
+        titles[nextIndex],
+        descriptions[nextIndex],
+        charts[nextIndex],
+      ].filter(Boolean);
+
+      gsap.to(incomingTextElements, {
+        opacity: 1,
         duration: 0.5,
+        delay: 0.1,
         ease: "power1.inOut",
-        onComplete: () => {
-          mainHeader.style.pointerEvents = "none";
+        onStart: () => {
+          incomingTextElements.forEach((el) => (el.style.pointerEvents = "auto"));
         },
       });
-      isFirstTransition = false;
+
+      currentIndex = nextIndex;
+      return;
     }
 
     const outgoingTextElements = [
@@ -1453,7 +1466,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const prevSlide = () => {
     const prevIndex = (currentIndex - 1 + totalSlides) % totalSlides;
-    goToSlide(prevIndex);
+    goToSlide(prevIndex < 0 ? totalSlides - 1 : prevIndex);
   };
 
   const startAutoplay = () => {
@@ -1480,7 +1493,11 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     resetSlideshow();
-    startAutoplay();
+
+    setTimeout(() => {
+      goToSlide(0);
+      startAutoplay();
+    }, 1500); 
   };
 
   const closeModal = () => {
@@ -1529,13 +1546,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
   window.addEventListener("resize", () => {
     storeOriginalImgWidths();
-    updateContentHeight(currentIndex, 0.2);
-    updateImageContainerWidth(currentIndex, 0.2);
+    if (currentIndex >= 0) {
+      updateContentHeight(currentIndex, 0.2);
+      updateImageContainerWidth(currentIndex, 0.2);
+    }
   });
 
   window.addEventListener("load", () => {
     storeOriginalImgWidths();
-    updateImageContainerWidth(currentIndex, 0);
+    updateImageContainerWidth(0, 0);
   });
 
   resetSlideshow();
