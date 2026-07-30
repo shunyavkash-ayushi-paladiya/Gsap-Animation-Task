@@ -381,11 +381,11 @@ img {
   position: relative;
 }
 
-.hero-img-content-2{
+.hero-img-content-2 {
   pointer-events: none;
   height: 754px;
   margin-top: 65px;
-  transition: width .5s ease-in-out;
+  transition: width 0.5s ease-in-out;
   position: relative;
   overflow: hidden;
 }
@@ -445,11 +445,11 @@ img {
 .hero-model-img {
   height: 100%;
   transition-property: left, filter;
-  transition-duration: 1s, .5s;
+  transition-duration: 1s, 0.5s;
   transition-timing-function: ease-in-out, ease-in-out;
 }
 
-.hero-model-img.show-filter{
+.hero-model-img.show-filter {
   filter: drop-shadow(-4px -4px 40px #00dafd66);
 }
 
@@ -595,12 +595,12 @@ img {
   color: #00dafd;
 }
 
-.lg-none{
+.lg-none {
   display: none;
   width: 100%;
 }
 
-.hero-process-chart-wrapper{
+.hero-process-chart-wrapper {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 24px;

@@ -48,7 +48,7 @@
     font-size: 50px;
   }
 
-  .hero-process-chart-items{
+  .hero-process-chart-items {
     gap: 24px;
   }
 }
@@ -74,62 +74,61 @@
     margin-top: 30px;
   }
 
-  .hero-model{
+  .hero-model {
     flex-direction: column;
   }
 
-  .hero-img-content-2{
+  .hero-img-content-2 {
     height: 310px;
   }
 
-  .md-none{
+  .md-none {
     display: none;
   }
 
-  .lg-none{
+  .lg-none {
     display: block;
   }
 
-  .hero-process-chart-items{
+  .hero-process-chart-items {
     display: grid;
-    grid-template-columns: repeat(3,1fr);
+    grid-template-columns: repeat(3, 1fr);
+    width: 100%;
   }
 
   .hero-process-chart-item:last-child {
-   grid-column: span 2;
+    grid-column: span 2;
   }
 
-  .hero-model-title-wrapper{
+  .hero-model-title-wrapper {
     padding-right: 0px;
   }
-  
-  .hero-model-arrows{
+
+  .hero-model-arrows {
     gap: 20px;
     flex-direction: row-reverse;
     top: 100%;
-    transform: translate(0% , -50%);
+    transform: translate(0%, -50%);
     right: 50%;
   }
 
-  .hero-model-arrow{
+  .hero-model-arrow {
     width: 40px;
   }
 
-  .close-modal-btn{
+  .close-modal-btn {
     top: -2%;
     right: 4%;
   }
 
-  .hero-model-img-content{
+  .hero-model-img-content {
     padding-right: 0%;
   }
 
-  .container{
+  .container {
     padding-left: 16px;
     padding-right: 16px;
   }
-
-  
 }
 
 @media screen and (max-width: 991px) and (min-width: 768px) {
@@ -169,12 +168,12 @@
     margin-top: 40px;
   }
 
-  .hero-process-item-title strong{
+  .hero-process-item-title strong {
     font-size: 22px;
     margin-bottom: 12px;
   }
-  
-  .hero-process-item-title{
+
+  .hero-process-item-title {
     font-size: 18px;
   }
 
@@ -184,8 +183,7 @@
   }
 }
 
-@media screen and (max-width: 767px) and (min-width: 576px){
-
+@media screen and (max-width: 767px) and (min-width: 576px) {
   .hero-model-title {
     font-size: 36px;
   }
@@ -206,12 +204,12 @@
     margin-top: 30px;
   }
 
-  .hero-process-item-title strong{
+  .hero-process-item-title strong {
     font-size: 22px;
     margin-bottom: 12px;
   }
-  
-  .hero-process-item-title{
+
+  .hero-process-item-title {
     font-size: 18px;
   }
 
@@ -265,12 +263,12 @@
     margin-top: 30px;
   }
 
-  .hero-process-item-title strong{
+  .hero-process-item-title strong {
     font-size: 14px;
     margin-bottom: 10px;
   }
-  
-  .hero-process-item-title{
+
+  .hero-process-item-title {
     font-size: 14px;
   }
 
@@ -280,15 +278,15 @@
     margin-top: 15px;
   }
 
-  .close-modal-btn{
+  .close-modal-btn {
     width: 40px;
   }
 
-  .hero-process-chart-text{
+  .hero-process-chart-text {
     font-size: 12px;
   }
 
-  .hero-process-chart-items{
+  .hero-process-chart-items {
     gap: 20px;
   }
 }

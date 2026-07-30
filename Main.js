@@ -1260,126 +1260,98 @@ document.addEventListener("DOMContentLoaded", () => {
   const imgContentContainer = document.querySelector(".hero-img-content-2");
 
   const mainHeader = document.querySelector(
-    ".hero-model-title:not(.hero-process-title)"
+    ".hero-model-title:not(.hero-process-title)",
   );
+  const titles = Array.from(document.querySelectorAll(".hero-process-title"));
+  const descriptions = Array.from(
+    document.querySelectorAll(".hero-model-content-title"),
+  );
+  const mainImgs = Array.from(document.querySelectorAll(".hero-model-img"));
 
-  let titles = [];
-  let descriptions = [];
-  let charts = [];
-  let mainImgs = [];
-
-  let currentIndex = -1;
+  let currentIndex = 0;
   let autoplayTimer = null;
   let filterTimer = null;
-  let resizeTimer = null;
   const AUTOPLAY_DELAY = 3000;
-  let totalSlides = 0;
+
+  const getCharts = () => {
+    const isDesktop = window.innerWidth > 991;
+    const containerSelector = isDesktop
+      ? ".hero-process-chart-content.md-none"
+      : ".hero-process-chart-content.lg-none";
+
+    const inactiveSelector = isDesktop
+      ? ".hero-process-chart-content.lg-none .hero-process-chart-items"
+      : ".hero-process-chart-content.md-none .hero-process-chart-items";
+
+    document.querySelectorAll(inactiveSelector).forEach((item) => {
+      gsap.set(item, { opacity: 0, pointerEvents: "none" });
+    });
+
+    return Array.from(
+      document.querySelectorAll(
+        `${containerSelector} .hero-process-chart-items`,
+      ),
+    );
+  };
+
+  const charts = getCharts();
+
+  const totalSlides = Math.min(
+    titles.length,
+    descriptions.length,
+    charts.length,
+    mainImgs.length,
+  );
 
   const originalImgWidths = [];
 
-  const updateActiveElements = () => {
-    const isMobile = window.innerWidth <= 991;
-
-    const activeChartContainer = document.querySelector(
-      isMobile ? ".hero-process-chart-content.lg-none" : ".hero-process-chart-content.md-none"
-    );
-
-    titles = Array.from(document.querySelectorAll(".hero-process-title"));
-    descriptions = Array.from(
-      document.querySelectorAll(".hero-model-content-title")
-    );
-    
-    charts = activeChartContainer
-      ? Array.from(activeChartContainer.querySelectorAll(".hero-process-chart-items"))
-      : Array.from(document.querySelectorAll(".hero-process-chart-items"));
-
-    mainImgs = Array.from(document.querySelectorAll(".hero-model-img"));
-
-    totalSlides = Math.min(
-      titles.length,
-      descriptions.length,
-      charts.length,
-      mainImgs.length
-    );
-  };
-
-  const setMaxContentHeight = () => {
-    if (!contentContainer || descriptions.length === 0) return;
-
-    let maxHeight = 0;
-    descriptions.forEach((desc) => {
-      const currentOpacity = desc.style.opacity;
-      const currentDisplay = desc.style.display;
-
-      desc.style.opacity = "1";
-      desc.style.display = "block";
-
-      const height = desc.offsetHeight;
-      if (height > maxHeight) {
-        maxHeight = height;
-      }
-
-      desc.style.opacity = currentOpacity;
-      desc.style.display = currentDisplay;
-    });
-
-    if (maxHeight > 0) {
-      gsap.set(contentContainer, { maxHeight: `${maxHeight}px`, height: "auto" });
-    }
-  };
-
-  const getImgCalculatedWidth = (img) => {
-    if (!img) return 0;
-
-    const inlineWidth = img.style.width;
-    img.style.width = "auto";
-
-    const boundingWidth = img.getBoundingClientRect().width;
-    const offsetWidth = img.offsetWidth;
-    const naturalWidth = img.naturalWidth;
-
-    img.style.width = inlineWidth;
-
-    return boundingWidth || offsetWidth || naturalWidth || 0;
-  };
-
   const storeOriginalImgWidths = () => {
     mainImgs.forEach((img, index) => {
-      const calculatedWidth = getImgCalculatedWidth(img);
+      const intrinsicWidth = img.naturalWidth;
 
-      if (calculatedWidth > 0) {
-        originalImgWidths[index] = calculatedWidth;
-        img.setAttribute("data-original-width", calculatedWidth);
+      if (intrinsicWidth > 0) {
+        originalImgWidths[index] = intrinsicWidth;
+        img.setAttribute("data-original-width", intrinsicWidth);
       } else {
         img.addEventListener(
           "load",
           () => {
-            const loadedWidth = getImgCalculatedWidth(img);
+            const loadedWidth = img.naturalWidth;
             originalImgWidths[index] = loadedWidth;
             img.setAttribute("data-original-width", loadedWidth);
 
-            const activeIndex = currentIndex < 0 ? 0 : currentIndex;
-            if (index === activeIndex) {
+            if (index === currentIndex) {
               updateImageContainerWidth(index, 0);
             }
           },
-          { once: true }
+          { once: true },
         );
       }
     });
   };
 
+  const updateContentHeight = (index, duration = 0.5) => {
+    if (contentContainer && descriptions[index]) {
+      const targetHeight = descriptions[index].offsetHeight;
+      gsap.to(contentContainer, {
+        height: targetHeight,
+        duration: duration,
+        ease: "power1.inOut",
+      });
+    }
+  };
+
   const updateImageContainerWidth = (index, duration = 0.5) => {
     return new Promise((resolve) => {
-      const activeIdx = index < 0 ? 0 : index;
-      if (!imgContentContainer || !mainImgs[activeIdx]) {
+      if (!imgContentContainer || !mainImgs[index]) {
         resolve();
         return;
       }
 
-      const img = mainImgs[activeIdx];
       const targetWidth =
-        getImgCalculatedWidth(img) || originalImgWidths[activeIdx];
+        mainImgs[index].naturalWidth ||
+        originalImgWidths[index] ||
+        mainImgs[index].getAttribute("data-original-width");
 
       if (targetWidth && targetWidth > 0) {
         gsap.to(imgContentContainer, {
@@ -1420,8 +1392,6 @@ document.addEventListener("DOMContentLoaded", () => {
     stopAutoplay();
     currentIndex = -1;
 
-    updateActiveElements();
-    setMaxContentHeight();
     storeOriginalImgWidths();
 
     if (mainHeader) {
@@ -1432,12 +1402,12 @@ document.addEventListener("DOMContentLoaded", () => {
       gsap.set(title, { opacity: 0, pointerEvents: "none" });
     });
 
-    document.querySelectorAll(".hero-process-chart-items").forEach((item) => {
-      gsap.set(item, { opacity: 0, pointerEvents: "none" });
-    });
+    const currentCharts = getCharts();
 
-    descriptions.forEach((item) => {
-      gsap.set(item, { opacity: 0, pointerEvents: "none" });
+    [descriptions, currentCharts].forEach((group) => {
+      group.forEach((item) => {
+        gsap.set(item, { opacity: 0, pointerEvents: "none" });
+      });
     });
 
     mainImgs.forEach((img, idx) => {
@@ -1449,13 +1419,17 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     updateActiveImage(0);
+    updateContentHeight(0, 0);
     updateImageContainerWidth(0, 0);
   };
 
   const goToSlide = async (nextIndex) => {
-    if (nextIndex === currentIndex || totalSlides === 0) return;
+    if (nextIndex === currentIndex) return;
 
     await updateImageContainerWidth(nextIndex, 0.4);
+    updateContentHeight(nextIndex, 0.4);
+
+    const currentCharts = getCharts();
 
     if (currentIndex === -1) {
       if (mainHeader) {
@@ -1472,7 +1446,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const incomingTextElements = [
         titles[nextIndex],
         descriptions[nextIndex],
-        charts[nextIndex],
+        currentCharts[nextIndex],
       ].filter(Boolean);
 
       gsap.to(incomingTextElements, {
@@ -1482,7 +1456,7 @@ document.addEventListener("DOMContentLoaded", () => {
         ease: "power1.inOut",
         onStart: () => {
           incomingTextElements.forEach(
-            (el) => (el.style.pointerEvents = "auto")
+            (el) => (el.style.pointerEvents = "auto"),
           );
         },
       });
@@ -1494,13 +1468,13 @@ document.addEventListener("DOMContentLoaded", () => {
     const outgoingTextElements = [
       titles[currentIndex],
       descriptions[currentIndex],
-      charts[currentIndex],
+      currentCharts[currentIndex],
     ].filter(Boolean);
 
     const incomingTextElements = [
       titles[nextIndex],
       descriptions[nextIndex],
-      charts[nextIndex],
+      currentCharts[nextIndex],
     ].filter(Boolean);
 
     const outgoingImg = mainImgs[currentIndex];
@@ -1513,9 +1487,7 @@ document.addEventListener("DOMContentLoaded", () => {
       duration: 0.5,
       ease: "power1.inOut",
       onComplete: () => {
-        outgoingTextElements.forEach(
-          (el) => (el.style.pointerEvents = "none")
-        );
+        outgoingTextElements.forEach((el) => (el.style.pointerEvents = "none"));
       },
     });
 
@@ -1525,9 +1497,7 @@ document.addEventListener("DOMContentLoaded", () => {
       delay: 0.1,
       ease: "power1.inOut",
       onStart: () => {
-        incomingTextElements.forEach(
-          (el) => (el.style.pointerEvents = "auto")
-        );
+        incomingTextElements.forEach((el) => (el.style.pointerEvents = "auto"));
       },
     });
 
@@ -1560,13 +1530,11 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   const nextSlide = () => {
-    if (totalSlides === 0) return;
     const nextIndex = (currentIndex + 1) % totalSlides;
     goToSlide(nextIndex);
   };
 
   const prevSlide = () => {
-    if (totalSlides === 0) return;
     const prevIndex = (currentIndex - 1 + totalSlides) % totalSlides;
     goToSlide(prevIndex < 0 ? totalSlides - 1 : prevIndex);
   };
@@ -1641,20 +1609,25 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   window.addEventListener("resize", () => {
-    clearTimeout(resizeTimer);
+    storeOriginalImgWidths();
 
-    resizeTimer = setTimeout(() => {
-      updateActiveElements();
-      setMaxContentHeight();
-      storeOriginalImgWidths();
-      const activeIdx = currentIndex < 0 ? 0 : currentIndex;
-      updateImageContainerWidth(activeIdx, 0.2);
-    }, 150);
+    const currentCharts = getCharts();
+
+    const activeIdx = currentIndex >= 0 ? currentIndex : 0;
+
+    currentCharts.forEach((chart, idx) => {
+      if (idx === activeIdx) {
+        gsap.set(chart, { opacity: 1, pointerEvents: "auto" });
+      } else {
+        gsap.set(chart, { opacity: 0, pointerEvents: "none" });
+      }
+    });
+
+    updateContentHeight(activeIdx, 0.2);
+    updateImageContainerWidth(activeIdx, 0.2);
   });
 
   window.addEventListener("load", () => {
-    updateActiveElements();
-    setMaxContentHeight();
     storeOriginalImgWidths();
     updateImageContainerWidth(0, 0);
   });
