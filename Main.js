@@ -1260,11 +1260,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const imgContentContainer = document.querySelector(".hero-img-content-2");
 
   const mainHeader = document.querySelector(
-    ".hero-model-title:not(.hero-process-title)"
+    ".hero-model-title:not(.hero-process-title)",
   );
   const titles = Array.from(document.querySelectorAll(".hero-process-title"));
   const descriptions = Array.from(
-    document.querySelectorAll(".hero-model-content-title")
+    document.querySelectorAll(".hero-model-content-title"),
   );
   const mainImgs = Array.from(document.querySelectorAll(".hero-model-img"));
 
@@ -1289,32 +1289,45 @@ document.addEventListener("DOMContentLoaded", () => {
 
     return Array.from(
       document.querySelectorAll(
-        `${containerSelector} .hero-process-chart-items`
-      )
+        `${containerSelector} .hero-process-chart-items`,
+      ),
     );
   };
+
+  const charts = getCharts();
 
   const totalSlides = Math.min(
     titles.length,
     descriptions.length,
-    getCharts().length,
-    mainImgs.length
+    charts.length,
+    mainImgs.length,
   );
 
-  // Measure dynamic rendered width based on screen constraints
-  const getResponsiveImageWidth = (img) => {
-    if (!img) return 0;
+  const originalImgWidths = [];
 
-    // Temporarily clear inline width constraints to read natural rendered bounds
-    const prevWidth = img.style.width;
-    img.style.width = "auto";
-    
-    // Get actual width constrained by current viewport/CSS
-    const bounds = img.getBoundingClientRect();
-    const targetWidth = bounds.width || img.naturalWidth || 0;
+  const storeOriginalImgWidths = () => {
+    mainImgs.forEach((img, index) => {
+      const intrinsicWidth = img.naturalWidth;
 
-    img.style.width = prevWidth; // Restore
-    return targetWidth;
+      if (intrinsicWidth > 0) {
+        originalImgWidths[index] = intrinsicWidth;
+        img.setAttribute("data-original-width", intrinsicWidth);
+      } else {
+        img.addEventListener(
+          "load",
+          () => {
+            const loadedWidth = img.naturalWidth;
+            originalImgWidths[index] = loadedWidth;
+            img.setAttribute("data-original-width", loadedWidth);
+
+            if (index === currentIndex) {
+              updateImageContainerWidth(index, 0);
+            }
+          },
+          { once: true },
+        );
+      }
+    });
   };
 
   const updateContentHeight = (index, duration = 0.5) => {
@@ -1335,7 +1348,10 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      const targetWidth = getResponsiveImageWidth(mainImgs[index]);
+      const targetWidth =
+        mainImgs[index].naturalWidth ||
+        originalImgWidths[index] ||
+        mainImgs[index].getAttribute("data-original-width");
 
       if (targetWidth && targetWidth > 0) {
         gsap.to(imgContentContainer, {
@@ -1375,6 +1391,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const resetSlideshow = () => {
     stopAutoplay();
     currentIndex = -1;
+
+    storeOriginalImgWidths();
 
     if (mainHeader) {
       gsap.set(mainHeader, { opacity: 1, pointerEvents: "auto" });
@@ -1438,7 +1456,7 @@ document.addEventListener("DOMContentLoaded", () => {
         ease: "power1.inOut",
         onStart: () => {
           incomingTextElements.forEach(
-            (el) => (el.style.pointerEvents = "auto")
+            (el) => (el.style.pointerEvents = "auto"),
           );
         },
       });
@@ -1549,7 +1567,7 @@ document.addEventListener("DOMContentLoaded", () => {
     setTimeout(() => {
       goToSlide(0);
       startAutoplay();
-    }, 500);
+    }, 1500);
   };
 
   const closeModal = () => {
@@ -1591,7 +1609,10 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   window.addEventListener("resize", () => {
+    storeOriginalImgWidths();
+
     const currentCharts = getCharts();
+
     const activeIdx = currentIndex >= 0 ? currentIndex : 0;
 
     currentCharts.forEach((chart, idx) => {
@@ -1607,6 +1628,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   window.addEventListener("load", () => {
+    storeOriginalImgWidths();
     updateImageContainerWidth(0, 0);
   });
 
