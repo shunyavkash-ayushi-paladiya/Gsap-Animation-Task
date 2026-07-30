@@ -46,8 +46,8 @@ img {
   display: flex;
   align-items: center;
   text-align: center;
-  background-color: azure;
-  /* background-color: brown; */
+  /* background-color: azure; */
+  background-color: brown;
 }
 
 .section-title {
@@ -582,15 +582,26 @@ img {
   top: 50%;
   right: 0%;
   transform: translateY(-50%);
-  width: 50px;
 }
 
 .hero-model-arrow {
   color: #666666;
   cursor: pointer;
   transition: all 0.3s ease-in-out;
+  width: 50px;
 }
 
 .hero-model-arrow:hover {
   color: #00dafd;
+}
+
+.lg-none{
+  display: none;
+  width: 100%;
+}
+
+.hero-process-chart-wrapper{
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
 }
