@@ -21,6 +21,14 @@
   .hero-description {
     font-size: 26px;
   }
+
+  .hero-img-content-2 {
+    height: 600px;
+  }
+
+  .hero-model-img-content{
+    padding-right: 3%;
+  }
 }
 
 @media screen and (max-width: 1024px) and (min-width: 992px) {
@@ -256,6 +264,10 @@
 
   .hero-model-content-title {
     font-size: 16px;
+    margin-top: 14px;
+  }
+
+  .hero-model-content {
     margin-top: 14px;
   }
 

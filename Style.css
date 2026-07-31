@@ -46,8 +46,8 @@ img {
   display: flex;
   align-items: center;
   text-align: center;
-  background-color: azure;
-  /* background-color: brown; */
+  /* background-color: azure; */
+  background-color: brown;
 }
 
 .section-title {
@@ -379,6 +379,7 @@ img {
   align-items: flex-start;
   padding-right: 6%;
   position: relative;
+  display: flex;
 }
 
 .hero-img-content-2 {
@@ -428,11 +429,11 @@ img {
   line-height: 1.5;
   color: white;
   font-weight: 400;
-  margin-top: 24px;
 }
 
 .hero-model-content {
   position: relative;
+  margin-top: 24px;
 }
 
 .hero-model-content-title-2 {
@@ -447,6 +448,7 @@ img {
   transition-property: left, filter;
   transition-duration: 1s, 0.5s;
   transition-timing-function: ease-in-out, ease-in-out;
+  max-width: none;
 }
 
 .hero-model-img.show-filter {
@@ -472,6 +474,7 @@ img {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
+  width: 100%;
 }
 
 .hero-model-title {
