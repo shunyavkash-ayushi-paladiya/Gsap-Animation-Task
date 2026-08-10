@@ -1273,6 +1273,16 @@ document.addEventListener("DOMContentLoaded", () => {
   let filterTimer = null;
   const AUTOPLAY_DELAY = 3000;
 
+  // Logs the original natural widths of all images
+  const logAllImageWidths = () => {
+    console.group("--- Image Original (Natural) Widths ---");
+    mainImgs.forEach((img, idx) => {
+      const width = img.naturalWidth || 0;
+      console.log(`Image [${idx}]: ${width}px (src: ${img.src})`);
+    });
+    console.groupEnd();
+  };
+
   const getCharts = () => {
     const isDesktop = window.innerWidth > 991;
     const containerSelector = isDesktop
@@ -1303,33 +1313,6 @@ document.addEventListener("DOMContentLoaded", () => {
     mainImgs.length,
   );
 
-  const originalImgWidths = [];
-
-  const storeOriginalImgWidths = () => {
-    mainImgs.forEach((img, index) => {
-      const intrinsicWidth = img.naturalWidth;
-
-      if (intrinsicWidth > 0) {
-        originalImgWidths[index] = intrinsicWidth;
-        img.setAttribute("data-original-width", intrinsicWidth);
-      } else {
-        img.addEventListener(
-          "load",
-          () => {
-            const loadedWidth = img.naturalWidth;
-            originalImgWidths[index] = loadedWidth;
-            img.setAttribute("data-original-width", loadedWidth);
-
-            if (index === currentIndex) {
-              updateImageContainerWidth(index, 0);
-            }
-          },
-          { once: true },
-        );
-      }
-    });
-  };
-
   const updateContentHeight = (index, duration = 0.5) => {
     if (contentContainer && descriptions[index]) {
       const targetHeight = descriptions[index].offsetHeight;
@@ -1341,27 +1324,49 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
+  // Helper to fetch intrinsic/original width of image
+  const getOriginalImageWidth = (img) => {
+    if (!img) return 0;
+    return img.naturalWidth || 0;
+  };
+
   const updateImageContainerWidth = (index, duration = 0.5) => {
     return new Promise((resolve) => {
-      if (!imgContentContainer || !mainImgs[index]) {
+      const currentImg = mainImgs[index];
+
+      if (!imgContentContainer || !currentImg) {
         resolve();
         return;
       }
 
-      const targetWidth =
-        mainImgs[index].naturalWidth ||
-        originalImgWidths[index] ||
-        mainImgs[index].getAttribute("data-original-width");
+      const applyWidth = () => {
+        logAllImageWidths(); // Output current widths of all images
 
-      if (targetWidth && targetWidth > 0) {
-        gsap.to(imgContentContainer, {
-          width: `${targetWidth}px`,
-          duration: duration,
-          ease: "power1.inOut",
-          onComplete: resolve,
-        });
+        const originalWidth = getOriginalImageWidth(currentImg);
+
+        if (originalWidth > 0) {
+          console.log(
+            `Setting .hero-img-content-2 width to Image [${index}] original width: ${originalWidth}px`
+          );
+
+          gsap.to(imgContentContainer, {
+            width: `${originalWidth}px`,
+            duration: duration,
+            ease: "power1.inOut",
+            onComplete: resolve,
+          });
+        } else {
+          console.warn(
+            `Image [${index}] has a naturalWidth of 0px. Container width unchanged.`
+          );
+          resolve();
+        }
+      };
+
+      if (currentImg.complete && currentImg.naturalWidth > 0) {
+        applyWidth();
       } else {
-        resolve();
+        currentImg.addEventListener("load", applyWidth, { once: true });
       }
     });
   };
@@ -1391,8 +1396,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const resetSlideshow = () => {
     stopAutoplay();
     currentIndex = -1;
-
-    storeOriginalImgWidths();
 
     if (mainHeader) {
       gsap.set(mainHeader, { opacity: 1, pointerEvents: "auto" });
@@ -1609,10 +1612,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   window.addEventListener("resize", () => {
-    storeOriginalImgWidths();
-
     const currentCharts = getCharts();
-
     const activeIdx = currentIndex >= 0 ? currentIndex : 0;
 
     currentCharts.forEach((chart, idx) => {
@@ -1628,7 +1628,6 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   window.addEventListener("load", () => {
-    storeOriginalImgWidths();
     updateImageContainerWidth(0, 0);
   });
 

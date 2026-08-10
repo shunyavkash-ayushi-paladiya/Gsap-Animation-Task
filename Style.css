@@ -46,8 +46,8 @@ img {
   display: flex;
   align-items: center;
   text-align: center;
-  /* background-color: azure; */
-  background-color: brown;
+  background-color: azure;
+  /* background-color: brown; */
 }
 
 .section-title {
@@ -176,6 +176,7 @@ img {
   width: 100%;
   border-top: none;
   border-left: none;
+  border-right: none;
   pointer-events: auto;
   font-family: "Manrope", sans-serif;
 }
@@ -389,6 +390,7 @@ img {
   transition: width 0.5s ease-in-out;
   position: relative;
   overflow: hidden;
+  max-width: 100% !important;
 }
 
 .hero-model-title-content {
@@ -448,7 +450,7 @@ img {
   transition-property: left, filter;
   transition-duration: 1s, 0.5s;
   transition-timing-function: ease-in-out, ease-in-out;
-  max-width: none;
+  /* max-width: none; */
 }
 
 .hero-model-img.show-filter {
