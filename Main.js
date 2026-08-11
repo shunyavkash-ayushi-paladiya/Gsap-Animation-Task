@@ -9,11 +9,9 @@ const lenis = new Lenis({
 });
 
 lenis.on("scroll", ScrollTrigger.update);
-
 gsap.ticker.add((time) => {
   lenis.raf(time * 1000);
 });
-
 gsap.ticker.lagSmoothing(0);
 
 window.addEventListener("load", () => {
@@ -21,9 +19,7 @@ window.addEventListener("load", () => {
   const wrap = document.querySelector(".hero-title-content");
   const title1 = document.querySelector(".hero-title:not(.hero-title-2)");
   const title2 = document.querySelector(".hero-title-2");
-  const description1 = document.querySelector(
-    ".hero-description:not(.hero-description-2)",
-  );
+  const description1 = document.querySelector(".hero-description:not(.hero-description-2)");
   const description2 = document.querySelector(".hero-description-2");
   const heroImgContent = document.querySelector(".hero-img-content");
   const heroContentItems = document.querySelector(".hero-content-items");
@@ -33,22 +29,12 @@ window.addEventListener("load", () => {
   const heroBorderOverlay2 = document.querySelector(".hero-border-overlay-2");
   const borderWrapper = document.querySelector(".hero-content-item-wrapper");
   const contentItems = document.querySelectorAll(".hero-content-item");
-  const itemDesc1 = document.querySelector(
-    ".hero-item-description:not(.hero-item-description-v2)",
-  );
+  const itemDesc1 = document.querySelector(".hero-item-description:not(.hero-item-description-v2)");
   const itemDesc2 = document.querySelector(".hero-item-description-v2");
   const heroContent = document.querySelector(".hero-content");
   const heroBtns = document.querySelectorAll(".hero-btn");
 
-  if (
-    !section ||
-    !wrap ||
-    !title1 ||
-    !title2 ||
-    !description1 ||
-    !heroImgContent ||
-    !heroContent
-  ) {
+  if (!section || !wrap || !title1 || !title2 || !description1 || !heroImgContent || !heroContent) {
     console.warn("Hero animation skipped: Core DOM elements missing.");
     return;
   }
@@ -84,12 +70,8 @@ window.addEventListener("load", () => {
     if (!borderWrapper || imgWrappers.length === 0) return;
 
     const originalImgStyle = heroImgContent.getAttribute("style") || "";
-    const originalContentItemsStyle = heroContentItems
-      ? heroContentItems.getAttribute("style") || ""
-      : "";
-    const originalOverlaysStyle = heroOverlays
-      ? heroOverlays.getAttribute("style") || ""
-      : "";
+    const originalContentItemsStyle = heroContentItems ? heroContentItems.getAttribute("style") || "" : "";
+    const originalOverlaysStyle = heroOverlays ? heroOverlays.getAttribute("style") || "" : "";
 
     gsap.set([heroImgContent, heroContentItems, heroOverlays], {
       clearProps: "transform,scale,x,y,width,height",
@@ -104,24 +86,8 @@ window.addEventListener("load", () => {
 
     imgWrappers.forEach((wrapper) => {
       const rect = wrapper.getBoundingClientRect();
-      const pctLeft =
-        imgContentRect.width > 0
-          ? Math.max(
-              0,
-              Math.min(
-                100,
-                ((rect.left - imgContentRect.left) / imgContentRect.width) *
-                  100,
-              ),
-            )
-          : 0;
-      const pctWidth =
-        imgContentRect.width > 0
-          ? Math.max(
-              0,
-              Math.min(100, (rect.width / imgContentRect.width) * 100),
-            )
-          : 0;
+      const pctLeft = imgContentRect.width > 0 ? Math.max(0, Math.min(100, ((rect.left - imgContentRect.left) / imgContentRect.width) * 100)) : 0;
+      const pctWidth = imgContentRect.width > 0 ? Math.max(0, Math.min(100, (rect.width / imgContentRect.width) * 100)) : 0;
       const centerOffset = rect.left - imgContentRect.left + rect.width / 2;
 
       imagePositions.push({
@@ -147,8 +113,7 @@ window.addEventListener("load", () => {
     });
 
     heroImgContent.setAttribute("style", originalImgStyle);
-    if (heroContentItems)
-      heroContentItems.setAttribute("style", originalContentItemsStyle);
+    if (heroContentItems) heroContentItems.setAttribute("style", originalContentItemsStyle);
     if (heroOverlays) heroOverlays.setAttribute("style", originalOverlaysStyle);
   }
 
@@ -164,7 +129,6 @@ window.addEventListener("load", () => {
         }
       }
     });
-
     contentItems.forEach((item, idx) => {
       if (item) {
         if (!enabled || idx === targetIndex) {
@@ -184,7 +148,6 @@ window.addEventListener("load", () => {
     const parts = text.split(/(\s+)/);
     let firstLetterIndex = 0;
     const meraLetters = ["M", "e", "R", "A"];
-
     el.innerHTML = "";
     parts.forEach((part) => {
       if (/^\s+$/.test(part)) {
@@ -194,7 +157,6 @@ window.addEventListener("load", () => {
         el.appendChild(space);
         return;
       }
-
       const word = document.createElement("span");
       word.className = "word";
       word.style.display = "inline-block";
@@ -202,12 +164,10 @@ window.addEventListener("load", () => {
 
       const firstLetterSpan = document.createElement("span");
       firstLetterSpan.className = "char first-letter";
-      firstLetterSpan.dataset.acronym =
-        meraLetters[firstLetterIndex] || part[0];
+      firstLetterSpan.dataset.acronym = meraLetters[firstLetterIndex] || part[0];
       firstLetterSpan.textContent = part[0];
       firstLetterSpan.style.display = "inline-block";
       word.appendChild(firstLetterSpan);
-
       firstLetterIndex++;
 
       if (part.length > 1) {
@@ -217,7 +177,6 @@ window.addEventListener("load", () => {
         restSpan.textContent = part.slice(1);
         word.appendChild(restSpan);
       }
-
       el.appendChild(word);
     });
   }
@@ -242,7 +201,6 @@ window.addEventListener("load", () => {
       clone.className = "mera-clone";
       clone.textContent = letter.dataset.acronym;
       cloneWrap.appendChild(clone);
-
       gsap.set(clone, {
         position: "absolute",
         display: "inline-block",
@@ -264,7 +222,6 @@ window.addEventListener("load", () => {
     const clones = gsap.utils.toArray(".mera-clone");
     const gap = 4;
     if (!clones.length) return clones;
-
     updateMeraCloneTargets(clones, wrapRect, gap);
     return clones;
   }
@@ -272,25 +229,22 @@ window.addEventListener("load", () => {
   function updateMeraCloneTargets(clones, wrapRect, gap) {
     const currentWrapRect = wrapRect || wrap.getBoundingClientRect();
     const calculatedGap = gap !== undefined ? gap : 4;
-    const totalWidth =
-      clones.reduce((sum, clone) => sum + clone.offsetWidth, 0) +
-      calculatedGap * (clones.length - 1);
-
+    const totalWidth = clones.reduce((sum, clone) => sum + clone.offsetWidth, 0) + calculatedGap * (clones.length - 1);
     let x = currentWrapRect.width / 2 - totalWidth / 2;
-
     clones.forEach((clone) => {
       clone.dataset.targetLeft = x;
       x += clone.offsetWidth + calculatedGap;
     });
   }
 
-  function animateToStepIndex(index, duration = 0.8) {
+  function animateToStepIndex(index, duration = 0.6) {
     if (!imagePositions[index]) calculateImagePositions();
     if (!imagePositions[index]) return;
 
     activeIndex = index;
     setInteractiveState(true, index);
 
+    // Active state toggles for image wrappers
     imgWrappers.forEach((wrapper, idx) => {
       if (wrapper) wrapper.classList.toggle("active", idx === index);
     });
@@ -309,39 +263,41 @@ window.addEventListener("load", () => {
       }
     }
 
+    // Active state & text colors for card items
     contentItems.forEach((item, idx) => {
       const isCurrent = idx === index;
       const titleText = item.querySelector(".hero-content-title");
       const contentDescText = item.querySelector(".hero-content-description");
-
       item.classList.toggle("active", isCurrent);
 
-      if (titleText)
+      if (titleText) {
         gsap.to(titleText, {
           color: isCurrent ? "#00dafd" : "#66666682",
-          duration: duration * 0.5,
+          duration: duration * 0.6,
+          ease: "power2.out",
           overwrite: "auto",
         });
-
-      if (contentDescText)
+      }
+      if (contentDescText) {
         gsap.to(contentDescText, {
           color: isCurrent ? "#ffffff" : "#66666682",
-          duration: duration * 0.5,
+          duration: duration * 0.6,
+          ease: "power2.out",
           overwrite: "auto",
         });
+      }
     });
 
+    // Mobile layout horizontal translates
     if (isMobileLayout) {
       const imgTargetX = imgOffsetsMobile[index] || 0;
       const contentTargetX = itemOffsets[index] || 0;
-
       gsap.to(heroImgContent, {
         x: imgTargetX,
         duration: duration,
         ease: "power2.inOut",
         overwrite: "auto",
       });
-
       if (heroContentItems) {
         gsap.to(heroContentItems, {
           x: contentTargetX,
@@ -352,6 +308,7 @@ window.addEventListener("load", () => {
       }
     }
 
+    // Image mask window step update
     if (heroImgOverlay) {
       const pos = imagePositions[index];
       gsap.to(heroImgOverlay, {
@@ -366,6 +323,7 @@ window.addEventListener("load", () => {
       });
     }
 
+    // Border overlay step update
     if (heroBorderOverlay && heroBorderOverlay2) {
       if (isMobileLayout) {
         const targetWidth = itemCumulativeWidths[index] || 0;
@@ -385,10 +343,7 @@ window.addEventListener("load", () => {
         });
       } else {
         if (index < 4) {
-          const targetWidth = Math.max(
-            0,
-            Math.min(imagePositions[index].right, borderWrapper.offsetWidth),
-          );
+          const targetWidth = Math.max(0, Math.min(imagePositions[index].right, borderWrapper.offsetWidth));
           gsap.to(heroBorderOverlay, {
             opacity: 1,
             width: targetWidth,
@@ -404,12 +359,8 @@ window.addEventListener("load", () => {
             overwrite: "auto",
           });
         } else {
-          const maxOverlay1Width = Math.max(
-            0,
-            Math.min(imagePositions[3].right, borderWrapper.offsetWidth),
-          );
+          const maxOverlay1Width = Math.max(0, Math.min(imagePositions[3].right, borderWrapper.offsetWidth));
           const targetWidth2 = Math.max(0, imagePositions[index].width);
-
           gsap.to(heroBorderOverlay, {
             opacity: 1,
             width: maxOverlay1Width,
@@ -428,19 +379,21 @@ window.addEventListener("load", () => {
       }
     }
 
-    if (itemDesc1)
+    // Section sub-description text colors
+    if (itemDesc1) {
       gsap.to(itemDesc1, {
         color: index < 4 ? "#ffffff" : "#66666682",
         duration: duration * 0.5,
         overwrite: "auto",
       });
-
-    if (itemDesc2)
+    }
+    if (itemDesc2) {
       gsap.to(itemDesc2, {
         color: index === 4 ? "#ffffff" : "#66666682",
         duration: duration * 0.5,
         overwrite: "auto",
       });
+    }
   }
 
   mm.add(
@@ -480,11 +433,9 @@ window.addEventListener("load", () => {
         const heights = recalculateHeights();
         naturalWrapHeight = heights.naturalWrapHeight;
         targetWrapHeight = heights.targetWrapHeight;
-
         const wrapRect = wrap.getBoundingClientRect();
         const titleStyle = window.getComputedStyle(title1);
         const clones = gsap.utils.toArray(".mera-clone");
-
         if (clones.length) {
           clones.forEach((clone, idx) => {
             const letter = firstLetters[idx];
@@ -502,7 +453,6 @@ window.addEventListener("load", () => {
           });
           updateMeraCloneTargets(clones, wrapRect, 4);
         }
-
         if (tl) tl.invalidate();
         ScrollTrigger.refresh();
       };
@@ -514,10 +464,7 @@ window.addEventListener("load", () => {
       gsap.set(description1, { opacity: 0, y: 0 });
       if (description2) gsap.set(description2, { opacity: 0, y: 50 });
 
-      const startImgXMobile =
-        isMobileLayout && imgOffsetsMobile[0] !== undefined
-          ? imgOffsetsMobile[0]
-          : 0;
+      const startImgXMobile = isMobileLayout && imgOffsetsMobile[0] !== undefined ? imgOffsetsMobile[0] : 0;
 
       if (heroContentItems) {
         gsap.set(heroContentItems, { opacity: 0, x: 0 });
@@ -537,6 +484,9 @@ window.addEventListener("load", () => {
         });
       }
 
+      contentItems.forEach((item) => item.classList.remove("active"));
+      imgWrappers.forEach((wrapper) => wrapper.classList.remove("active"));
+
       if (heroImgOverlay) {
         gsap.set(heroImgOverlay, { opacity: 0 });
         if (imagePositions[0]) {
@@ -549,31 +499,28 @@ window.addEventListener("load", () => {
         }
       }
 
-      contentItems.forEach((item) => item.classList.remove("active"));
-      imgWrappers.forEach((wrapper) => wrapper.classList.remove("active"));
-
+      // Initial border overlay set to card 1 width (NO growth animation)
       if (heroBorderOverlay) {
+        const firstCardWidth = () => {
+          if (isMobileLayout) return itemCumulativeWidths[0] || 0;
+          if (!borderWrapper || !imagePositions[0]) return 0;
+          return Math.max(0, Math.min(imagePositions[0].right, borderWrapper.offsetWidth));
+        };
         gsap.set(heroBorderOverlay, {
           opacity: 0,
-          width: () => {
-            if (isMobileLayout) return itemCumulativeWidths[0] || 0;
-            if (!borderWrapper || !imagePositions[0]) return 0;
-            return Math.max(
-              0,
-              Math.min(imagePositions[0].right, borderWrapper.offsetWidth),
-            );
-          },
+          width: firstCardWidth,
         });
       }
 
-      if (heroBorderOverlay2)
-        gsap.set(heroBorderOverlay2, { width: 0, opacity: 0 });
+      if (heroBorderOverlay2) gsap.set(heroBorderOverlay2, { width: 0, opacity: 0 });
       if (itemDesc1) gsap.set(itemDesc1, { color: "#66666682" });
       if (itemDesc2) gsap.set(itemDesc2, { color: "#66666682" });
 
       contentItems.forEach((item) => {
-        const desc = item.querySelector(".hero-content-description");
-        if (desc) gsap.set(desc, { color: "#66666682" });
+        const titleText = item.querySelector(".hero-content-title");
+        const descText = item.querySelector(".hero-content-description");
+        if (titleText) gsap.set(titleText, { color: "#66666682" });
+        if (descText) gsap.set(descText, { color: "#66666682" });
       });
 
       gsap.set(heroImgContent, {
@@ -588,8 +535,8 @@ window.addEventListener("load", () => {
       const totalSteps = heroImages.length;
       const scrollDistancePerStep = isShortDesktopLayout ? 300 : 700;
       const baseIntroDistance = isShortDesktopLayout ? 800 : 1200;
-      const dynamicEndScroll =
-        baseIntroDistance + totalSteps * scrollDistancePerStep;
+      const dynamicEndScroll = baseIntroDistance + totalSteps * scrollDistancePerStep;
+      const stepLabels = Array.from({ length: totalSteps }, (_, i) => `step_${i}`);
 
       tl = gsap.timeline({
         scrollTrigger: {
@@ -597,27 +544,37 @@ window.addEventListener("load", () => {
           start: "top top",
           end: `+=${dynamicEndScroll}`,
           pin: true,
-          scrub: 0.6,
+          scrub: 0.5,
           invalidateOnRefresh: true,
+          snap: {
+            snapTo: (progress) => {
+              if (isClickScrolling || isShortDesktopLayout) return progress;
+              if (!tl || !tl.duration()) return progress;
+
+              const activeStartProgress = tl.labels.overlaysActiveStart / tl.duration();
+              const activeEndProgress = tl.labels[`step_${totalSteps - 1}`] / tl.duration();
+
+              if (progress >= activeStartProgress && progress <= activeEndProgress) {
+                const stepPositions = stepLabels
+                  .map((label) => (tl.labels[label] !== undefined ? tl.labels[label] / tl.duration() : null))
+                  .filter((val) => val !== null);
+
+                return gsap.utils.snap(stepPositions, progress);
+              }
+              return progress;
+            },
+            duration: { min: 0.2, max: 0.5 },
+            delay: 0.05,
+            directional: true,
+            ease: "power2.out",
+          },
         },
       });
 
       const titleFadeDuration = 0.3;
-      tl.to(
-        title1,
-        { opacity: 1, duration: titleFadeDuration, ease: "power1.out" },
-        0,
-      );
-      tl.to(
-        ".char-rest",
-        { "--position": "0%", duration: 0.5, ease: "power1.inOut" },
-        titleFadeDuration + 0.1,
-      );
-      tl.to(
-        firstLetters,
-        { color: "#00dafd", duration: 0.2, ease: "none" },
-        ">",
-      );
+      tl.to(title1, { opacity: 1, duration: titleFadeDuration, ease: "power1.out" }, 0);
+      tl.to(".char-rest", { "--position": "0%", duration: 0.5, ease: "power1.inOut" }, titleFadeDuration + 0.1);
+      tl.to(firstLetters, { color: "#00dafd", duration: 0.2, ease: "none" }, ">");
       tl.set(meraClones, { opacity: 1 });
       tl.set(firstLetters, { opacity: 0 });
       tl.to(
@@ -634,7 +591,7 @@ window.addEventListener("load", () => {
           onComplete: () => wrap.classList.remove("active"),
           onReverseComplete: () => wrap.classList.add("active"),
         },
-        ">",
+        ">"
       );
       tl.to(
         wrap,
@@ -643,7 +600,7 @@ window.addEventListener("load", () => {
           duration: 1.15,
           ease: "power2.inOut",
         },
-        ">",
+        ">"
       );
 
       if (isMobileLayout) {
@@ -655,7 +612,7 @@ window.addEventListener("load", () => {
             duration: 0.8,
             ease: "power2.inOut",
           },
-          ">",
+          ">"
         );
       } else {
         tl.to(
@@ -667,29 +624,17 @@ window.addEventListener("load", () => {
             duration: 1.15,
             ease: "power2.inOut",
           },
-          "<",
+          "<"
         );
       }
 
-      tl.to(
-        description1,
-        { opacity: 1, duration: 0.4, ease: "power1.out" },
-        ">+=0.2",
-      );
+      tl.to(description1, { opacity: 1, duration: 0.4, ease: "power1.out" }, ">+=0.2");
       if (description2) {
-        tl.to(
-          description2,
-          { opacity: 1, duration: 0.4, ease: "power1.out" },
-          "<",
-        );
+        tl.to(description2, { opacity: 1, duration: 0.4, ease: "power1.out" }, "<");
       }
 
       const finalMoveDuration = 0.55;
-      tl.to(
-        description1,
-        { y: 0, opacity: 0, duration: finalMoveDuration, ease: "power2.inOut" },
-        ">",
-      );
+      tl.to(description1, { y: 0, opacity: 0, duration: finalMoveDuration, ease: "power2.inOut" }, ">");
       if (description2) {
         tl.to(
           description2,
@@ -699,19 +644,16 @@ window.addEventListener("load", () => {
             duration: finalMoveDuration,
             ease: "power2.inOut",
           },
-          "<",
+          "<"
         );
       }
-      tl.to(
-        [title1, cloneWrap],
-        { y: -70, duration: finalMoveDuration, ease: "power2.inOut" },
-        "<",
-      );
-      tl.to(
-        title2,
-        { opacity: 1, y: 0, duration: finalMoveDuration, ease: "power2.inOut" },
-        "<",
-      );
+      tl.to([title1, cloneWrap], { y: -70, duration: finalMoveDuration, ease: "power2.inOut" }, "<");
+      tl.to(title2, { opacity: 1, y: 0, duration: finalMoveDuration, ease: "power2.inOut" }, "<");
+
+      // 1. Show hero-content-items (0 to 1 opacity) while title & description translate
+      if (heroContentItems) {
+        tl.to(heroContentItems, { opacity: 1, x: 0, duration: finalMoveDuration, ease: "power2.inOut" }, "<");
+      }
 
       if (isMobileLayout) {
         tl.to(
@@ -722,444 +664,71 @@ window.addEventListener("load", () => {
             duration: 0.8,
             ease: "power2.inOut",
           },
-          ">",
+          ">"
         );
       }
 
-      if (heroContentItems) {
-        tl.to(
-          heroContentItems,
-          { opacity: 1, x: 0, duration: 0.5, ease: "power2.inOut" },
-          isMobileLayout ? ">-=0.3" : "<",
-        );
-      }
+      // 2. Initial Overlay Fade (0% -> 50%)
+      tl.add("overlaysEntry", ">");
+      tl.call(() => calculateImagePositions(), null, "overlaysEntry-=0.05");
 
       if (heroOverlays) {
-        tl.add("overlaysEntry", "-=0.2");
-        tl.call(() => calculateImagePositions(), null, "overlaysEntry-=0.05");
-        tl.to(
-          heroOverlays,
-          { opacity: 1, y: 0, duration: 0.8, ease: "power2.out" },
-          "overlaysEntry",
-        );
-        tl.call(
-          () => {
-            if (isShortDesktopLayout || isClickScrolling) return;
-            if (contentItems[0]) contentItems[0].classList.add("active");
-            if (imgWrappers[0]) imgWrappers[0].classList.add("active");
-          },
-          null,
-          "overlaysEntry",
-        );
-        tl.call(
-          () => {
-            if (isShortDesktopLayout || isClickScrolling) return;
-            if (contentItems[0]) contentItems[0].classList.remove("active");
-            if (imgWrappers[0]) imgWrappers[0].classList.remove("active");
-          },
-          null,
-          "overlaysEntry-=0.01",
-        );
+        tl.to(heroOverlays, { opacity: 0.5, y: 0, duration: 0.4, ease: "power2.out" }, "overlaysEntry");
+      }
 
-        if (heroImgOverlay) {
-          tl.to(
-            heroImgOverlay,
-            { opacity: 1, duration: 0.6, ease: "power2.inOut" },
-            "overlaysEntry+=0.2",
-          );
+      if (heroImgOverlay) {
+        tl.to(heroImgOverlay, { opacity: 0.5, duration: 0.4, ease: "power2.out" }, "overlaysEntry");
+      }
+
+      // 3. Simultaneously change Card 1 colors & fade in .hero-border-overlay
+      const firstItem = contentItems[0];
+      if (firstItem) {
+        const firstTitle = firstItem.querySelector(".hero-content-title");
+        const firstDesc = firstItem.querySelector(".hero-content-description");
+        if (firstTitle) {
+          tl.to(firstTitle, { color: "#00dafd", duration: 0.4, ease: "power2.out" }, "overlaysEntry");
         }
-
-        tl.add("overlaysActiveStart", "overlaysEntry+=0.3");
-        tl.set(heroOverlays, { opacity: 1, y: 0 }, "overlaysActiveStart");
-        tl.call(
-          () => {
-            if (isClickScrolling) return;
-            setInteractiveState(true, activeIndex);
-          },
-          null,
-          "overlaysActiveStart",
-        );
-        tl.call(
-          () => {
-            if (isClickScrolling) return;
-            setInteractiveState(false);
-          },
-          null,
-          "overlaysActiveStart-=0.01",
-        );
-
-        const firstTitle = contentItems[0]?.querySelector(
-          ".hero-content-title",
-        );
-        const firstDesc = contentItems[0]?.querySelector(
-          ".hero-content-description",
-        );
-
-        if (firstTitle)
-          tl.to(
-            firstTitle,
-            { color: "#00dafd", duration: 0.2, ease: "power2.inOut" },
-            "overlaysActiveStart",
-          );
-
-        if (firstDesc)
-          tl.to(
-            firstDesc,
-            { color: "#ffffff", duration: 0.2, ease: "power2.inOut" },
-            "overlaysActiveStart",
-          );
-
-        if (itemDesc1)
-          tl.to(
-            itemDesc1,
-            { color: "#ffffff", duration: 0.2, ease: "power2.inOut" },
-            "overlaysActiveStart",
-          );
-
-        if (heroBorderOverlay)
-          tl.to(
-            heroBorderOverlay,
-            { opacity: 1, duration: 0.2, ease: "power2.inOut" },
-            "overlaysActiveStart",
-          );
-
-        if (heroImages.length > 0) {
-          let cutoutTracker = {
-            leftPct: imagePositions[0] ? imagePositions[0].imgPctLeft : 0,
-            rightPct: imagePositions[0] ? imagePositions[0].imgPctRight : 0,
-          };
-
-          heroImages.forEach((img, index) => {
-            const matchingBlock = contentItems[index];
-            const prevBlock = contentItems[index - 1];
-            const wrapper = imgWrappers[index];
-            const prevWrapper = imgWrappers[index - 1];
-            const isFirst = index === 0;
-            const isLast = index === heroImages.length - 1;
-            const stepLabel = `step_${index}`;
-
-            tl.add(stepLabel, isFirst ? "overlaysActiveStart" : "+=0.6");
-            tl.call(
-              () => {
-                if (isClickScrolling) return;
-                activeIndex = index;
-                setInteractiveState(true, index);
-              },
-              null,
-              stepLabel,
-            );
-
-            if (!isFirst) {
-              tl.call(
-                () => {
-                  if (isShortDesktopLayout || isClickScrolling) return;
-                  if (wrapper) wrapper.classList.add("active");
-                  if (prevWrapper) prevWrapper.classList.remove("active");
-                },
-                null,
-                stepLabel,
-              );
-              tl.call(
-                () => {
-                  if (isShortDesktopLayout || isClickScrolling) return;
-                  if (wrapper) wrapper.classList.remove("active");
-                  if (prevWrapper) prevWrapper.classList.add("active");
-                },
-                null,
-                `${stepLabel}-=0.01`,
-              );
-            }
-
-            if (isLast) {
-              tl.call(
-                () => {
-                  if (isShortDesktopLayout || isClickScrolling) return;
-                  img.classList.add("hero-img-2");
-                },
-                null,
-                `${stepLabel}+=0.3`,
-              );
-              tl.call(
-                () => {
-                  if (isShortDesktopLayout || isClickScrolling) return;
-                  img.classList.remove("hero-img-2");
-                },
-                null,
-                `${stepLabel}+=0.29`,
-              );
-            }
-
-            if (isShortDesktopLayout) {
-              tl.call(
-                () => {
-                  if (isFirst) animateToStepIndex(0, 0);
-                },
-                null,
-                stepLabel,
-              );
-            }
-
-            if (isMobileLayout) {
-              tl.to(
-                heroImgContent,
-                {
-                  x: () =>
-                    imgOffsetsMobile[index] !== undefined
-                      ? imgOffsetsMobile[index]
-                      : 0,
-                  duration: 0.8,
-                  ease: "power2.inOut",
-                },
-                stepLabel,
-              );
-
-              if (heroContentItems) {
-                tl.to(
-                  heroContentItems,
-                  {
-                    x: () => itemOffsets[index] || 0,
-                    duration: 0.8,
-                    ease: "power2.inOut",
-                  },
-                  stepLabel,
-                );
-              }
-            }
-
-            if (heroImgOverlay && !isFirst) {
-              tl.to(
-                cutoutTracker,
-                {
-                  leftPct: () =>
-                    imagePositions[index]
-                      ? imagePositions[index].imgPctLeft
-                      : 0,
-                  rightPct: () =>
-                    imagePositions[index]
-                      ? imagePositions[index].imgPctRight
-                      : 0,
-                  duration: 0.8,
-                  ease: "power2.inOut",
-                  modifiers: {
-                    leftPct: (value) =>
-                      isShortDesktopLayout ? cutoutTracker.leftPct : value,
-                    rightPct: (value) =>
-                      isShortDesktopLayout ? cutoutTracker.rightPct : value,
-                  },
-                  onUpdate: () => {
-                    if (isClickScrolling) return;
-                    heroImgOverlay.style.clipPath = `polygon(
-                      0% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 0%, 
-                      ${cutoutTracker.leftPct}% 0%, ${cutoutTracker.leftPct}% 100%, ${cutoutTracker.rightPct}% 100%, ${cutoutTracker.rightPct}% 0%, ${cutoutTracker.leftPct}% 0%
-                    )`;
-                  },
-                },
-                stepLabel,
-              );
-            }
-
-            if (heroBorderOverlay && !isFirst) {
-              tl.to(
-                heroBorderOverlay,
-                {
-                  opacity: 1,
-                  width: () => {
-                    if (isShortDesktopLayout || isClickScrolling)
-                      return heroBorderOverlay.offsetWidth;
-                    if (isMobileLayout) return itemCumulativeWidths[index] || 0;
-                    if (!borderWrapper || !imagePositions[index]) return 0;
-                    return index < 4
-                      ? Math.max(
-                          0,
-                          Math.min(
-                            imagePositions[index].right,
-                            borderWrapper.offsetWidth,
-                          ),
-                        )
-                      : Math.max(
-                          0,
-                          Math.min(
-                            imagePositions[3].right,
-                            borderWrapper.offsetWidth,
-                          ),
-                        );
-                  },
-                  duration: 0.8,
-                  ease: "power2.inOut",
-                },
-                stepLabel,
-              );
-            }
-
-            if (heroBorderOverlay2 && !isFirst) {
-              tl.to(
-                heroBorderOverlay2,
-                {
-                  opacity: () => (index >= 4 ? 1 : 0),
-                  width: () => {
-                    if (isShortDesktopLayout || isClickScrolling)
-                      return heroBorderOverlay2.offsetWidth;
-                    if (isMobileLayout)
-                      return index >= 4 ? itemCumulativeWidths[index] || 0 : 0;
-                    if (!borderWrapper || !imagePositions[index]) return 0;
-                    return index >= 4
-                      ? Math.max(0, imagePositions[index].width)
-                      : 0;
-                  },
-                  duration: 0.8,
-                  ease: "power2.inOut",
-                  onStart: () => {
-                    if (isShortDesktopLayout || isClickScrolling) return;
-                    if (matchingBlock) matchingBlock.classList.add("active");
-                    if (prevBlock) prevBlock.classList.remove("active");
-                  },
-                  onReverseComplete: () => {
-                    if (isShortDesktopLayout || isClickScrolling) return;
-                    if (matchingBlock) matchingBlock.classList.remove("active");
-                    if (prevBlock) prevBlock.classList.add("active");
-                  },
-                },
-                stepLabel,
-              );
-            }
-
-            if (matchingBlock && !isFirst) {
-              const titleText = matchingBlock.querySelector(
-                ".hero-content-title",
-              );
-              if (titleText) {
-                tl.to(
-                  titleText,
-                  {
-                    color: "#00dafd",
-                    modifiers: {
-                      color: (c) =>
-                        isShortDesktopLayout || isClickScrolling
-                          ? titleText.style.color
-                          : c,
-                    },
-                  },
-                  stepLabel,
-                );
-              }
-
-              const contentDescText = matchingBlock.querySelector(
-                ".hero-content-description",
-              );
-              if (contentDescText) {
-                tl.to(
-                  contentDescText,
-                  {
-                    color: "#ffffff",
-                    modifiers: {
-                      color: (c) =>
-                        isShortDesktopLayout || isClickScrolling
-                          ? contentDescText.style.color
-                          : c,
-                    },
-                  },
-                  stepLabel,
-                );
-              }
-
-              if (index < 4) {
-                if (itemDesc1)
-                  tl.to(
-                    itemDesc1,
-                    {
-                      color: "#ffffff",
-                      modifiers: {
-                        color: (c) =>
-                          isShortDesktopLayout || isClickScrolling
-                            ? itemDesc1.style.color
-                            : c,
-                      },
-                    },
-                    stepLabel,
-                  );
-                if (itemDesc2)
-                  tl.to(
-                    itemDesc2,
-                    {
-                      color: "#66666682",
-                      modifiers: {
-                        color: (c) =>
-                          isShortDesktopLayout || isClickScrolling
-                            ? itemDesc2.style.color
-                            : c,
-                      },
-                    },
-                    stepLabel,
-                  );
-              } else if (index === 4) {
-                if (itemDesc1)
-                  tl.to(
-                    itemDesc1,
-                    {
-                      color: "#66666682",
-                      modifiers: {
-                        color: (c) =>
-                          isShortDesktopLayout || isClickScrolling
-                            ? itemDesc1.style.color
-                            : c,
-                      },
-                    },
-                    stepLabel,
-                  );
-                if (itemDesc2)
-                  tl.to(
-                    itemDesc2,
-                    {
-                      color: "#ffffff",
-                      modifiers: {
-                        color: (c) =>
-                          isShortDesktopLayout || isClickScrolling
-                            ? itemDesc2.style.color
-                            : c,
-                      },
-                    },
-                    stepLabel,
-                  );
-              }
-            }
-
-            if (prevBlock) {
-              const prevTitle = prevBlock.querySelector(".hero-content-title");
-              if (prevTitle)
-                tl.to(
-                  prevTitle,
-                  {
-                    color: "#66666682",
-                    modifiers: {
-                      color: (c) =>
-                        isShortDesktopLayout || isClickScrolling
-                          ? prevTitle.style.color
-                          : c,
-                    },
-                  },
-                  stepLabel,
-                );
-
-              const prevDescText = prevBlock.querySelector(
-                ".hero-content-description",
-              );
-              if (prevDescText)
-                tl.to(
-                  prevDescText,
-                  {
-                    color: "#66666682",
-                    modifiers: {
-                      color: (c) =>
-                        isShortDesktopLayout || isClickScrolling
-                          ? prevDescText.style.color
-                          : c,
-                    },
-                  },
-                  stepLabel,
-                );
-            }
-          });
+        if (firstDesc) {
+          tl.to(firstDesc, { color: "#ffffff", duration: 0.4, ease: "power2.out" }, "overlaysEntry");
         }
+      }
+
+      if (heroBorderOverlay) {
+        tl.to(heroBorderOverlay, { opacity: 1, duration: 0.4, ease: "power2.out" }, "overlaysEntry");
+      }
+
+      if (itemDesc1) {
+        tl.to(itemDesc1, { color: "#ffffff", duration: 0.4, ease: "power2.out" }, "overlaysEntry");
+      }
+
+      // 4. Increase Overlays opacity (50% -> 100%)
+      if (heroOverlays) {
+        tl.to(heroOverlays, { opacity: 1, duration: 0.4, ease: "power2.out" }, ">");
+      }
+      if (heroImgOverlay) {
+        tl.to(heroImgOverlay, { opacity: 1, duration: 0.4, ease: "power2.out" }, "<");
+      }
+
+      // 5. Scroll Step Sequence Start
+      tl.add("overlaysActiveStart", ">");
+
+      tl.call(() => {
+        if (isClickScrolling) return;
+        animateToStepIndex(0, 0.4);
+      }, null, "overlaysActiveStart");
+
+      if (heroImages.length > 0) {
+        heroImages.forEach((_, index) => {
+          const isFirst = index === 0;
+          const stepLabel = `step_${index}`;
+
+          tl.add(stepLabel, isFirst ? "overlaysActiveStart" : "+=0.6");
+
+          tl.call(() => {
+            if (isClickScrolling) return;
+            animateToStepIndex(index, 0.6);
+          }, null, stepLabel);
+        });
       }
 
       tl.to({}, { duration: 1.0 });
@@ -1183,13 +752,19 @@ window.addEventListener("load", () => {
             const finalTweenTime = labelTime + stepOffset;
             const safeTime = Math.min(finalTweenTime, tl.duration());
             const progress = safeTime / tl.duration();
-            const targetScroll =
-              scrollST.start + progress * (scrollST.end - scrollST.start);
+            const targetScroll = scrollST.start + progress * (scrollST.end - scrollST.start);
 
-            lenis.scrollTo(targetScroll, {
+            gsap.to(window, {
+              scrollTo: { y: targetScroll, autoKill: true },
               duration: 1.0,
-              easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+              ease: "power2.inOut",
+              onStart: () => {
+                isClickScrolling = true;
+              },
               onComplete: () => {
+                isClickScrolling = false;
+              },
+              onInterrupt: () => {
                 isClickScrolling = false;
               },
             });
@@ -1213,27 +788,22 @@ window.addEventListener("load", () => {
         const btnHandler = (e) => {
           e.stopPropagation();
           const lastIndex = heroImages.length - 1;
-
           const lastImg = heroImages[lastIndex];
           if (lastImg) {
             gsap.killTweensOf(lastImg);
             lastImg.classList.remove("hero-img-2");
           }
-
           if (imgWrappers[lastIndex]) {
             imgWrappers[lastIndex].classList.remove("active");
           }
-
           if (contentItems[lastIndex]) {
             contentItems[lastIndex].classList.remove("active");
           }
-
           if (activeIndex === lastIndex) {
             const fallbackIndex = Math.max(0, lastIndex - 1);
             animateToStepIndex(fallbackIndex);
           }
         };
-
         btn.addEventListener("click", btnHandler);
         clickHandlers.push({ element: btn, clickHandler: btnHandler });
       });
@@ -1245,7 +815,7 @@ window.addEventListener("load", () => {
         });
         if (tl) tl.kill();
       };
-    },
+    }
   );
 });
 
