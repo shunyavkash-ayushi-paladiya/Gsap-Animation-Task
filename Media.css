@@ -136,6 +136,10 @@
     grid-column: span 2;
   }
 
+  .hero-model-section {
+    padding-block: 40px;
+  }
+
   .hero-model-title-wrapper {
     padding-right: 0px;
   }

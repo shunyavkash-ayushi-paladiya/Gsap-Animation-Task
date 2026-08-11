@@ -1274,7 +1274,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let autoplayTimer = null;
   let filterTimer = null;
   let resizeDebounceTimer = null;
-  const AUTOPLAY_DELAY = 4000;
+  const AUTOPLAY_DELAY = 5000;
 
   const getOffscreenLeftPosition = (targetImg) => {
     const imgWidth = getTargetImageWidth(targetImg);
