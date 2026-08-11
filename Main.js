@@ -1249,6 +1249,8 @@ window.addEventListener("load", () => {
   );
 });
 
+
+
 document.addEventListener("DOMContentLoaded", () => {
   const heroBtn = document.querySelector(".hero-btn");
   const modalSection = document.querySelector(".hero-model-section");
@@ -1260,27 +1262,46 @@ document.addEventListener("DOMContentLoaded", () => {
   const imgContentContainer = document.querySelector(".hero-img-content-2");
 
   const mainHeader = document.querySelector(
-    ".hero-model-title:not(.hero-process-title)",
+    ".hero-model-title:not(.hero-process-title)"
   );
   const titles = Array.from(document.querySelectorAll(".hero-process-title"));
   const descriptions = Array.from(
-    document.querySelectorAll(".hero-model-content-title"),
+    document.querySelectorAll(".hero-model-content-title")
   );
   const mainImgs = Array.from(document.querySelectorAll(".hero-model-img"));
 
   let currentIndex = 0;
   let autoplayTimer = null;
   let filterTimer = null;
-  const AUTOPLAY_DELAY = 3000;
+  let resizeDebounceTimer = null;
+  const AUTOPLAY_DELAY = 5000;
 
-  // Logs the original natural widths of all images
-  const logAllImageWidths = () => {
-    console.group("--- Image Original (Natural) Widths ---");
-    mainImgs.forEach((img, idx) => {
-      const width = img.naturalWidth || 0;
-      console.log(`Image [${idx}]: ${width}px (src: ${img.src})`);
-    });
-    console.groupEnd();
+  const getOffscreenLeftPosition = () => {
+    return "calc(100% + var(--processSliderImgWrapperWidth) + 34px + 100px)";
+  };
+
+  const getOriginalImageWidth = (img) => {
+    if (!img) return 0;
+    
+    if (img.naturalWidth && img.naturalWidth > 0) {
+      return img.naturalWidth;
+    }
+
+    const tempImg = new Image();
+    tempImg.src = img.src;
+    return tempImg.naturalWidth || 0;
+  };
+
+  const updateImgWidthVariable = (img) => {
+    if (!img) return 0;
+    const width = getOriginalImageWidth(img);
+    if (imgContentContainer && width > 0) {
+      imgContentContainer.style.setProperty(
+        "--processSliderImgWrapperWidth",
+        `${width}px`
+      );
+    }
+    return width;
   };
 
   const getCharts = () => {
@@ -1299,18 +1320,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
     return Array.from(
       document.querySelectorAll(
-        `${containerSelector} .hero-process-chart-items`,
-      ),
+        `${containerSelector} .hero-process-chart-items`
+      )
     );
   };
-
-  const charts = getCharts();
 
   const totalSlides = Math.min(
     titles.length,
     descriptions.length,
-    charts.length,
-    mainImgs.length,
+    mainImgs.length
   );
 
   const updateContentHeight = (index, duration = 0.5) => {
@@ -1324,12 +1342,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
-  // Helper to fetch intrinsic/original width of image
-  const getOriginalImageWidth = (img) => {
-    if (!img) return 0;
-    return img.naturalWidth || 0;
-  };
-
   const updateImageContainerWidth = (index, duration = 0.5) => {
     return new Promise((resolve) => {
       const currentImg = mainImgs[index];
@@ -1340,25 +1352,16 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       const applyWidth = () => {
-        logAllImageWidths(); // Output current widths of all images
+        const targetWidth = updateImgWidthVariable(currentImg);
 
-        const originalWidth = getOriginalImageWidth(currentImg);
-
-        if (originalWidth > 0) {
-          console.log(
-            `Setting .hero-img-content-2 width to Image [${index}] original width: ${originalWidth}px`
-          );
-
+        if (targetWidth > 0) {
           gsap.to(imgContentContainer, {
-            width: `${originalWidth}px`,
+            width: `${targetWidth}px`,
             duration: duration,
             ease: "power1.inOut",
             onComplete: resolve,
           });
         } else {
-          console.warn(
-            `Image [${index}] has a naturalWidth of 0px. Container width unchanged.`
-          );
           resolve();
         }
       };
@@ -1413,11 +1416,19 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     });
 
+    if (mainImgs[0]) {
+      updateImgWidthVariable(mainImgs[0]);
+    }
+
+    const offscreenPos = getOffscreenLeftPosition();
+
     mainImgs.forEach((img, idx) => {
+      gsap.set(img, { xPercent: 0, x: 0 });
+
       if (idx === 0) {
-        gsap.set(img, { opacity: 1, xPercent: 0, pointerEvents: "auto" });
+        gsap.set(img, { opacity: 1, left: "0px", pointerEvents: "auto" });
       } else {
-        gsap.set(img, { opacity: 0, xPercent: 100, pointerEvents: "none" });
+        gsap.set(img, { opacity: 0, left: offscreenPos, pointerEvents: "none" });
       }
     });
 
@@ -1459,7 +1470,7 @@ document.addEventListener("DOMContentLoaded", () => {
         ease: "power1.inOut",
         onStart: () => {
           incomingTextElements.forEach(
-            (el) => (el.style.pointerEvents = "auto"),
+            (el) => (el.style.pointerEvents = "auto")
           );
         },
       });
@@ -1504,9 +1515,11 @@ document.addEventListener("DOMContentLoaded", () => {
       },
     });
 
+    const offscreenPos = getOffscreenLeftPosition();
+
     if (outgoingImg) {
       gsap.to(outgoingImg, {
-        xPercent: 100,
+        left: offscreenPos,
         opacity: 0,
         duration: 0.4,
         ease: "power1.inOut",
@@ -1517,9 +1530,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (incomingImg) {
-      gsap.set(incomingImg, { xPercent: 100, opacity: 0 });
+      gsap.set(incomingImg, { left: offscreenPos, opacity: 0, xPercent: 0, x: 0 });
       gsap.to(incomingImg, {
-        xPercent: 0,
+        left: "0px",
         opacity: 1,
         duration: 0.9,
         ease: "power1.inOut",
@@ -1612,23 +1625,27 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   window.addEventListener("resize", () => {
-    const currentCharts = getCharts();
-    const activeIdx = currentIndex >= 0 ? currentIndex : 0;
+    clearTimeout(resizeDebounceTimer);
+    resizeDebounceTimer = setTimeout(() => {
+      const currentCharts = getCharts();
+      const activeIdx = currentIndex >= 0 ? currentIndex : 0;
 
-    currentCharts.forEach((chart, idx) => {
-      if (idx === activeIdx) {
-        gsap.set(chart, { opacity: 1, pointerEvents: "auto" });
-      } else {
-        gsap.set(chart, { opacity: 0, pointerEvents: "none" });
-      }
-    });
+      currentCharts.forEach((chart, idx) => {
+        if (idx === activeIdx) {
+          gsap.set(chart, { opacity: 1, pointerEvents: "auto" });
+        } else {
+          gsap.set(chart, { opacity: 0, pointerEvents: "none" });
+        }
+      });
 
-    updateContentHeight(activeIdx, 0.2);
-    updateImageContainerWidth(activeIdx, 0.2);
+      updateContentHeight(activeIdx, 0.2);
+      updateImageContainerWidth(activeIdx, 0.2);
+    }, 100);
   });
 
   window.addEventListener("load", () => {
-    updateImageContainerWidth(0, 0);
+    const activeIdx = currentIndex >= 0 ? currentIndex : 0;
+    updateImageContainerWidth(activeIdx, 0);
   });
 
   resetSlideshow();

@@ -87,7 +87,7 @@
   }
 
   .hero-img-content-2 {
-    height: 310px;
+    height: 390px;
   }
 
   .md-none {
@@ -106,6 +106,10 @@
 
   .hero-process-chart-item:last-child {
     grid-column: span 2;
+  }
+
+  .hero-model-section{
+    padding-block: 40px;
   }
 
   .hero-model-title-wrapper {
