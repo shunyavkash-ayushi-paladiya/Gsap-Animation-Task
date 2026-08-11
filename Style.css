@@ -39,6 +39,8 @@ img {
 
 .relative {
   position: relative;
+  display: flex;
+  align-items: center;
 }
 
 .section-heading {
@@ -426,6 +428,7 @@ img {
 .hero-model-content {
   position: relative;
   margin-top: 24px;
+  z-index: 1;
 }
 
 .hero-model-content-title-2 {
@@ -437,11 +440,11 @@ img {
 
 .hero-img-content-2 {
   pointer-events: none;
-    width: 398px;
-    height: 754px;
-    margin-top: 65px;
-    transition: width .5s ease-in-out;
-    position: relative;
+  width: 398px;
+  height: 754px;
+  margin-top: 65px;
+  transition: width 0.5s ease-in-out;
+  position: relative;
 }
 
 .hero-model-img {

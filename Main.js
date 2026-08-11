@@ -1274,27 +1274,33 @@ document.addEventListener("DOMContentLoaded", () => {
   let autoplayTimer = null;
   let filterTimer = null;
   let resizeDebounceTimer = null;
-  const AUTOPLAY_DELAY = 5000;
+  const AUTOPLAY_DELAY = 4000;
 
-  const getOffscreenLeftPosition = () => {
-    return "calc(100% + var(--processSliderImgWrapperWidth) + 34px + 100px)";
+  const getOffscreenLeftPosition = (targetImg) => {
+    const imgWidth = getTargetImageWidth(targetImg);
+    const containerWidth = imgContentContainer
+      ? imgContentContainer.parentElement?.getBoundingClientRect().width || window.innerWidth
+      : window.innerWidth;
+    
+    return `${containerWidth + imgWidth + 100}px`;
   };
 
-  const getOriginalImageWidth = (img) => {
+  const getTargetImageWidth = (img) => {
     if (!img) return 0;
-    
-    if (img.naturalWidth && img.naturalWidth > 0) {
-      return img.naturalWidth;
+
+    const rectWidth = img.getBoundingClientRect().width;
+    if (rectWidth > 0) return rectWidth;
+    if (img.naturalWidth && img.naturalHeight && imgContentContainer) {
+      const containerHeight = imgContentContainer.offsetHeight || 300;
+      return (img.naturalWidth / img.naturalHeight) * containerHeight;
     }
 
-    const tempImg = new Image();
-    tempImg.src = img.src;
-    return tempImg.naturalWidth || 0;
+    return img.naturalWidth || img.offsetWidth || 300;
   };
 
   const updateImgWidthVariable = (img) => {
     if (!img) return 0;
-    const width = getOriginalImageWidth(img);
+    const width = getTargetImageWidth(img);
     if (imgContentContainer && width > 0) {
       imgContentContainer.style.setProperty(
         "--processSliderImgWrapperWidth",
@@ -1420,9 +1426,8 @@ document.addEventListener("DOMContentLoaded", () => {
       updateImgWidthVariable(mainImgs[0]);
     }
 
-    const offscreenPos = getOffscreenLeftPosition();
-
     mainImgs.forEach((img, idx) => {
+      const offscreenPos = getOffscreenLeftPosition(img);
       gsap.set(img, { xPercent: 0, x: 0 });
 
       if (idx === 0) {
@@ -1515,11 +1520,10 @@ document.addEventListener("DOMContentLoaded", () => {
       },
     });
 
-    const offscreenPos = getOffscreenLeftPosition();
-
     if (outgoingImg) {
+      const offscreenPosOut = getOffscreenLeftPosition(outgoingImg);
       gsap.to(outgoingImg, {
-        left: offscreenPos,
+        left: offscreenPosOut,
         opacity: 0,
         duration: 0.4,
         ease: "power1.inOut",
@@ -1530,7 +1534,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (incomingImg) {
-      gsap.set(incomingImg, { left: offscreenPos, opacity: 0, xPercent: 0, x: 0 });
+      const offscreenPosIn = getOffscreenLeftPosition(incomingImg);
+      gsap.set(incomingImg, { left: offscreenPosIn, opacity: 0, xPercent: 0, x: 0 });
       gsap.to(incomingImg, {
         left: "0px",
         opacity: 1,
