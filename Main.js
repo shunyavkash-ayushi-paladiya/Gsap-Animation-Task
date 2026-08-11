@@ -138,7 +138,7 @@ window.addEventListener("load", () => {
     });
 
     let accumX = 0;
-    const gap = 25;
+    const gap = 30;
     contentItems.forEach((item) => {
       itemOffsets.push(-accumX);
       const itemWidth = item.getBoundingClientRect().width;

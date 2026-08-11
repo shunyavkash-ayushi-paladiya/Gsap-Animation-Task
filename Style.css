@@ -144,22 +144,6 @@ img {
   mask-image: linear-gradient(90deg, black var(--position), transparent 0%);
 }
 
-.mera-clone-wrap {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 5;
-}
-
-.mera-clone {
-  position: absolute;
-  display: inline-block;
-  font: inherit;
-  line-height: inherit;
-  opacity: 0;
-  will-change: left, top, opacity, transform;
-}
-
 .hero-btn {
   display: flex;
   border-bottom: 1px solid white;
