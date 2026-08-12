@@ -21,6 +21,7 @@ window.addEventListener("load", () => {
   const title2 = document.querySelector(".hero-title-2");
   const description1 = document.querySelector(".hero-description:not(.hero-description-2)");
   const description2 = document.querySelector(".hero-description-2");
+  const heroDescriptionContent = document.querySelector(".hero-description-content");
   const heroImgContent = document.querySelector(".hero-img-content");
   const heroContentItems = document.querySelector(".hero-content-items");
   const heroOverlays = document.querySelector(".hero-overlays");
@@ -414,6 +415,7 @@ window.addEventListener("load", () => {
       isTabletMobile: "(max-width: 991px) and (min-width: 768px)",
       isMediumMobile: "(max-width: 767px) and (min-width: 480px)",
       isSmallMobile: "(max-width: 479px)",
+      isShortScreen: "(max-height: 700px)",
     },
     (context) => {
       isMobileLayout = context.conditions.isMobile;
@@ -422,6 +424,122 @@ window.addEventListener("load", () => {
       isSmallMobileLayout = context.conditions.isSmallMobile;
       isShortDesktopLayout = context.conditions.isShortDesktop;
 
+      // REMOVE height, maxHeight, minHeight FOR 991px OR LESS AND HEIGHT 700px OR LESS
+      if (context.conditions.isMobile || context.conditions.isShortScreen) {
+        gsap.set(section, { clearProps: "height,maxHeight,minHeight" });
+      }
+
+      if (isShortDesktopLayout) {
+        // --- 992px+ AND height <= 700px SPECIFIC OVERRIDES --- //
+
+        // Reset section height explicitly
+        gsap.set(section, { clearProps: "height,maxHeight,minHeight" });
+        section.style.minHeight = "auto";
+
+        // Clear transforms/positions and apply relative styling
+        gsap.set([wrap, title1, description1], { clearProps: "all" });
+        wrap.classList.remove("active");
+
+        gsap.set(title1, { display: "none" });
+        gsap.set(description1, { display: "none" });
+
+        gsap.set(title2, {
+          display: "block",
+          opacity: 1,
+          position: "relative",
+          left: 0,
+          x: 0,
+          y: 0,
+          transform: "none",
+        });
+
+        if (description2) {
+          gsap.set(description2, {
+            display: "block",
+            opacity: 1,
+            position: "relative",
+            left: 0,
+            x: 0,
+            y: 0,
+            transform: "none",
+          });
+        }
+
+        if (heroDescriptionContent) {
+          gsap.set(heroDescriptionContent, { overflow: "visible" });
+        }
+
+        gsap.set(heroImgContent, {
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          x: 0,
+          width: "auto",
+          clearProps: "transform",
+        });
+
+        if (heroContentItems) {
+          gsap.set(heroContentItems, { opacity: 1, x: 0 });
+        }
+
+        if (heroOverlays) {
+          gsap.set(heroOverlays, { opacity: 1, y: 0 });
+        }
+
+        // Calculate layout positions
+        calculateImagePositions();
+
+        // Directly show first active step (Index 0) without waiting for scroll
+        animateToStepIndex(0, 0.4);
+
+        // Click handlers for step switching (No ScrollTrigger pin/scrub)
+        const clickHandlers = [];
+
+        const handleItemClick = (index) => {
+          calculateImagePositions();
+          animateToStepIndex(index, 0.8);
+        };
+
+        imgWrappers.forEach((wrapper, index) => {
+          const clickHandler = () => handleItemClick(index);
+          wrapper.addEventListener("click", clickHandler);
+          clickHandlers.push({ element: wrapper, clickHandler });
+        });
+
+        contentItems.forEach((item, index) => {
+          const clickHandler = () => handleItemClick(index);
+          item.addEventListener("click", clickHandler);
+          clickHandlers.push({ element: item, clickHandler });
+        });
+
+        heroBtns.forEach((btn) => {
+          const btnHandler = (e) => {
+            e.stopPropagation();
+            const lastIndex = heroImages.length - 1;
+            const lastImg = heroImages[lastIndex];
+            if (lastImg) {
+              gsap.killTweensOf(lastImg);
+              lastImg.classList.remove("hero-img-2");
+            }
+            if (imgWrappers[lastIndex]) imgWrappers[lastIndex].classList.remove("active");
+            if (contentItems[lastIndex]) contentItems[lastIndex].classList.remove("active");
+            if (activeIndex === lastIndex) {
+              const fallbackIndex = Math.max(0, lastIndex - 1);
+              animateToStepIndex(fallbackIndex);
+            }
+          };
+          btn.addEventListener("click", btnHandler);
+          clickHandlers.push({ element: btn, clickHandler: btnHandler });
+        });
+
+        return () => {
+          clickHandlers.forEach(({ element, clickHandler }) => {
+            if (element) element.removeEventListener("click", clickHandler);
+          });
+        };
+      }
+
+      // --- STANDARD SCREEN SIZES & `<= 991px` MOBILE/TABLET (SCROLL + CLICK ANIMATIONS) --- //
       calculateImagePositions();
       setInteractiveState(false);
 
@@ -523,8 +641,8 @@ window.addEventListener("load", () => {
       });
 
       const totalSteps = heroImages.length;
-      const scrollDistancePerStep = isShortDesktopLayout ? 300 : 700;
-      const baseIntroDistance = isShortDesktopLayout ? 800 : 1200;
+      const scrollDistancePerStep = 700;
+      const baseIntroDistance = 1200;
       const dynamicEndScroll = baseIntroDistance + totalSteps * scrollDistancePerStep;
       const stepLabels = Array.from({ length: totalSteps }, (_, i) => `step_${i}`);
 
@@ -538,7 +656,7 @@ window.addEventListener("load", () => {
           invalidateOnRefresh: true,
           snap: {
             snapTo: (progress) => {
-              if (isClickScrolling || isShortDesktopLayout) return progress;
+              if (isClickScrolling) return progress;
               if (!tl || !tl.duration()) return progress;
 
               const activeStartProgress = tl.labels.overlaysActiveStart / tl.duration();
@@ -566,7 +684,6 @@ window.addEventListener("load", () => {
       tl.to(".char-rest", { "--position": "0%", duration: 0.5, ease: "power1.inOut" }, titleFadeDuration + 0.1);
       tl.to(firstLetters, { color: "#00dafd", duration: 0.2, ease: "none" }, ">");
 
-      // Seamless cross-fade transition without layout pop
       tl.add(() => syncMeraClonesPosition(), ">");
       tl.to(meraClones, { opacity: 1, duration: 0.15, ease: "linear" }, ">");
       tl.to(firstLetters, { opacity: 0, duration: 0.15, ease: "linear" }, "<");
@@ -731,36 +848,32 @@ window.addEventListener("load", () => {
         if (!tl || index === activeIndex) return;
         calculateImagePositions();
 
-        if (isShortDesktopLayout) {
-          animateToStepIndex(index);
-        } else {
-          const labelTime = tl.labels[`step_${index}`];
-          if (labelTime !== undefined) {
-            isClickScrolling = true;
-            animateToStepIndex(index, 0.8);
+        const labelTime = tl.labels[`step_${index}`];
+        if (labelTime !== undefined) {
+          isClickScrolling = true;
+          animateToStepIndex(index, 0.8);
 
-            const scrollST = tl.scrollTrigger;
-            const stepOffset = index === 0 ? 0.5 : 0.8;
-            const finalTweenTime = labelTime + stepOffset;
-            const safeTime = Math.min(finalTweenTime, tl.duration());
-            const progress = safeTime / tl.duration();
-            const targetScroll = scrollST.start + progress * (scrollST.end - scrollST.start);
+          const scrollST = tl.scrollTrigger;
+          const stepOffset = index === 0 ? 0.5 : 0.8;
+          const finalTweenTime = labelTime + stepOffset;
+          const safeTime = Math.min(finalTweenTime, tl.duration());
+          const progress = safeTime / tl.duration();
+          const targetScroll = scrollST.start + progress * (scrollST.end - scrollST.start);
 
-            gsap.to(window, {
-              scrollTo: { y: targetScroll, autoKill: true },
-              duration: 1.0,
-              ease: "power2.inOut",
-              onStart: () => {
-                isClickScrolling = true;
-              },
-              onComplete: () => {
-                isClickScrolling = false;
-              },
-              onInterrupt: () => {
-                isClickScrolling = false;
-              },
-            });
-          }
+          gsap.to(window, {
+            scrollTo: { y: targetScroll, autoKill: true },
+            duration: 1.0,
+            ease: "power2.inOut",
+            onStart: () => {
+              isClickScrolling = true;
+            },
+            onComplete: () => {
+              isClickScrolling = false;
+            },
+            onInterrupt: () => {
+              isClickScrolling = false;
+            },
+          });
         }
       };
 
