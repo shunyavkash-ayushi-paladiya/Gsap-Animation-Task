@@ -244,7 +244,6 @@ window.addEventListener("load", () => {
     activeIndex = index;
     setInteractiveState(true, index);
 
-    // Active state toggles for image wrappers
     imgWrappers.forEach((wrapper, idx) => {
       if (wrapper) wrapper.classList.toggle("active", idx === index);
     });
@@ -263,7 +262,6 @@ window.addEventListener("load", () => {
       }
     }
 
-    // Active state & text colors for card items
     contentItems.forEach((item, idx) => {
       const isCurrent = idx === index;
       const titleText = item.querySelector(".hero-content-title");
@@ -288,7 +286,6 @@ window.addEventListener("load", () => {
       }
     });
 
-    // Mobile layout horizontal translates
     if (isMobileLayout) {
       const imgTargetX = imgOffsetsMobile[index] || 0;
       const contentTargetX = itemOffsets[index] || 0;
@@ -308,7 +305,6 @@ window.addEventListener("load", () => {
       }
     }
 
-    // Image mask window step update
     if (heroImgOverlay) {
       const pos = imagePositions[index];
       gsap.to(heroImgOverlay, {
@@ -323,7 +319,6 @@ window.addEventListener("load", () => {
       });
     }
 
-    // Border overlay step update
     if (heroBorderOverlay && heroBorderOverlay2) {
       if (isMobileLayout) {
         const targetWidth = itemCumulativeWidths[index] || 0;
@@ -379,7 +374,6 @@ window.addEventListener("load", () => {
       }
     }
 
-    // Section sub-description text colors
     if (itemDesc1) {
       gsap.to(itemDesc1, {
         color: index < 4 ? "#ffffff" : "#66666682",
@@ -499,7 +493,6 @@ window.addEventListener("load", () => {
         }
       }
 
-      // Initial border overlay set to card 1 width (NO growth animation)
       if (heroBorderOverlay) {
         const firstCardWidth = () => {
           if (isMobileLayout) return itemCumulativeWidths[0] || 0;
@@ -650,7 +643,6 @@ window.addEventListener("load", () => {
       tl.to([title1, cloneWrap], { y: -70, duration: finalMoveDuration, ease: "power2.inOut" }, "<");
       tl.to(title2, { opacity: 1, y: 0, duration: finalMoveDuration, ease: "power2.inOut" }, "<");
 
-      // 1. Show hero-content-items (0 to 1 opacity) while title & description translate
       if (heroContentItems) {
         tl.to(heroContentItems, { opacity: 1, x: 0, duration: finalMoveDuration, ease: "power2.inOut" }, "<");
       }
@@ -668,7 +660,6 @@ window.addEventListener("load", () => {
         );
       }
 
-      // 2. Initial Overlay Fade (0% -> 50%)
       tl.add("overlaysEntry", ">");
       tl.call(() => calculateImagePositions(), null, "overlaysEntry-=0.05");
 
@@ -680,7 +671,6 @@ window.addEventListener("load", () => {
         tl.to(heroImgOverlay, { opacity: 0.5, duration: 0.4, ease: "power2.out" }, "overlaysEntry");
       }
 
-      // 3. Simultaneously change Card 1 colors & fade in .hero-border-overlay
       const firstItem = contentItems[0];
       if (firstItem) {
         const firstTitle = firstItem.querySelector(".hero-content-title");
@@ -701,7 +691,6 @@ window.addEventListener("load", () => {
         tl.to(itemDesc1, { color: "#ffffff", duration: 0.4, ease: "power2.out" }, "overlaysEntry");
       }
 
-      // 4. Increase Overlays opacity (50% -> 100%)
       if (heroOverlays) {
         tl.to(heroOverlays, { opacity: 1, duration: 0.4, ease: "power2.out" }, ">");
       }
@@ -709,7 +698,6 @@ window.addEventListener("load", () => {
         tl.to(heroImgOverlay, { opacity: 1, duration: 0.4, ease: "power2.out" }, "<");
       }
 
-      // 5. Scroll Step Sequence Start
       tl.add("overlaysActiveStart", ">");
 
       tl.call(() => {
