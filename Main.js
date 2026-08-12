@@ -120,24 +120,14 @@ window.addEventListener("load", () => {
   function setInteractiveState(enabled, targetIndex = activeIndex) {
     imgWrappers.forEach((wrapper, idx) => {
       if (wrapper) {
-        if (!enabled || idx === targetIndex) {
-          wrapper.style.pointerEvents = "none";
-          wrapper.style.cursor = "default";
-        } else {
-          wrapper.style.pointerEvents = "auto";
-          wrapper.style.cursor = "pointer";
-        }
+        wrapper.style.pointerEvents = !enabled || idx === targetIndex ? "none" : "auto";
+        wrapper.style.cursor = !enabled || idx === targetIndex ? "default" : "pointer";
       }
     });
     contentItems.forEach((item, idx) => {
       if (item) {
-        if (!enabled || idx === targetIndex) {
-          item.style.pointerEvents = "none";
-          item.style.cursor = "default";
-        } else {
-          item.style.pointerEvents = "auto";
-          item.style.cursor = "pointer";
-        }
+        item.style.pointerEvents = !enabled || idx === targetIndex ? "none" : "auto";
+        item.style.cursor = !enabled || idx === targetIndex ? "default" : "pointer";
       }
     });
   }
@@ -149,6 +139,7 @@ window.addEventListener("load", () => {
     let firstLetterIndex = 0;
     const meraLetters = ["M", "e", "R", "A"];
     el.innerHTML = "";
+
     parts.forEach((part) => {
       if (/^\s+$/.test(part)) {
         const space = document.createElement("span");
@@ -190,6 +181,33 @@ window.addEventListener("load", () => {
 
   splitTitle(title1);
 
+  function syncMeraClonesPosition() {
+    const wrapRect = wrap.getBoundingClientRect();
+    const titleStyle = window.getComputedStyle(title1);
+    const firstLetters = gsap.utils.toArray(".first-letter", title1);
+    const clones = gsap.utils.toArray(".mera-clone");
+
+    firstLetters.forEach((letter, idx) => {
+      const clone = clones[idx];
+      if (clone && letter) {
+        const rect = letter.getBoundingClientRect();
+        gsap.set(clone, {
+          left: rect.left - wrapRect.left,
+          top: rect.top - wrapRect.top,
+          fontSize: titleStyle.fontSize,
+          fontFamily: titleStyle.fontFamily,
+          fontWeight: titleStyle.fontWeight,
+          lineHeight: titleStyle.lineHeight,
+          letterSpacing: titleStyle.letterSpacing,
+        });
+      }
+    });
+
+    if (clones.length) {
+      updateMeraCloneTargets(clones, wrapRect, 4);
+    }
+  }
+
   function buildMeraClones(firstLetters) {
     cloneWrap.innerHTML = "";
     const wrapRect = wrap.getBoundingClientRect();
@@ -201,39 +219,37 @@ window.addEventListener("load", () => {
       clone.className = "mera-clone";
       clone.textContent = letter.dataset.acronym;
       cloneWrap.appendChild(clone);
+
       gsap.set(clone, {
         position: "absolute",
         display: "inline-block",
         opacity: 0,
         whiteSpace: "nowrap",
         left: rect.left - wrapRect.left,
-        top: "50%",
-        yPercent: -50,
+        top: rect.top - wrapRect.top,
         color: "#00dafd",
         fontSize: titleStyle.fontSize,
         fontFamily: titleStyle.fontFamily,
         fontWeight: titleStyle.fontWeight,
         lineHeight: titleStyle.lineHeight,
         letterSpacing: titleStyle.letterSpacing,
-        willChange: "transform, opacity",
+        willChange: "transform, opacity, left, top",
       });
     });
 
     const clones = gsap.utils.toArray(".mera-clone");
-    const gap = 4;
     if (!clones.length) return clones;
-    updateMeraCloneTargets(clones, wrapRect, gap);
+    updateMeraCloneTargets(clones, wrapRect, 4);
     return clones;
   }
 
-  function updateMeraCloneTargets(clones, wrapRect, gap) {
+  function updateMeraCloneTargets(clones, wrapRect, gap = 4) {
     const currentWrapRect = wrapRect || wrap.getBoundingClientRect();
-    const calculatedGap = gap !== undefined ? gap : 4;
-    const totalWidth = clones.reduce((sum, clone) => sum + clone.offsetWidth, 0) + calculatedGap * (clones.length - 1);
+    const totalWidth = clones.reduce((sum, clone) => sum + clone.offsetWidth, 0) + gap * (clones.length - 1);
     let x = currentWrapRect.width / 2 - totalWidth / 2;
     clones.forEach((clone) => {
       clone.dataset.targetLeft = x;
-      x += clone.offsetWidth + calculatedGap;
+      x += clone.offsetWidth + gap;
     });
   }
 
@@ -427,26 +443,7 @@ window.addEventListener("load", () => {
         const heights = recalculateHeights();
         naturalWrapHeight = heights.naturalWrapHeight;
         targetWrapHeight = heights.targetWrapHeight;
-        const wrapRect = wrap.getBoundingClientRect();
-        const titleStyle = window.getComputedStyle(title1);
-        const clones = gsap.utils.toArray(".mera-clone");
-        if (clones.length) {
-          clones.forEach((clone, idx) => {
-            const letter = firstLetters[idx];
-            if (letter) {
-              const rect = letter.getBoundingClientRect();
-              gsap.set(clone, {
-                left: rect.left - wrapRect.left,
-                fontSize: titleStyle.fontSize,
-                fontFamily: titleStyle.fontFamily,
-                fontWeight: titleStyle.fontWeight,
-                lineHeight: titleStyle.lineHeight,
-                letterSpacing: titleStyle.letterSpacing,
-              });
-            }
-          });
-          updateMeraCloneTargets(clones, wrapRect, 4);
-        }
+        syncMeraClonesPosition();
         if (tl) tl.invalidate();
         ScrollTrigger.refresh();
       };
@@ -568,8 +565,12 @@ window.addEventListener("load", () => {
       tl.to(title1, { opacity: 1, duration: titleFadeDuration, ease: "power1.out" }, 0);
       tl.to(".char-rest", { "--position": "0%", duration: 0.5, ease: "power1.inOut" }, titleFadeDuration + 0.1);
       tl.to(firstLetters, { color: "#00dafd", duration: 0.2, ease: "none" }, ">");
-      tl.set(meraClones, { opacity: 1 });
-      tl.set(firstLetters, { opacity: 0 });
+
+      // Seamless cross-fade transition without layout pop
+      tl.add(() => syncMeraClonesPosition(), ">");
+      tl.to(meraClones, { opacity: 1, duration: 0.15, ease: "linear" }, ">");
+      tl.to(firstLetters, { opacity: 0, duration: 0.15, ease: "linear" }, "<");
+
       tl.to(
         meraClones,
         {
@@ -579,6 +580,8 @@ window.addEventListener("load", () => {
             if (clones.length) updateMeraCloneTargets(clones, wrapRect, 4);
             return Number(el.dataset.targetLeft);
           },
+          top: "50%",
+          yPercent: -50,
           duration: 0.5,
           ease: "power2.inOut",
           onComplete: () => wrap.classList.remove("active"),
@@ -586,6 +589,7 @@ window.addEventListener("load", () => {
         },
         ">"
       );
+
       tl.to(
         wrap,
         {
@@ -806,7 +810,6 @@ window.addEventListener("load", () => {
     }
   );
 });
-
 
 
 document.addEventListener("DOMContentLoaded", () => {
