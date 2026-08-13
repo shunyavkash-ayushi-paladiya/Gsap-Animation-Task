@@ -1,6 +1,5 @@
 gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
 
-// Enable GSAP ScrollTrigger normalization for mobile devices to prevent URL bar jumping
 ScrollTrigger.config({ ignoreMobileResize: true });
 
 const lenis = new Lenis({
@@ -11,7 +10,6 @@ const lenis = new Lenis({
   touchMultiplier: 2.0,
 });
 
-// Keep Lenis and GSAP ScrollTrigger synchronized
 lenis.on("scroll", () => {
   ScrollTrigger.update();
 });
@@ -22,9 +20,7 @@ gsap.ticker.add((time) => {
 
 gsap.ticker.lagSmoothing(0);
 
-// Ensure full initialization after document & fonts load completely
 window.addEventListener("load", () => {
-  // Use document.fonts.ready if available to avoid layout shifts on mobile device font loads
   if (document.fonts && document.fonts.ready) {
     document.fonts.ready.then(initHeroAnimation);
   } else {
@@ -107,7 +103,6 @@ function initHeroAnimation() {
       gsap.set(heroImgContent, { width: getResponsiveTargetWidth() });
     }
 
-    // Force layout recalculation for accuracy on real device viewports
     void borderWrapper.offsetWidth;
 
     const wrapperRect = borderWrapper.getBoundingClientRect();
@@ -955,7 +950,6 @@ function initHeroAnimation() {
         clickHandlers.push({ element: btn, clickHandler: btnHandler });
       });
 
-      // Refresh ScrollTrigger recalculations after all device renders finish
       setTimeout(() => {
         ScrollTrigger.refresh();
       }, 300);
