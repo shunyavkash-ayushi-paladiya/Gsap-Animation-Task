@@ -571,7 +571,7 @@ window.addEventListener("load", () => {
       gsap.set(title1, { opacity: 0, y: 0 });
       gsap.set(title2, { opacity: 0, y: 60 });
       gsap.set(description1, { opacity: 0, y: 0 });
-      if (description2) gsap.set(description2, { opacity: 0, y: 50 });
+      if (description2) gsap.set(description2, { opacity: 0, y: 40 });
 
       const startImgXMobile = isMobileLayout && imgOffsetsMobile[0] !== undefined ? imgOffsetsMobile[0] : 0;
 
