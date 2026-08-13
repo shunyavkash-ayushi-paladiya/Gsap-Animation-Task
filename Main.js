@@ -59,6 +59,10 @@ window.addEventListener("load", () => {
   let activeIndex = 0;
   let isClickScrolling = false;
 
+  // Track window dimensions to avoid mobile address-bar resize resets
+  let lastWindowWidth = window.innerWidth;
+  let lastWindowHeight = window.innerHeight;
+
   function getResponsiveTargetWidth() {
     if (isSmallMobileLayout) return "265%";
     if (isMediumMobileLayout) return "150%";
@@ -262,7 +266,7 @@ window.addEventListener("load", () => {
     setInteractiveState(false);
     contentItems.forEach((item) => item.classList.remove("active"));
     imgWrappers.forEach((wrapper) => wrapper.classList.remove("active"));
-    
+
     if (heroImages.length > 0) {
       const lastImg = heroImages[heroImages.length - 1];
       if (lastImg) lastImg.classList.remove("hero-img-2");
@@ -579,7 +583,18 @@ window.addEventListener("load", () => {
 
       let { naturalWrapHeight, targetWrapHeight } = recalculateHeights();
 
+      // FIXED: Ignore mobile height-only resizes caused by address-bar collapsing/expanding
       const handleResize = () => {
+        const newWidth = window.innerWidth;
+        const newHeight = window.innerHeight;
+
+        if (isMobileLayout && newWidth === lastWindowWidth && Math.abs(newHeight - lastWindowHeight) < 120) {
+          return;
+        }
+
+        lastWindowWidth = newWidth;
+        lastWindowHeight = newHeight;
+
         calculateImagePositions();
         const heights = recalculateHeights();
         naturalWrapHeight = heights.naturalWrapHeight;
@@ -592,7 +607,7 @@ window.addEventListener("load", () => {
       window.addEventListener("resize", handleResize);
 
       gsap.set(title1, { opacity: 0, y: 0 });
-      
+
       const title2InitialY = isLargeDesktopLayout ? 70 : isMobileXSLayout ? 35 : isMobileLayout ? 46 : 60;
       gsap.set(title2, { opacity: 0, y: title2InitialY });
 
@@ -669,7 +684,7 @@ window.addEventListener("load", () => {
           end: `+=${dynamicEndScroll}`,
           pin: true,
           scrub: 0.5,
-          invalidateOnRefresh: true,
+          invalidateOnRefresh: false, // FIXED: Prevents breaking timeline during mobile scroll
           snap: {
             snapTo: (progress) => {
               if (isClickScrolling) return progress;
@@ -704,15 +719,14 @@ window.addEventListener("load", () => {
       tl.to(meraClones, { opacity: 1, duration: 0.15, ease: "linear" }, ">");
       tl.to(firstLetters, { opacity: 0, duration: 0.15, ease: "linear" }, "<");
 
+      // FIXED: Pre-calculate Clone target values so reverse animation stays exact
+      const initialWrapRect = wrap.getBoundingClientRect();
+      updateMeraCloneTargets(meraClones, initialWrapRect, 4);
+
       tl.to(
         meraClones,
         {
-          left: (i, el) => {
-            const wrapRect = wrap.getBoundingClientRect();
-            const clones = gsap.utils.toArray(".mera-clone");
-            if (clones.length) updateMeraCloneTargets(clones, wrapRect, 4);
-            return Number(el.dataset.targetLeft);
-          },
+          left: (i, el) => Number(el.dataset.targetLeft),
           top: "50%",
           yPercent: -50,
           duration: 0.5,
@@ -723,10 +737,11 @@ window.addEventListener("load", () => {
         ">"
       );
 
+      // FIXED: Directly static target height to prevent recalculation glitches on reverse
       tl.to(
         wrap,
         {
-          height: () => targetWrapHeight,
+          height: targetWrapHeight,
           duration: 1.15,
           ease: "power2.inOut",
         },
@@ -738,7 +753,7 @@ window.addEventListener("load", () => {
           heroImgContent,
           {
             opacity: 1,
-            x: () => startImgXMobile,
+            x: startImgXMobile,
             duration: 0.8,
             ease: "power2.inOut",
           },
@@ -785,11 +800,12 @@ window.addEventListener("load", () => {
       }
 
       if (isMobileLayout) {
+        const responsiveTargetWidth = getResponsiveTargetWidth();
         tl.to(
           heroImgContent,
           {
-            width: () => getResponsiveTargetWidth(),
-            x: () => startImgXMobile,
+            width: responsiveTargetWidth,
+            x: startImgXMobile,
             duration: 0.8,
             ease: "power2.inOut",
           },
@@ -837,14 +853,18 @@ window.addEventListener("load", () => {
 
       tl.add("overlaysActiveStart", ">");
 
-      // Reset states when scrubbing back past the step animations start point
-      tl.call((direction) => {
-        if (direction < 0) {
-          resetOverlayAndStepStates();
-        } else if (!isClickScrolling) {
-          animateToStepIndex(0, 0.4);
-        }
-      }, ["direction"], "overlaysActiveStart");
+      // FIXED: Ensure backward scrubbing triggers reset properly
+      tl.call(
+        (direction) => {
+          if (direction < 0) {
+            resetOverlayAndStepStates();
+          } else if (!isClickScrolling) {
+            animateToStepIndex(0, 0.4);
+          }
+        },
+        ["direction"],
+        "overlaysActiveStart"
+      );
 
       if (heroImages.length > 0) {
         heroImages.forEach((_, index) => {
@@ -853,10 +873,14 @@ window.addEventListener("load", () => {
 
           tl.add(stepLabel, isFirst ? "overlaysActiveStart" : "+=0.6");
 
-          tl.call(() => {
-            if (isClickScrolling) return;
-            animateToStepIndex(index, 0.6);
-          }, null, stepLabel);
+          tl.call(
+            () => {
+              if (isClickScrolling) return;
+              animateToStepIndex(index, 0.6);
+            },
+            null,
+            stepLabel
+          );
         });
       }
 
