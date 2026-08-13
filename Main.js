@@ -52,6 +52,8 @@ window.addEventListener("load", () => {
   let isTabletMobileLayout = false;
   let isMediumMobileLayout = false;
   let isSmallMobileLayout = false;
+  let isMobileXSLayout = false;
+  let isMobileXXSLayout = false;
   let isShortDesktopLayout = false;
   let activeIndex = 0;
   let isClickScrolling = false;
@@ -415,6 +417,8 @@ window.addEventListener("load", () => {
       isTabletMobile: "(max-width: 991px) and (min-width: 768px)",
       isMediumMobile: "(max-width: 767px) and (min-width: 480px)",
       isSmallMobile: "(max-width: 479px)",
+      isMobileXS: "(max-width: 575px)",
+      isMobileXXS: "(max-width: 335px)",
       isShortScreen: "(max-height: 700px)",
     },
     (context) => {
@@ -422,21 +426,19 @@ window.addEventListener("load", () => {
       isTabletMobileLayout = context.conditions.isTabletMobile;
       isMediumMobileLayout = context.conditions.isMediumMobile;
       isSmallMobileLayout = context.conditions.isSmallMobile;
+      isMobileXSLayout = context.conditions.isMobileXS;
+      isMobileXXSLayout = context.conditions.isMobileXXS;
       isShortDesktopLayout = context.conditions.isShortDesktop;
 
-      // REMOVE height, maxHeight, minHeight FOR 991px OR LESS AND HEIGHT 700px OR LESS
       if (context.conditions.isMobile || context.conditions.isShortScreen) {
         gsap.set(section, { clearProps: "height,maxHeight,minHeight" });
       }
 
       if (isShortDesktopLayout) {
-        // --- 992px+ AND height <= 700px SPECIFIC OVERRIDES --- //
 
-        // Reset section height explicitly
         gsap.set(section, { clearProps: "height,maxHeight,minHeight" });
         section.style.minHeight = "auto";
 
-        // Clear transforms/positions and apply relative styling
         gsap.set([wrap, title1, description1], { clearProps: "all" });
         wrap.classList.remove("active");
 
@@ -486,13 +488,10 @@ window.addEventListener("load", () => {
           gsap.set(heroOverlays, { opacity: 1, y: 0 });
         }
 
-        // Calculate layout positions
         calculateImagePositions();
 
-        // Directly show first active step (Index 0) without waiting for scroll
         animateToStepIndex(0, 0.4);
 
-        // Click handlers for step switching (No ScrollTrigger pin/scrub)
         const clickHandlers = [];
 
         const handleItemClick = (index) => {
@@ -539,7 +538,6 @@ window.addEventListener("load", () => {
         };
       }
 
-      // --- STANDARD SCREEN SIZES & `<= 991px` MOBILE/TABLET (SCROLL + CLICK ANIMATIONS) --- //
       calculateImagePositions();
       setInteractiveState(false);
 
@@ -569,9 +567,16 @@ window.addEventListener("load", () => {
       window.addEventListener("resize", handleResize);
 
       gsap.set(title1, { opacity: 0, y: 0 });
-      gsap.set(title2, { opacity: 0, y: 60 });
+      
+      const title2InitialY = isMobileXSLayout ? 35 : isMobileLayout ? 46 : 60;
+      gsap.set(title2, { opacity: 0, y: title2InitialY });
+
       gsap.set(description1, { opacity: 0, y: 0 });
-      if (description2) gsap.set(description2, { opacity: 0, y: 40 });
+
+      if (description2) {
+        const desc2InitialY = isMobileXXSLayout ? 40 : isMobileXSLayout ? 22 : isMobileLayout ? 34 : 40;
+        gsap.set(description2, { opacity: 0, y: desc2InitialY });
+      }
 
       const startImgXMobile = isMobileLayout && imgOffsetsMobile[0] !== undefined ? imgOffsetsMobile[0] : 0;
 
