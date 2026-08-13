@@ -48,6 +48,7 @@ window.addEventListener("load", () => {
   let itemCumulativeWidths = [];
   let tl;
   let mm = gsap.matchMedia();
+  let isLargeDesktopLayout = false;
   let isMobileLayout = false;
   let isTabletMobileLayout = false;
   let isMediumMobileLayout = false;
@@ -411,6 +412,7 @@ window.addEventListener("load", () => {
 
   mm.add(
     {
+      isLargeDesktop: "(min-width: 1380px) and (min-height: 701px)",
       isDesktop: "(min-width: 992px) and (min-height: 701px)",
       isShortDesktop: "(min-width: 992px) and (max-height: 700px)",
       isMobile: "(max-width: 991px)",
@@ -419,9 +421,10 @@ window.addEventListener("load", () => {
       isSmallMobile: "(max-width: 479px)",
       isMobileXS: "(max-width: 575px)",
       isMobileXXS: "(max-width: 335px)",
-      isShortScreen: "(max-height: 700px)",
+      isShortOrMobile: "(max-width: 991px), (max-height: 700px)",
     },
     (context) => {
+      isLargeDesktopLayout = context.conditions.isLargeDesktop;
       isMobileLayout = context.conditions.isMobile;
       isTabletMobileLayout = context.conditions.isTabletMobile;
       isMediumMobileLayout = context.conditions.isMediumMobile;
@@ -430,12 +433,13 @@ window.addEventListener("load", () => {
       isMobileXXSLayout = context.conditions.isMobileXXS;
       isShortDesktopLayout = context.conditions.isShortDesktop;
 
-      if (context.conditions.isMobile || context.conditions.isShortScreen) {
+      const isUnpinnedLayout = context.conditions.isMobile || context.conditions.isShortOrMobile;
+
+      if (isUnpinnedLayout) {
         gsap.set(section, { clearProps: "height,maxHeight,minHeight" });
       }
 
-      if (isShortDesktopLayout) {
-
+      if (isShortDesktopLayout || isUnpinnedLayout) {
         gsap.set(section, { clearProps: "height,maxHeight,minHeight" });
         section.style.minHeight = "auto";
 
@@ -476,7 +480,7 @@ window.addEventListener("load", () => {
           y: 0,
           scale: 1,
           x: 0,
-          width: "auto",
+          width: isMobileLayout ? getResponsiveTargetWidth() : "auto",
           clearProps: "transform",
         });
 
@@ -489,7 +493,6 @@ window.addEventListener("load", () => {
         }
 
         calculateImagePositions();
-
         animateToStepIndex(0, 0.4);
 
         const clickHandlers = [];
@@ -566,16 +569,16 @@ window.addEventListener("load", () => {
 
       window.addEventListener("resize", handleResize);
 
-      gsap.set(title1, { opacity: 0, y: 0 });
-      
-      const title2InitialY = isMobileXSLayout ? 35 : isMobileLayout ? 46 : 60;
-      gsap.set(title2, { opacity: 0, y: title2InitialY });
+      gsap.set(title1, { opacity: 0, y: 0, display: "block" });
 
-      gsap.set(description1, { opacity: 0, y: 0 });
+      const title2InitialY = isLargeDesktopLayout ? 70 : isMobileXSLayout ? 35 : isMobileLayout ? 46 : 60;
+      gsap.set(title2, { opacity: 0, y: title2InitialY, display: "block" });
+
+      gsap.set(description1, { opacity: 0, y: 0, display: "block" });
 
       if (description2) {
         const desc2InitialY = isMobileXXSLayout ? 40 : isMobileXSLayout ? 22 : isMobileLayout ? 34 : 40;
-        gsap.set(description2, { opacity: 0, y: desc2InitialY });
+        gsap.set(description2, { opacity: 0, y: desc2InitialY, display: "block" });
       }
 
       const startImgXMobile = isMobileLayout && imgOffsetsMobile[0] !== undefined ? imgOffsetsMobile[0] : 0;
@@ -659,6 +662,16 @@ window.addEventListener("load", () => {
           pin: true,
           scrub: 0.5,
           invalidateOnRefresh: true,
+          onUpdate: (self) => {
+            if (self.direction === -1) {
+              const activeStartProgress = tl.labels.overlaysActiveStart / tl.duration();
+              if (self.progress < activeStartProgress) {
+                setInteractiveState(false);
+                imgWrappers.forEach((wrapper) => wrapper.classList.remove("active"));
+                contentItems.forEach((item) => item.classList.remove("active"));
+              }
+            }
+          },
           snap: {
             snapTo: (progress) => {
               if (isClickScrolling) return progress;
@@ -766,7 +779,7 @@ window.addEventListener("load", () => {
           "<"
         );
       }
-      tl.to([title1, cloneWrap], { y: -60, duration: finalMoveDuration, ease: "power2.inOut" }, "<");
+      tl.to([title1, cloneWrap], { y: -70, duration: finalMoveDuration, ease: "power2.inOut" }, "<");
       tl.to(title2, { opacity: 1, y: 0, duration: finalMoveDuration, ease: "power2.inOut" }, "<");
 
       if (heroContentItems) {
@@ -928,7 +941,6 @@ window.addEventListener("load", () => {
     }
   );
 });
-
 
 document.addEventListener("DOMContentLoaded", () => {
   const heroBtn = document.querySelector(".hero-btn");
