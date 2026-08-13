@@ -59,7 +59,6 @@ window.addEventListener("load", () => {
   let activeIndex = 0;
   let isClickScrolling = false;
 
-  // Track window dimensions to avoid mobile address-bar resize resets
   let lastWindowWidth = window.innerWidth;
   let lastWindowHeight = window.innerHeight;
 
@@ -583,7 +582,6 @@ window.addEventListener("load", () => {
 
       let { naturalWrapHeight, targetWrapHeight } = recalculateHeights();
 
-      // FIXED: Ignore mobile height-only resizes caused by address-bar collapsing/expanding
       const handleResize = () => {
         const newWidth = window.innerWidth;
         const newHeight = window.innerHeight;
@@ -684,7 +682,7 @@ window.addEventListener("load", () => {
           end: `+=${dynamicEndScroll}`,
           pin: true,
           scrub: 0.5,
-          invalidateOnRefresh: false, // FIXED: Prevents breaking timeline during mobile scroll
+          invalidateOnRefresh: false,  
           snap: {
             snapTo: (progress) => {
               if (isClickScrolling) return progress;
@@ -719,7 +717,6 @@ window.addEventListener("load", () => {
       tl.to(meraClones, { opacity: 1, duration: 0.15, ease: "linear" }, ">");
       tl.to(firstLetters, { opacity: 0, duration: 0.15, ease: "linear" }, "<");
 
-      // FIXED: Pre-calculate Clone target values so reverse animation stays exact
       const initialWrapRect = wrap.getBoundingClientRect();
       updateMeraCloneTargets(meraClones, initialWrapRect, 4);
 
@@ -737,7 +734,6 @@ window.addEventListener("load", () => {
         ">"
       );
 
-      // FIXED: Directly static target height to prevent recalculation glitches on reverse
       tl.to(
         wrap,
         {
@@ -853,7 +849,6 @@ window.addEventListener("load", () => {
 
       tl.add("overlaysActiveStart", ">");
 
-      // FIXED: Ensure backward scrubbing triggers reset properly
       tl.call(
         (direction) => {
           if (direction < 0) {
