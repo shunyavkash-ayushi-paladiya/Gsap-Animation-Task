@@ -257,6 +257,30 @@ window.addEventListener("load", () => {
     });
   }
 
+  function resetOverlayAndStepStates() {
+    activeIndex = 0;
+    setInteractiveState(false);
+    contentItems.forEach((item) => item.classList.remove("active"));
+    imgWrappers.forEach((wrapper) => wrapper.classList.remove("active"));
+    
+    if (heroImages.length > 0) {
+      const lastImg = heroImages[heroImages.length - 1];
+      if (lastImg) lastImg.classList.remove("hero-img-2");
+    }
+
+    if (heroBorderOverlay) gsap.set(heroBorderOverlay, { opacity: 0 });
+    if (heroBorderOverlay2) gsap.set(heroBorderOverlay2, { opacity: 0, width: 0 });
+    if (itemDesc1) gsap.set(itemDesc1, { color: "#66666682" });
+    if (itemDesc2) gsap.set(itemDesc2, { color: "#66666682" });
+
+    contentItems.forEach((item) => {
+      const titleText = item.querySelector(".hero-content-title");
+      const descText = item.querySelector(".hero-content-description");
+      if (titleText) gsap.set(titleText, { color: "#66666682" });
+      if (descText) gsap.set(descText, { color: "#66666682" });
+    });
+  }
+
   function animateToStepIndex(index, duration = 0.6) {
     if (!imagePositions[index]) calculateImagePositions();
     if (!imagePositions[index]) return;
@@ -412,7 +436,7 @@ window.addEventListener("load", () => {
 
   mm.add(
     {
-      isLargeDesktop: "(min-width: 1380px) and (min-height: 701px)",
+      isLargeDesktop: "(min-width: 1380px)",
       isDesktop: "(min-width: 992px) and (min-height: 701px)",
       isShortDesktop: "(min-width: 992px) and (max-height: 700px)",
       isMobile: "(max-width: 991px)",
@@ -421,7 +445,7 @@ window.addEventListener("load", () => {
       isSmallMobile: "(max-width: 479px)",
       isMobileXS: "(max-width: 575px)",
       isMobileXXS: "(max-width: 335px)",
-      isShortOrMobile: "(max-width: 991px), (max-height: 700px)",
+      isShortScreen: "(max-height: 700px)",
     },
     (context) => {
       isLargeDesktopLayout = context.conditions.isLargeDesktop;
@@ -433,13 +457,11 @@ window.addEventListener("load", () => {
       isMobileXXSLayout = context.conditions.isMobileXXS;
       isShortDesktopLayout = context.conditions.isShortDesktop;
 
-      const isUnpinnedLayout = context.conditions.isMobile || context.conditions.isShortOrMobile;
-
-      if (isUnpinnedLayout) {
+      if (context.conditions.isMobile || context.conditions.isShortScreen) {
         gsap.set(section, { clearProps: "height,maxHeight,minHeight" });
       }
 
-      if (isShortDesktopLayout || isUnpinnedLayout) {
+      if (isShortDesktopLayout) {
         gsap.set(section, { clearProps: "height,maxHeight,minHeight" });
         section.style.minHeight = "auto";
 
@@ -480,7 +502,7 @@ window.addEventListener("load", () => {
           y: 0,
           scale: 1,
           x: 0,
-          width: isMobileLayout ? getResponsiveTargetWidth() : "auto",
+          width: "auto",
           clearProps: "transform",
         });
 
@@ -542,7 +564,7 @@ window.addEventListener("load", () => {
       }
 
       calculateImagePositions();
-      setInteractiveState(false);
+      resetOverlayAndStepStates();
 
       const firstLetters = gsap.utils.toArray(".first-letter", title1);
       let meraClones = buildMeraClones(firstLetters);
@@ -569,16 +591,16 @@ window.addEventListener("load", () => {
 
       window.addEventListener("resize", handleResize);
 
-      gsap.set(title1, { opacity: 0, y: 0, display: "block" });
-
+      gsap.set(title1, { opacity: 0, y: 0 });
+      
       const title2InitialY = isLargeDesktopLayout ? 70 : isMobileXSLayout ? 35 : isMobileLayout ? 46 : 60;
-      gsap.set(title2, { opacity: 0, y: title2InitialY, display: "block" });
+      gsap.set(title2, { opacity: 0, y: title2InitialY });
 
-      gsap.set(description1, { opacity: 0, y: 0, display: "block" });
+      gsap.set(description1, { opacity: 0, y: 0 });
 
       if (description2) {
         const desc2InitialY = isMobileXXSLayout ? 40 : isMobileXSLayout ? 22 : isMobileLayout ? 34 : 40;
-        gsap.set(description2, { opacity: 0, y: desc2InitialY, display: "block" });
+        gsap.set(description2, { opacity: 0, y: desc2InitialY });
       }
 
       const startImgXMobile = isMobileLayout && imgOffsetsMobile[0] !== undefined ? imgOffsetsMobile[0] : 0;
@@ -600,9 +622,6 @@ window.addEventListener("load", () => {
           zIndex: 10,
         });
       }
-
-      contentItems.forEach((item) => item.classList.remove("active"));
-      imgWrappers.forEach((wrapper) => wrapper.classList.remove("active"));
 
       if (heroImgOverlay) {
         gsap.set(heroImgOverlay, { opacity: 0 });
@@ -628,17 +647,6 @@ window.addEventListener("load", () => {
         });
       }
 
-      if (heroBorderOverlay2) gsap.set(heroBorderOverlay2, { width: 0, opacity: 0 });
-      if (itemDesc1) gsap.set(itemDesc1, { color: "#66666682" });
-      if (itemDesc2) gsap.set(itemDesc2, { color: "#66666682" });
-
-      contentItems.forEach((item) => {
-        const titleText = item.querySelector(".hero-content-title");
-        const descText = item.querySelector(".hero-content-description");
-        if (titleText) gsap.set(titleText, { color: "#66666682" });
-        if (descText) gsap.set(descText, { color: "#66666682" });
-      });
-
       gsap.set(heroImgContent, {
         opacity: 0,
         y: isMobileLayout ? 0 : 70,
@@ -662,16 +670,6 @@ window.addEventListener("load", () => {
           pin: true,
           scrub: 0.5,
           invalidateOnRefresh: true,
-          onUpdate: (self) => {
-            if (self.direction === -1) {
-              const activeStartProgress = tl.labels.overlaysActiveStart / tl.duration();
-              if (self.progress < activeStartProgress) {
-                setInteractiveState(false);
-                imgWrappers.forEach((wrapper) => wrapper.classList.remove("active"));
-                contentItems.forEach((item) => item.classList.remove("active"));
-              }
-            }
-          },
           snap: {
             snapTo: (progress) => {
               if (isClickScrolling) return progress;
@@ -839,10 +837,14 @@ window.addEventListener("load", () => {
 
       tl.add("overlaysActiveStart", ">");
 
-      tl.call(() => {
-        if (isClickScrolling) return;
-        animateToStepIndex(0, 0.4);
-      }, null, "overlaysActiveStart");
+      // Reset states when scrubbing back past the step animations start point
+      tl.call((direction) => {
+        if (direction < 0) {
+          resetOverlayAndStepStates();
+        } else if (!isClickScrolling) {
+          animateToStepIndex(0, 0.4);
+        }
+      }, ["direction"], "overlaysActiveStart");
 
       if (heroImages.length > 0) {
         heroImages.forEach((_, index) => {
