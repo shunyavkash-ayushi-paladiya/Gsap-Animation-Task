@@ -20,13 +20,23 @@ gsap.ticker.add((time) => {
 
 gsap.ticker.lagSmoothing(0);
 
-window.addEventListener("load", () => {
-  if (document.fonts && document.fonts.ready) {
-    document.fonts.ready.then(initHeroAnimation);
+const onDOMContentLoaded = () => {
+  const initWhenReady = () => {
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(() => initHeroAnimation());
+    } else {
+      initHeroAnimation();
+    }
+  };
+
+  if (document.readyState === "complete") {
+    initWhenReady();
   } else {
-    initHeroAnimation();
+    window.addEventListener("load", initWhenReady, { once: true });
   }
-});
+};
+
+onDOMContentLoaded();
 
 function initHeroAnimation() {
   const section = document.querySelector(".hero-section");
@@ -75,6 +85,7 @@ function initHeroAnimation() {
 
   let activeIndex = 0;
   let isClickScrolling = false;
+  let lastWidth = window.innerWidth;
 
   function getResponsiveTargetWidth() {
     if (isSmallMobileLayout) return "265%";
@@ -148,6 +159,7 @@ function initHeroAnimation() {
         wrapper.style.cursor = !enabled || idx === targetIndex ? "default" : "pointer";
       }
     });
+
     contentItems.forEach((item, idx) => {
       if (item) {
         item.style.pointerEvents = !enabled || idx === targetIndex ? "none" : "auto";
@@ -193,7 +205,6 @@ function initHeroAnimation() {
         restSpan.textContent = part.slice(1);
         word.appendChild(restSpan);
       }
-
       el.appendChild(word);
     });
   }
@@ -319,7 +330,6 @@ function initHeroAnimation() {
           overwrite: "auto",
         });
       }
-
       if (contentDescText) {
         gsap.to(contentDescText, {
           color: isCurrent ? "#ffffff" : "#66666682",
@@ -356,9 +366,9 @@ function initHeroAnimation() {
       gsap.to(heroImgOverlay, {
         opacity: 1,
         clipPath: `polygon(
-            0% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 0%, 
-            ${pos.imgPctLeft}% 0%, ${pos.imgPctLeft}% 100%, ${pos.imgPctRight}% 100%, ${pos.imgPctRight}% 0%, ${pos.imgPctLeft}% 0%
-          )`,
+          0% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 0%, 
+          ${pos.imgPctLeft}% 0%, ${pos.imgPctLeft}% 100%, ${pos.imgPctRight}% 100%, ${pos.imgPctRight}% 0%, ${pos.imgPctLeft}% 0%
+        )`,
         duration: duration,
         ease: "power2.inOut",
         overwrite: "auto",
@@ -427,7 +437,6 @@ function initHeroAnimation() {
         overwrite: "auto",
       });
     }
-
     if (itemDesc2) {
       gsap.to(itemDesc2, {
         color: index === 4 ? "#ffffff" : "#66666682",
@@ -467,8 +476,10 @@ function initHeroAnimation() {
       if (isShortDesktopLayout) {
         gsap.set(section, { clearProps: "height,maxHeight,minHeight" });
         section.style.minHeight = "auto";
+
         gsap.set([wrap, title1, description1], { clearProps: "all" });
         wrap.classList.remove("active");
+
         gsap.set(title1, { display: "none" });
         gsap.set(description1, { display: "none" });
         gsap.set(title2, {
@@ -509,7 +520,6 @@ function initHeroAnimation() {
         if (heroContentItems) {
           gsap.set(heroContentItems, { opacity: 1, x: 0 });
         }
-
         if (heroOverlays) {
           gsap.set(heroOverlays, { opacity: 1, y: 0 });
         }
@@ -581,13 +591,19 @@ function initHeroAnimation() {
       let { naturalWrapHeight, targetWrapHeight } = recalculateHeights();
 
       const handleResize = () => {
-        calculateImagePositions();
-        const heights = recalculateHeights();
-        naturalWrapHeight = heights.naturalWrapHeight;
-        targetWrapHeight = heights.targetWrapHeight;
-        syncMeraClonesPosition();
-        if (tl) tl.invalidate();
-        ScrollTrigger.refresh();
+        const currentWidth = window.innerWidth;
+        if (currentWidth === lastWidth) return; 
+        lastWidth = currentWidth;
+
+        requestAnimationFrame(() => {
+          calculateImagePositions();
+          const heights = recalculateHeights();
+          naturalWrapHeight = heights.naturalWrapHeight;
+          targetWrapHeight = heights.targetWrapHeight;
+          syncMeraClonesPosition();
+          if (tl) tl.invalidate();
+          ScrollTrigger.refresh();
+        });
       };
 
       window.addEventListener("resize", handleResize);
@@ -595,8 +611,8 @@ function initHeroAnimation() {
       gsap.set(title1, { opacity: 0, y: 0 });
       const title2InitialY = isLargeDesktopLayout ? 70 : isMobileXSLayout ? 35 : isMobileLayout ? 46 : 60;
       gsap.set(title2, { opacity: 0, y: title2InitialY });
-      gsap.set(description1, { opacity: 0, y: 0 });
 
+      gsap.set(description1, { opacity: 0, y: 0 });
       if (description2) {
         const desc2InitialY = isMobileXXSLayout ? 40 : isMobileXSLayout ? 22 : isMobileLayout ? 34 : 40;
         gsap.set(description2, { opacity: 0, y: desc2InitialY });
@@ -631,9 +647,9 @@ function initHeroAnimation() {
           const x1 = imagePositions[0].imgPctLeft;
           const x2 = imagePositions[0].imgPctRight;
           heroImgOverlay.style.clipPath = `polygon(
-              0% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 0%, 
-              ${x1}% 0%, ${x1}% 100%, ${x2}% 100%, ${x2}% 0%, ${x1}% 0%
-            )`;
+            0% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 0%, 
+            ${x1}% 0%, ${x1}% 100%, ${x2}% 100%, ${x2}% 0%, ${x1}% 0%
+          )`;
         }
       }
 
@@ -688,6 +704,7 @@ function initHeroAnimation() {
             snapTo: (progress) => {
               if (isClickScrolling) return progress;
               if (!tl || !tl.duration()) return progress;
+
               const activeStartProgress = tl.labels.overlaysActiveStart / tl.duration();
               const activeEndProgress = tl.labels[`step_${totalSteps - 1}`] / tl.duration();
 
@@ -708,13 +725,13 @@ function initHeroAnimation() {
       });
 
       const titleFadeDuration = 0.3;
+
       tl.to(title1, { opacity: 1, duration: titleFadeDuration, ease: "power1.out" }, 0);
       tl.to(".char-rest", { "--position": "0%", duration: 0.5, ease: "power1.inOut" }, titleFadeDuration + 0.1);
       tl.to(firstLetters, { color: "#00dafd", duration: 0.2, ease: "none" }, ">");
       tl.add(() => syncMeraClonesPosition(), ">");
       tl.to(meraClones, { opacity: 1, duration: 0.15, ease: "linear" }, ">");
       tl.to(firstLetters, { opacity: 0, duration: 0.15, ease: "linear" }, "<");
-
       tl.to(
         meraClones,
         {
@@ -776,18 +793,8 @@ function initHeroAnimation() {
 
       const finalMoveDuration = 0.55;
       tl.to(description1, { y: 0, opacity: 0, duration: finalMoveDuration, ease: "power2.inOut" }, ">");
-
       if (description2) {
-        tl.to(
-          description2,
-          {
-            y: 0,
-            opacity: 1,
-            duration: finalMoveDuration,
-            ease: "power2.inOut",
-          },
-          "<"
-        );
+        tl.to(description2, { y: 0, opacity: 1, duration: finalMoveDuration, ease: "power2.inOut" }, "<");
       }
 
       tl.to([title1, cloneWrap], { y: -70, duration: finalMoveDuration, ease: "power2.inOut" }, "<");
@@ -816,7 +823,6 @@ function initHeroAnimation() {
       if (heroOverlays) {
         tl.to(heroOverlays, { opacity: 0.5, y: 0, duration: 0.4, ease: "power2.out" }, "overlaysEntry");
       }
-
       if (heroImgOverlay) {
         tl.to(heroImgOverlay, { opacity: 0.5, duration: 0.4, ease: "power2.out" }, "overlaysEntry");
       }
@@ -836,7 +842,6 @@ function initHeroAnimation() {
       if (heroBorderOverlay) {
         tl.to(heroBorderOverlay, { opacity: 1, duration: 0.4, ease: "power2.out" }, "overlaysEntry");
       }
-
       if (itemDesc1) {
         tl.to(itemDesc1, { color: "#ffffff", duration: 0.4, ease: "power2.out" }, "overlaysEntry");
       }
@@ -844,7 +849,6 @@ function initHeroAnimation() {
       if (heroOverlays) {
         tl.to(heroOverlays, { opacity: 1, duration: 0.4, ease: "power2.out" }, ">");
       }
-
       if (heroImgOverlay) {
         tl.to(heroImgOverlay, { opacity: 1, duration: 0.4, ease: "power2.out" }, "<");
       }
@@ -881,8 +885,8 @@ function initHeroAnimation() {
       const handleItemClick = (index) => {
         if (!tl || index === activeIndex) return;
         calculateImagePositions();
-        const labelTime = tl.labels[`step_${index}`];
 
+        const labelTime = tl.labels[`step_${index}`];
         if (labelTime !== undefined) {
           isClickScrolling = true;
           animateToStepIndex(index, 0.8);
@@ -945,9 +949,30 @@ function initHeroAnimation() {
             animateToStepIndex(fallbackIndex);
           }
         };
-
         btn.addEventListener("click", btnHandler);
         clickHandlers.push({ element: btn, clickHandler: btnHandler });
+      });
+
+      const imgs = heroImgContent.querySelectorAll("img");
+      let loadedImagesCount = 0;
+      imgs.forEach((img) => {
+        if (img.complete) {
+          loadedImagesCount++;
+        } else {
+          img.addEventListener(
+            "load",
+            () => {
+              loadedImagesCount++;
+              if (loadedImagesCount === imgs.length) {
+                requestAnimationFrame(() => {
+                  calculateImagePositions();
+                  ScrollTrigger.refresh();
+                });
+              }
+            },
+            { once: true }
+          );
+        }
       });
 
       setTimeout(() => {
