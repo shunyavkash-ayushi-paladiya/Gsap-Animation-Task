@@ -569,7 +569,7 @@ window.addEventListener("load", () => {
       window.addEventListener("resize", handleResize);
 
       gsap.set(title1, { opacity: 0, y: 0 });
-      gsap.set(title2, { opacity: 0, y: 150 });
+      gsap.set(title2, { opacity: 0, y: 60 });
       gsap.set(description1, { opacity: 0, y: 0 });
       if (description2) gsap.set(description2, { opacity: 0, y: 50 });
 
@@ -761,7 +761,7 @@ window.addEventListener("load", () => {
           "<"
         );
       }
-      tl.to([title1, cloneWrap], { y: -70, duration: finalMoveDuration, ease: "power2.inOut" }, "<");
+      tl.to([title1, cloneWrap], { y: -60, duration: finalMoveDuration, ease: "power2.inOut" }, "<");
       tl.to(title2, { opacity: 1, y: 0, duration: finalMoveDuration, ease: "power2.inOut" }, "<");
 
       if (heroContentItems) {
