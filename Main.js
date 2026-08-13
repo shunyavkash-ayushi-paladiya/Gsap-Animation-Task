@@ -1,5 +1,8 @@
 gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
 
+// Enable GSAP ScrollTrigger normalization for mobile devices to prevent URL bar jumping
+ScrollTrigger.config({ ignoreMobileResize: true });
+
 const lenis = new Lenis({
   duration: 1.2,
   easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
@@ -8,13 +11,28 @@ const lenis = new Lenis({
   touchMultiplier: 2.0,
 });
 
-lenis.on("scroll", ScrollTrigger.update);
+// Keep Lenis and GSAP ScrollTrigger synchronized
+lenis.on("scroll", () => {
+  ScrollTrigger.update();
+});
+
 gsap.ticker.add((time) => {
   lenis.raf(time * 1000);
 });
+
 gsap.ticker.lagSmoothing(0);
 
+// Ensure full initialization after document & fonts load completely
 window.addEventListener("load", () => {
+  // Use document.fonts.ready if available to avoid layout shifts on mobile device font loads
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(initHeroAnimation);
+  } else {
+    initHeroAnimation();
+  }
+});
+
+function initHeroAnimation() {
   const section = document.querySelector(".hero-section");
   const wrap = document.querySelector(".hero-title-content");
   const title1 = document.querySelector(".hero-title:not(.hero-title-2)");
@@ -42,12 +60,14 @@ window.addEventListener("load", () => {
 
   const heroImages = heroImgContent.querySelectorAll(".hero-img");
   const imgWrappers = heroImgContent.querySelectorAll(".hero-img-wrapper");
+
   let imagePositions = [];
   let itemOffsets = [];
   let imgOffsetsMobile = [];
   let itemCumulativeWidths = [];
   let tl;
   let mm = gsap.matchMedia();
+
   let isLargeDesktopLayout = false;
   let isMobileLayout = false;
   let isTabletMobileLayout = false;
@@ -56,12 +76,9 @@ window.addEventListener("load", () => {
   let isMobileXSLayout = false;
   let isMobileXXSLayout = false;
   let isShortDesktopLayout = false;
+
   let activeIndex = 0;
   let isClickScrolling = false;
-
-  // Track viewport dimensions to prevent address bar recalculation triggers
-  let lastWindowWidth = window.innerWidth;
-  let lastWindowHeight = window.innerHeight;
 
   function getResponsiveTargetWidth() {
     if (isSmallMobileLayout) return "265%";
@@ -75,6 +92,7 @@ window.addEventListener("load", () => {
     itemOffsets = [];
     imgOffsetsMobile = [];
     itemCumulativeWidths = [];
+
     if (!borderWrapper || imgWrappers.length === 0) return;
 
     const originalImgStyle = heroImgContent.getAttribute("style") || "";
@@ -88,6 +106,9 @@ window.addEventListener("load", () => {
     if (isMobileLayout) {
       gsap.set(heroImgContent, { width: getResponsiveTargetWidth() });
     }
+
+    // Force layout recalculation for accuracy on real device viewports
+    void borderWrapper.offsetWidth;
 
     const wrapperRect = borderWrapper.getBoundingClientRect();
     const imgContentRect = heroImgContent.getBoundingClientRect();
@@ -146,8 +167,8 @@ window.addEventListener("load", () => {
     const parts = text.split(/(\s+)/);
     let firstLetterIndex = 0;
     const meraLetters = ["M", "e", "R", "A"];
-    el.innerHTML = "";
 
+    el.innerHTML = "";
     parts.forEach((part) => {
       if (/^\s+$/.test(part)) {
         const space = document.createElement("span");
@@ -156,6 +177,7 @@ window.addEventListener("load", () => {
         el.appendChild(space);
         return;
       }
+
       const word = document.createElement("span");
       word.className = "word";
       word.style.display = "inline-block";
@@ -176,6 +198,7 @@ window.addEventListener("load", () => {
         restSpan.textContent = part.slice(1);
         word.appendChild(restSpan);
       }
+
       el.appendChild(word);
     });
   }
@@ -255,33 +278,10 @@ window.addEventListener("load", () => {
     const currentWrapRect = wrapRect || wrap.getBoundingClientRect();
     const totalWidth = clones.reduce((sum, clone) => sum + clone.offsetWidth, 0) + gap * (clones.length - 1);
     let x = currentWrapRect.width / 2 - totalWidth / 2;
+
     clones.forEach((clone) => {
       clone.dataset.targetLeft = x;
       x += clone.offsetWidth + gap;
-    });
-  }
-
-  function resetOverlayAndStepStates() {
-    activeIndex = 0;
-    setInteractiveState(false);
-    contentItems.forEach((item) => item.classList.remove("active"));
-    imgWrappers.forEach((wrapper) => wrapper.classList.remove("active"));
-
-    if (heroImages.length > 0) {
-      const lastImg = heroImages[heroImages.length - 1];
-      if (lastImg) lastImg.classList.remove("hero-img-2");
-    }
-
-    if (heroBorderOverlay) gsap.set(heroBorderOverlay, { opacity: 0 });
-    if (heroBorderOverlay2) gsap.set(heroBorderOverlay2, { opacity: 0, width: 0 });
-    if (itemDesc1) gsap.set(itemDesc1, { color: "#66666682" });
-    if (itemDesc2) gsap.set(itemDesc2, { color: "#66666682" });
-
-    contentItems.forEach((item) => {
-      const titleText = item.querySelector(".hero-content-title");
-      const descText = item.querySelector(".hero-content-description");
-      if (titleText) gsap.set(titleText, { color: "#66666682" });
-      if (descText) gsap.set(descText, { color: "#66666682" });
     });
   }
 
@@ -324,6 +324,7 @@ window.addEventListener("load", () => {
           overwrite: "auto",
         });
       }
+
       if (contentDescText) {
         gsap.to(contentDescText, {
           color: isCurrent ? "#ffffff" : "#66666682",
@@ -337,12 +338,14 @@ window.addEventListener("load", () => {
     if (isMobileLayout) {
       const imgTargetX = imgOffsetsMobile[index] || 0;
       const contentTargetX = itemOffsets[index] || 0;
+
       gsap.to(heroImgContent, {
         x: imgTargetX,
         duration: duration,
         ease: "power2.inOut",
         overwrite: "auto",
       });
+
       if (heroContentItems) {
         gsap.to(heroContentItems, {
           x: contentTargetX,
@@ -358,9 +361,9 @@ window.addEventListener("load", () => {
       gsap.to(heroImgOverlay, {
         opacity: 1,
         clipPath: `polygon(
-          0% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 0%, 
-          ${pos.imgPctLeft}% 0%, ${pos.imgPctLeft}% 100%, ${pos.imgPctRight}% 100%, ${pos.imgPctRight}% 0%, ${pos.imgPctLeft}% 0%
-        )`,
+            0% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 0%, 
+            ${pos.imgPctLeft}% 0%, ${pos.imgPctLeft}% 100%, ${pos.imgPctRight}% 100%, ${pos.imgPctRight}% 0%, ${pos.imgPctLeft}% 0%
+          )`,
         duration: duration,
         ease: "power2.inOut",
         overwrite: "auto",
@@ -429,6 +432,7 @@ window.addEventListener("load", () => {
         overwrite: "auto",
       });
     }
+
     if (itemDesc2) {
       gsap.to(itemDesc2, {
         color: index === 4 ? "#ffffff" : "#66666682",
@@ -468,13 +472,10 @@ window.addEventListener("load", () => {
       if (isShortDesktopLayout) {
         gsap.set(section, { clearProps: "height,maxHeight,minHeight" });
         section.style.minHeight = "auto";
-
         gsap.set([wrap, title1, description1], { clearProps: "all" });
         wrap.classList.remove("active");
-
         gsap.set(title1, { display: "none" });
         gsap.set(description1, { display: "none" });
-
         gsap.set(title2, {
           display: "block",
           opacity: 1,
@@ -522,7 +523,6 @@ window.addEventListener("load", () => {
         animateToStepIndex(0, 0.4);
 
         const clickHandlers = [];
-
         const handleItemClick = (index) => {
           calculateImagePositions();
           animateToStepIndex(index, 0.8);
@@ -545,12 +545,14 @@ window.addEventListener("load", () => {
             e.stopPropagation();
             const lastIndex = heroImages.length - 1;
             const lastImg = heroImages[lastIndex];
+
             if (lastImg) {
               gsap.killTweensOf(lastImg);
               lastImg.classList.remove("hero-img-2");
             }
             if (imgWrappers[lastIndex]) imgWrappers[lastIndex].classList.remove("active");
             if (contentItems[lastIndex]) contentItems[lastIndex].classList.remove("active");
+
             if (activeIndex === lastIndex) {
               const fallbackIndex = Math.max(0, lastIndex - 1);
               animateToStepIndex(fallbackIndex);
@@ -568,7 +570,7 @@ window.addEventListener("load", () => {
       }
 
       calculateImagePositions();
-      resetOverlayAndStepStates();
+      setInteractiveState(false);
 
       const firstLetters = gsap.utils.toArray(".first-letter", title1);
       let meraClones = buildMeraClones(firstLetters);
@@ -584,17 +586,6 @@ window.addEventListener("load", () => {
       let { naturalWrapHeight, targetWrapHeight } = recalculateHeights();
 
       const handleResize = () => {
-        const newWidth = window.innerWidth;
-        const newHeight = window.innerHeight;
-
-        // Ignore minor vertical height changes caused by mobile address bar toggles
-        if (isMobileLayout && newWidth === lastWindowWidth && Math.abs(newHeight - lastWindowHeight) < 120) {
-          return;
-        }
-
-        lastWindowWidth = newWidth;
-        lastWindowHeight = newHeight;
-
         calculateImagePositions();
         const heights = recalculateHeights();
         naturalWrapHeight = heights.naturalWrapHeight;
@@ -607,10 +598,8 @@ window.addEventListener("load", () => {
       window.addEventListener("resize", handleResize);
 
       gsap.set(title1, { opacity: 0, y: 0 });
-
       const title2InitialY = isLargeDesktopLayout ? 70 : isMobileXSLayout ? 35 : isMobileLayout ? 46 : 60;
       gsap.set(title2, { opacity: 0, y: title2InitialY });
-
       gsap.set(description1, { opacity: 0, y: 0 });
 
       if (description2) {
@@ -638,15 +627,18 @@ window.addEventListener("load", () => {
         });
       }
 
+      contentItems.forEach((item) => item.classList.remove("active"));
+      imgWrappers.forEach((wrapper) => wrapper.classList.remove("active"));
+
       if (heroImgOverlay) {
         gsap.set(heroImgOverlay, { opacity: 0 });
         if (imagePositions[0]) {
           const x1 = imagePositions[0].imgPctLeft;
           const x2 = imagePositions[0].imgPctRight;
           heroImgOverlay.style.clipPath = `polygon(
-            0% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 0%, 
-            ${x1}% 0%, ${x1}% 100%, ${x2}% 100%, ${x2}% 0%, ${x1}% 0%
-          )`;
+              0% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 0%, 
+              ${x1}% 0%, ${x1}% 100%, ${x2}% 100%, ${x2}% 0%, ${x1}% 0%
+            )`;
         }
       }
 
@@ -661,6 +653,17 @@ window.addEventListener("load", () => {
           width: firstCardWidth,
         });
       }
+
+      if (heroBorderOverlay2) gsap.set(heroBorderOverlay2, { width: 0, opacity: 0 });
+      if (itemDesc1) gsap.set(itemDesc1, { color: "#66666682" });
+      if (itemDesc2) gsap.set(itemDesc2, { color: "#66666682" });
+
+      contentItems.forEach((item) => {
+        const titleText = item.querySelector(".hero-content-title");
+        const descText = item.querySelector(".hero-content-description");
+        if (titleText) gsap.set(titleText, { color: "#66666682" });
+        if (descText) gsap.set(descText, { color: "#66666682" });
+      });
 
       gsap.set(heroImgContent, {
         opacity: 0,
@@ -683,13 +686,13 @@ window.addEventListener("load", () => {
           start: "top top",
           end: `+=${dynamicEndScroll}`,
           pin: true,
+          pinSpacing: true,
           scrub: 0.5,
-          invalidateOnRefresh: false, // Prevents layout glitches on mobile reverse scroll
+          invalidateOnRefresh: true,
           snap: {
             snapTo: (progress) => {
               if (isClickScrolling) return progress;
               if (!tl || !tl.duration()) return progress;
-
               const activeStartProgress = tl.labels.overlaysActiveStart / tl.duration();
               const activeEndProgress = tl.labels[`step_${totalSteps - 1}`] / tl.duration();
 
@@ -697,7 +700,6 @@ window.addEventListener("load", () => {
                 const stepPositions = stepLabels
                   .map((label) => (tl.labels[label] !== undefined ? tl.labels[label] / tl.duration() : null))
                   .filter((val) => val !== null);
-
                 return gsap.utils.snap(stepPositions, progress);
               }
               return progress;
@@ -714,18 +716,19 @@ window.addEventListener("load", () => {
       tl.to(title1, { opacity: 1, duration: titleFadeDuration, ease: "power1.out" }, 0);
       tl.to(".char-rest", { "--position": "0%", duration: 0.5, ease: "power1.inOut" }, titleFadeDuration + 0.1);
       tl.to(firstLetters, { color: "#00dafd", duration: 0.2, ease: "none" }, ">");
-
       tl.add(() => syncMeraClonesPosition(), ">");
       tl.to(meraClones, { opacity: 1, duration: 0.15, ease: "linear" }, ">");
       tl.to(firstLetters, { opacity: 0, duration: 0.15, ease: "linear" }, "<");
 
-      const initialWrapRect = wrap.getBoundingClientRect();
-      updateMeraCloneTargets(meraClones, initialWrapRect, 4);
-
       tl.to(
         meraClones,
         {
-          left: (i, el) => Number(el.dataset.targetLeft),
+          left: (i, el) => {
+            const wrapRect = wrap.getBoundingClientRect();
+            const clones = gsap.utils.toArray(".mera-clone");
+            if (clones.length) updateMeraCloneTargets(clones, wrapRect, 4);
+            return Number(el.dataset.targetLeft);
+          },
           top: "50%",
           yPercent: -50,
           duration: 0.5,
@@ -739,7 +742,7 @@ window.addEventListener("load", () => {
       tl.to(
         wrap,
         {
-          height: targetWrapHeight,
+          height: () => targetWrapHeight,
           duration: 1.15,
           ease: "power2.inOut",
         },
@@ -751,7 +754,7 @@ window.addEventListener("load", () => {
           heroImgContent,
           {
             opacity: 1,
-            x: startImgXMobile,
+            x: () => startImgXMobile,
             duration: 0.8,
             ease: "power2.inOut",
           },
@@ -778,6 +781,7 @@ window.addEventListener("load", () => {
 
       const finalMoveDuration = 0.55;
       tl.to(description1, { y: 0, opacity: 0, duration: finalMoveDuration, ease: "power2.inOut" }, ">");
+
       if (description2) {
         tl.to(
           description2,
@@ -790,6 +794,7 @@ window.addEventListener("load", () => {
           "<"
         );
       }
+
       tl.to([title1, cloneWrap], { y: -70, duration: finalMoveDuration, ease: "power2.inOut" }, "<");
       tl.to(title2, { opacity: 1, y: 0, duration: finalMoveDuration, ease: "power2.inOut" }, "<");
 
@@ -798,12 +803,11 @@ window.addEventListener("load", () => {
       }
 
       if (isMobileLayout) {
-        const responsiveTargetWidth = getResponsiveTargetWidth();
         tl.to(
           heroImgContent,
           {
-            width: responsiveTargetWidth,
-            x: startImgXMobile,
+            width: () => getResponsiveTargetWidth(),
+            x: () => startImgXMobile,
             duration: 0.8,
             ease: "power2.inOut",
           },
@@ -845,22 +849,18 @@ window.addEventListener("load", () => {
       if (heroOverlays) {
         tl.to(heroOverlays, { opacity: 1, duration: 0.4, ease: "power2.out" }, ">");
       }
+
       if (heroImgOverlay) {
         tl.to(heroImgOverlay, { opacity: 1, duration: 0.4, ease: "power2.out" }, "<");
       }
 
       tl.add("overlaysActiveStart", ">");
-
-      // Handle reverse direction triggers cleanly
       tl.call(
-        (direction) => {
-          if (direction < 0) {
-            resetOverlayAndStepStates();
-          } else if (!isClickScrolling) {
-            animateToStepIndex(0, 0.4);
-          }
+        () => {
+          if (isClickScrolling) return;
+          animateToStepIndex(0, 0.4);
         },
-        ["direction"],
+        null,
         "overlaysActiveStart"
       );
 
@@ -868,9 +868,7 @@ window.addEventListener("load", () => {
         heroImages.forEach((_, index) => {
           const isFirst = index === 0;
           const stepLabel = `step_${index}`;
-
           tl.add(stepLabel, isFirst ? "overlaysActiveStart" : "+=0.6");
-
           tl.call(
             () => {
               if (isClickScrolling) return;
@@ -885,12 +883,11 @@ window.addEventListener("load", () => {
       tl.to({}, { duration: 1.0 });
 
       const clickHandlers = [];
-
       const handleItemClick = (index) => {
         if (!tl || index === activeIndex) return;
         calculateImagePositions();
-
         const labelTime = tl.labels[`step_${index}`];
+
         if (labelTime !== undefined) {
           isClickScrolling = true;
           animateToStepIndex(index, 0.8);
@@ -936,6 +933,7 @@ window.addEventListener("load", () => {
           e.stopPropagation();
           const lastIndex = heroImages.length - 1;
           const lastImg = heroImages[lastIndex];
+
           if (lastImg) {
             gsap.killTweensOf(lastImg);
             lastImg.classList.remove("hero-img-2");
@@ -946,14 +944,21 @@ window.addEventListener("load", () => {
           if (contentItems[lastIndex]) {
             contentItems[lastIndex].classList.remove("active");
           }
+
           if (activeIndex === lastIndex) {
             const fallbackIndex = Math.max(0, lastIndex - 1);
             animateToStepIndex(fallbackIndex);
           }
         };
+
         btn.addEventListener("click", btnHandler);
         clickHandlers.push({ element: btn, clickHandler: btnHandler });
       });
+
+      // Refresh ScrollTrigger recalculations after all device renders finish
+      setTimeout(() => {
+        ScrollTrigger.refresh();
+      }, 300);
 
       return () => {
         window.removeEventListener("resize", handleResize);
@@ -964,7 +969,7 @@ window.addEventListener("load", () => {
       };
     }
   );
-});
+}
 
 document.addEventListener("DOMContentLoaded", () => {
   const heroBtn = document.querySelector(".hero-btn");
