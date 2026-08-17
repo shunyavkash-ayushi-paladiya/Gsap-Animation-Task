@@ -1,9 +1,5 @@
 gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
-
-ScrollTrigger.config({
-  ignoreMobileResize: true,
-  autoRefreshEvents: "DOMContentLoaded,load,visibilitychange"
-});
+ScrollTrigger.config({ ignoreMobileResize: true, autoRefreshEvents: "DOMContentLoaded,load,visibilitychange" });
 
 if (ScrollTrigger.isTouch) {
   ScrollTrigger.normalizeScroll(true);
@@ -55,13 +51,13 @@ function initHeroAnimation() {
 
   const heroImages = heroImgContent.querySelectorAll(".hero-img");
   const imgWrappers = heroImgContent.querySelectorAll(".hero-img-wrapper");
+
   let imagePositions = [];
   let itemOffsets = [];
   let imgOffsetsMobile = [];
   let itemCumulativeWidths = [];
   let tl;
   let mm = gsap.matchMedia();
-
   let isLargeDesktopLayout = false;
   let isMobileLayout = false;
   let isTabletMobileLayout = false;
@@ -70,7 +66,6 @@ function initHeroAnimation() {
   let isMobileXSLayout = false;
   let isMobileXXSLayout = false;
   let isShortDesktopLayout = false;
-
   let activeIndex = 0;
   let isClickScrolling = false;
   let autoPlayTimer = null;
@@ -103,6 +98,7 @@ function initHeroAnimation() {
     }
 
     void borderWrapper.offsetWidth;
+
     const wrapperRect = borderWrapper.getBoundingClientRect();
     const imgContentRect = heroImgContent.getBoundingClientRect();
 
@@ -146,7 +142,6 @@ function initHeroAnimation() {
         wrapper.style.cursor = !enabled || idx === targetIndex ? "default" : "pointer";
       }
     });
-
     contentItems.forEach((item, idx) => {
       if (item) {
         item.style.pointerEvents = !enabled || idx === targetIndex ? "none" : "auto";
@@ -161,8 +156,8 @@ function initHeroAnimation() {
     const parts = text.split(/(\s+)/);
     let firstLetterIndex = 0;
     const meraLetters = ["M", "e", "R", "A"];
-
     el.innerHTML = "";
+
     parts.forEach((part) => {
       if (/^\s+$/.test(part)) {
         const space = document.createElement("span");
@@ -182,7 +177,6 @@ function initHeroAnimation() {
       firstLetterSpan.dataset.acronym = meraLetters[firstLetterIndex] || part[0];
       firstLetterSpan.textContent = part[0];
       firstLetterSpan.style.display = "inline-block";
-
       word.appendChild(firstLetterSpan);
       firstLetterIndex++;
 
@@ -193,7 +187,6 @@ function initHeroAnimation() {
         restSpan.textContent = part.slice(1);
         word.appendChild(restSpan);
       }
-
       el.appendChild(word);
     });
   }
@@ -307,6 +300,7 @@ function initHeroAnimation() {
       const isCurrent = idx === index;
       const titleText = item.querySelector(".hero-content-title");
       const contentDescText = item.querySelector(".hero-content-description");
+
       item.classList.toggle("active", isCurrent);
 
       if (titleText) {
@@ -479,12 +473,14 @@ function initHeroAnimation() {
     if (isShortDesktopLayout) {
       gsap.set(section, { clearProps: "height,maxHeight,minHeight" });
       section.style.minHeight = "auto";
+
       gsap.set([wrap, title1, description1], { clearProps: "all" });
       wrap.classList.remove("active");
+
       gsap.set(title1, { display: "none" });
       gsap.set(description1, { display: "none" });
-      gsap.set(title2, { display: "block", opacity: 1, position: "relative", left: 0, x: 0, y: 0, transform: "none" });
 
+      gsap.set(title2, { display: "block", opacity: 1, position: "relative", left: 0, x: 0, y: 0, transform: "none" });
       if (description2) {
         gsap.set(description2, { display: "block", opacity: 1, position: "relative", left: 0, x: 0, y: 0, transform: "none" });
       }
@@ -496,11 +492,9 @@ function initHeroAnimation() {
 
       calculateImagePositions();
       animateToStepIndex(0, 0.4);
-
       startAutoPlay(3500);
 
       const clickHandlers = [];
-
       const handleItemClick = (index) => {
         stopAutoPlay();
         calculateImagePositions();
@@ -525,17 +519,21 @@ function initHeroAnimation() {
           stopAutoPlay();
           const lastIndex = heroImages.length - 1;
           const lastImg = heroImages[lastIndex];
+
           if (lastImg) {
             gsap.killTweensOf(lastImg);
             lastImg.classList.remove("hero-img-2");
           }
+
           if (imgWrappers[lastIndex]) imgWrappers[lastIndex].classList.remove("active");
           if (contentItems[lastIndex]) contentItems[lastIndex].classList.remove("active");
+
           if (activeIndex === lastIndex) {
             const fallbackIndex = Math.max(0, lastIndex - 1);
             animateToStepIndex(fallbackIndex);
           }
         };
+
         btn.addEventListener("click", btnHandler);
         clickHandlers.push({ element: btn, clickHandler: btnHandler });
       });
@@ -585,7 +583,6 @@ function initHeroAnimation() {
       heroImgContent.addEventListener("mousedown", handlePointerDown);
       window.addEventListener("mousemove", handlePointerMove);
       window.addEventListener("mouseup", handlePointerUp);
-
       heroImgContent.addEventListener("touchstart", handlePointerDown, { passive: true });
       heroImgContent.addEventListener("touchend", handlePointerUp, { passive: true });
 
@@ -633,8 +630,8 @@ function initHeroAnimation() {
     gsap.set(title1, { opacity: 0, y: 0, autoAlpha: 0 });
     const title2InitialY = isLargeDesktopLayout ? 70 : isMobileXSLayout ? 35 : isMobileLayout ? 46 : 60;
     gsap.set(title2, { opacity: 0, autoAlpha: 0, y: title2InitialY });
-
     gsap.set(description1, { opacity: 0, y: 0 });
+
     if (description2) {
       const desc2InitialY = isMobileXXSLayout ? 40 : isMobileXSLayout ? 22 : isMobileLayout ? 34 : 40;
       gsap.set(description2, { opacity: 0, autoAlpha: 0, y: desc2InitialY });
@@ -682,6 +679,7 @@ function initHeroAnimation() {
     }
 
     if (heroBorderOverlay2) gsap.set(heroBorderOverlay2, { width: 0, opacity: 0 });
+
     if (itemDesc1) gsap.set(itemDesc1, { color: "#66666682" });
     if (itemDesc2) gsap.set(itemDesc2, { color: "#66666682" });
 
@@ -705,7 +703,6 @@ function initHeroAnimation() {
     const scrollDistancePerStep = isMobileLayout ? 500 : 700;
     const baseIntroDistance = isMobileLayout ? 800 : 1200;
     const dynamicEndScroll = baseIntroDistance + totalSteps * scrollDistancePerStep;
-    const stepLabels = Array.from({ length: totalSteps }, (_, i) => `step_${i}`);
 
     tl = gsap.timeline({
       scrollTrigger: {
@@ -717,28 +714,7 @@ function initHeroAnimation() {
         scrub: isMobileLayout ? 0.8 : 0.5,
         invalidateOnRefresh: true,
         fastScrollEnd: true,
-        preventOverlaps: true,
-        snap: {
-          snapTo: (progress) => {
-            if (isClickScrolling) return progress;
-            if (!tl || !tl.duration()) return progress;
-
-            const activeStartProgress = tl.labels.overlaysActiveStart / tl.duration();
-            const activeEndProgress = tl.labels[`step_${totalSteps - 1}`] / tl.duration();
-
-            if (progress >= activeStartProgress && progress <= activeEndProgress) {
-              const stepPositions = stepLabels
-                .map((label) => (tl.labels[label] !== undefined ? tl.labels[label] / tl.duration() : null))
-                .filter((val) => val !== null);
-              return gsap.utils.snap(stepPositions, progress);
-            }
-            return progress;
-          },
-          duration: { min: 0.2, max: 0.5 },
-          delay: 0.05,
-          directional: true,
-          ease: "power2.out",
-        },
+        preventOverlaps: true
       },
     });
 
@@ -746,11 +722,9 @@ function initHeroAnimation() {
     tl.to(title1, { opacity: 1, autoAlpha: 1, duration: titleFadeDuration, ease: "power1.out" }, 0);
     tl.to(".char-rest", { "--position": "0%", duration: 0.5, ease: "power1.inOut" }, titleFadeDuration + 0.1);
     tl.to(firstLetters, { color: "#00dafd", duration: 0.2, ease: "none" }, ">");
-
     tl.add(() => { syncMeraClonesPosition(); }, ">");
     tl.to(meraClones, { opacity: 1, duration: 0.15, ease: "linear" }, ">");
     tl.to(firstLetters, { opacity: 0, duration: 0.15, ease: "linear" }, "<");
-
     tl.to(meraClones, {
       left: (i, el) => {
         const wrapRect = wrap.getBoundingClientRect();
@@ -781,14 +755,12 @@ function initHeroAnimation() {
 
     const finalMoveDuration = 0.55;
     tl.to(description1, { y: 0, opacity: 0, autoAlpha: 0, duration: finalMoveDuration, ease: "power2.inOut" }, ">");
-
     if (description2) {
       tl.to(description2, { y: 0, opacity: 1, autoAlpha: 1, duration: finalMoveDuration, ease: "power2.inOut" }, "<");
     }
 
     tl.to([title1, cloneWrap], { y: -70, opacity: 0, autoAlpha: 0, duration: finalMoveDuration, ease: "power2.inOut" }, "<");
     tl.to(title2, { opacity: 1, autoAlpha: 1, y: 0, duration: finalMoveDuration, ease: "power2.inOut" }, "<");
-
     if (heroContentItems) {
       tl.to(heroContentItems, { opacity: 1, x: 0, duration: finalMoveDuration, ease: "power2.inOut" }, "<");
     }
@@ -882,17 +854,21 @@ function initHeroAnimation() {
         e.stopPropagation();
         const lastIndex = heroImages.length - 1;
         const lastImg = heroImages[lastIndex];
+
         if (lastImg) {
           gsap.killTweensOf(lastImg);
           lastImg.classList.remove("hero-img-2");
         }
+
         if (imgWrappers[lastIndex]) imgWrappers[lastIndex].classList.remove("active");
         if (contentItems[lastIndex]) contentItems[lastIndex].classList.remove("active");
+
         if (activeIndex === lastIndex) {
           const fallbackIndex = Math.max(0, lastIndex - 1);
           animateToStepIndex(fallbackIndex);
         }
       };
+
       btn.addEventListener("click", btnHandler);
       clickHandlers.push({ element: btn, clickHandler: btnHandler });
     });
