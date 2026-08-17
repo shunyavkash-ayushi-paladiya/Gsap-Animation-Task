@@ -1,6 +1,5 @@
 gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
 
-// Enable normalizeScroll for mobile to prevent address-bar height resize bugs
 ScrollTrigger.config({
   ignoreMobileResize: true,
   autoRefreshEvents: "DOMContentLoaded,load,visibilitychange"
@@ -74,6 +73,7 @@ function initHeroAnimation() {
 
   let activeIndex = 0;
   let isClickScrolling = false;
+  let autoPlayTimer = null;
 
   function getResponsiveTargetWidth() {
     if (isSmallMobileLayout) return "265%";
@@ -435,6 +435,22 @@ function initHeroAnimation() {
     }
   }
 
+  function startAutoPlay(intervalMs = 3500) {
+    stopAutoPlay();
+    autoPlayTimer = setInterval(() => {
+      const nextIndex = (activeIndex + 1) % heroImages.length;
+      calculateImagePositions();
+      animateToStepIndex(nextIndex, 0.8);
+    }, intervalMs);
+  }
+
+  function stopAutoPlay() {
+    if (autoPlayTimer) {
+      clearInterval(autoPlayTimer);
+      autoPlayTimer = null;
+    }
+  }
+
   mm.add({
     isLargeDesktop: "(min-width: 1380px)",
     isDesktop: "(min-width: 992px) and (min-height: 701px)",
@@ -468,7 +484,7 @@ function initHeroAnimation() {
       gsap.set(title1, { display: "none" });
       gsap.set(description1, { display: "none" });
       gsap.set(title2, { display: "block", opacity: 1, position: "relative", left: 0, x: 0, y: 0, transform: "none" });
-      
+
       if (description2) {
         gsap.set(description2, { display: "block", opacity: 1, position: "relative", left: 0, x: 0, y: 0, transform: "none" });
       }
@@ -481,8 +497,12 @@ function initHeroAnimation() {
       calculateImagePositions();
       animateToStepIndex(0, 0.4);
 
+      startAutoPlay(3500);
+
       const clickHandlers = [];
+
       const handleItemClick = (index) => {
+        stopAutoPlay();
         calculateImagePositions();
         animateToStepIndex(index, 0.8);
       };
@@ -502,6 +522,7 @@ function initHeroAnimation() {
       heroBtns.forEach((btn) => {
         const btnHandler = (e) => {
           e.stopPropagation();
+          stopAutoPlay();
           const lastIndex = heroImages.length - 1;
           const lastImg = heroImages[lastIndex];
           if (lastImg) {
@@ -519,7 +540,63 @@ function initHeroAnimation() {
         clickHandlers.push({ element: btn, clickHandler: btnHandler });
       });
 
+      let startX = 0;
+      let startY = 0;
+      let isDragging = false;
+      const minSwipeDistance = 40;
+
+      heroImgContent.style.cursor = "grab";
+
+      const handlePointerDown = (e) => {
+        isDragging = true;
+        startX = e.type.includes("touch") ? e.touches[0].clientX : e.clientX;
+        startY = e.type.includes("touch") ? e.touches[0].clientY : e.clientY;
+        heroImgContent.style.cursor = "grabbing";
+        stopAutoPlay();
+      };
+
+      const handlePointerMove = (e) => {
+        if (!isDragging) return;
+      };
+
+      const handlePointerUp = (e) => {
+        if (!isDragging) return;
+        isDragging = false;
+        heroImgContent.style.cursor = "grab";
+
+        const endX = e.type.includes("touch") ? e.changedTouches[0].clientX : e.clientX;
+        const endY = e.type.includes("touch") ? e.changedTouches[0].clientY : e.clientY;
+        const deltaX = endX - startX;
+        const deltaY = endY - startY;
+
+        if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > minSwipeDistance) {
+          if (deltaX < 0) {
+            if (activeIndex < heroImages.length - 1) {
+              handleItemClick(activeIndex + 1);
+            }
+          } else {
+            if (activeIndex > 0) {
+              handleItemClick(activeIndex - 1);
+            }
+          }
+        }
+      };
+
+      heroImgContent.addEventListener("mousedown", handlePointerDown);
+      window.addEventListener("mousemove", handlePointerMove);
+      window.addEventListener("mouseup", handlePointerUp);
+
+      heroImgContent.addEventListener("touchstart", handlePointerDown, { passive: true });
+      heroImgContent.addEventListener("touchend", handlePointerUp, { passive: true });
+
       return () => {
+        stopAutoPlay();
+        heroImgContent.removeEventListener("mousedown", handlePointerDown);
+        window.removeEventListener("mousemove", handlePointerMove);
+        window.removeEventListener("mouseup", handlePointerUp);
+        heroImgContent.removeEventListener("touchstart", handlePointerDown);
+        heroImgContent.removeEventListener("touchend", handlePointerUp);
+
         clickHandlers.forEach(({ element, clickHandler }) => {
           if (element) element.removeEventListener("click", clickHandler);
         });
@@ -542,7 +619,6 @@ function initHeroAnimation() {
 
     let { naturalWrapHeight, targetWrapHeight } = recalculateHeights();
 
-    // Use ScrollTrigger's refreshInit instead of window resize to avoid loop glitches
     const handleRefreshInit = () => {
       calculateImagePositions();
       const heights = recalculateHeights();
