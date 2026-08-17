@@ -1,11 +1,14 @@
 gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
-ScrollTrigger.config({ ignoreMobileResize: true, autoRefreshEvents: "DOMContentLoaded,load,visibilitychange" });
+ScrollTrigger.config({
+  ignoreMobileResize: true,
+  autoRefreshEvents: "DOMContentLoaded,load,visibilitychange",
+});
 
 if (ScrollTrigger.isTouch) {
   ScrollTrigger.normalizeScroll(true);
 }
 
-const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+const isTouchDevice = "ontouchstart" in window || navigator.maxTouchPoints > 0;
 
 function safeInit() {
   if (document.fonts && document.fonts.ready) {
@@ -28,9 +31,13 @@ function initHeroAnimation() {
   const wrap = document.querySelector(".hero-title-content");
   const title1 = document.querySelector(".hero-title:not(.hero-title-2)");
   const title2 = document.querySelector(".hero-title-2");
-  const description1 = document.querySelector(".hero-description:not(.hero-description-2)");
+  const description1 = document.querySelector(
+    ".hero-description:not(.hero-description-2)",
+  );
   const description2 = document.querySelector(".hero-description-2");
-  const heroDescriptionContent = document.querySelector(".hero-description-content");
+  const heroDescriptionContent = document.querySelector(
+    ".hero-description-content",
+  );
   const heroImgContent = document.querySelector(".hero-img-content");
   const heroContentItems = document.querySelector(".hero-content-items");
   const heroOverlays = document.querySelector(".hero-overlays");
@@ -39,12 +46,22 @@ function initHeroAnimation() {
   const heroBorderOverlay2 = document.querySelector(".hero-border-overlay-2");
   const borderWrapper = document.querySelector(".hero-content-item-wrapper");
   const contentItems = document.querySelectorAll(".hero-content-item");
-  const itemDesc1 = document.querySelector(".hero-item-description:not(.hero-item-description-v2)");
+  const itemDesc1 = document.querySelector(
+    ".hero-item-description:not(.hero-item-description-v2)",
+  );
   const itemDesc2 = document.querySelector(".hero-item-description-v2");
   const heroContent = document.querySelector(".hero-content");
   const heroBtns = document.querySelectorAll(".hero-btn");
 
-  if (!section || !wrap || !title1 || !title2 || !description1 || !heroImgContent || !heroContent) {
+  if (
+    !section ||
+    !wrap ||
+    !title1 ||
+    !title2 ||
+    !description1 ||
+    !heroImgContent ||
+    !heroContent
+  ) {
     console.warn("Hero animation skipped: Core DOM elements missing.");
     return;
   }
@@ -86,8 +103,12 @@ function initHeroAnimation() {
     if (!borderWrapper || imgWrappers.length === 0) return;
 
     const originalImgStyle = heroImgContent.getAttribute("style") || "";
-    const originalContentItemsStyle = heroContentItems ? heroContentItems.getAttribute("style") || "" : "";
-    const originalOverlaysStyle = heroOverlays ? heroOverlays.getAttribute("style") || "" : "";
+    const originalContentItemsStyle = heroContentItems
+      ? heroContentItems.getAttribute("style") || ""
+      : "";
+    const originalOverlaysStyle = heroOverlays
+      ? heroOverlays.getAttribute("style") || ""
+      : "";
 
     gsap.set([heroImgContent, heroContentItems, heroOverlays], {
       clearProps: "transform,scale,x,y,width,height",
@@ -104,8 +125,24 @@ function initHeroAnimation() {
 
     imgWrappers.forEach((wrapper) => {
       const rect = wrapper.getBoundingClientRect();
-      const pctLeft = imgContentRect.width > 0 ? Math.max(0, Math.min(100, ((rect.left - imgContentRect.left) / imgContentRect.width) * 100)) : 0;
-      const pctWidth = imgContentRect.width > 0 ? Math.max(0, Math.min(100, (rect.width / imgContentRect.width) * 100)) : 0;
+      const pctLeft =
+        imgContentRect.width > 0
+          ? Math.max(
+              0,
+              Math.min(
+                100,
+                ((rect.left - imgContentRect.left) / imgContentRect.width) *
+                  100,
+              ),
+            )
+          : 0;
+      const pctWidth =
+        imgContentRect.width > 0
+          ? Math.max(
+              0,
+              Math.min(100, (rect.width / imgContentRect.width) * 100),
+            )
+          : 0;
       const centerOffset = rect.left - imgContentRect.left + rect.width / 2;
 
       imagePositions.push({
@@ -131,21 +168,26 @@ function initHeroAnimation() {
     });
 
     heroImgContent.setAttribute("style", originalImgStyle);
-    if (heroContentItems) heroContentItems.setAttribute("style", originalContentItemsStyle);
+    if (heroContentItems)
+      heroContentItems.setAttribute("style", originalContentItemsStyle);
     if (heroOverlays) heroOverlays.setAttribute("style", originalOverlaysStyle);
   }
 
   function setInteractiveState(enabled, targetIndex = activeIndex) {
     imgWrappers.forEach((wrapper, idx) => {
       if (wrapper) {
-        wrapper.style.pointerEvents = !enabled || idx === targetIndex ? "none" : "auto";
-        wrapper.style.cursor = !enabled || idx === targetIndex ? "default" : "pointer";
+        wrapper.style.pointerEvents =
+          !enabled || idx === targetIndex ? "none" : "auto";
+        wrapper.style.cursor =
+          !enabled || idx === targetIndex ? "default" : "pointer";
       }
     });
     contentItems.forEach((item, idx) => {
       if (item) {
-        item.style.pointerEvents = !enabled || idx === targetIndex ? "none" : "auto";
-        item.style.cursor = !enabled || idx === targetIndex ? "default" : "pointer";
+        item.style.pointerEvents =
+          !enabled || idx === targetIndex ? "none" : "auto";
+        item.style.cursor =
+          !enabled || idx === targetIndex ? "default" : "pointer";
       }
     });
   }
@@ -174,7 +216,8 @@ function initHeroAnimation() {
 
       const firstLetterSpan = document.createElement("span");
       firstLetterSpan.className = "char first-letter";
-      firstLetterSpan.dataset.acronym = meraLetters[firstLetterIndex] || part[0];
+      firstLetterSpan.dataset.acronym =
+        meraLetters[firstLetterIndex] || part[0];
       firstLetterSpan.textContent = part[0];
       firstLetterSpan.style.display = "inline-block";
       word.appendChild(firstLetterSpan);
@@ -262,7 +305,9 @@ function initHeroAnimation() {
 
   function updateMeraCloneTargets(clones, wrapRect, gap = 4) {
     const currentWrapRect = wrapRect || wrap.getBoundingClientRect();
-    const totalWidth = clones.reduce((sum, clone) => sum + clone.offsetWidth, 0) + gap * (clones.length - 1);
+    const totalWidth =
+      clones.reduce((sum, clone) => sum + clone.offsetWidth, 0) +
+      gap * (clones.length - 1);
     let x = currentWrapRect.width / 2 - totalWidth / 2;
 
     clones.forEach((clone) => {
@@ -376,7 +421,10 @@ function initHeroAnimation() {
         });
       } else {
         if (index < 4) {
-          const targetWidth = Math.max(0, Math.min(imagePositions[index].right, borderWrapper.offsetWidth));
+          const targetWidth = Math.max(
+            0,
+            Math.min(imagePositions[index].right, borderWrapper.offsetWidth),
+          );
           gsap.to(heroBorderOverlay, {
             opacity: 1,
             width: targetWidth,
@@ -392,7 +440,10 @@ function initHeroAnimation() {
             overwrite: "auto",
           });
         } else {
-          const maxOverlay1Width = Math.max(0, Math.min(imagePositions[3].right, borderWrapper.offsetWidth));
+          const maxOverlay1Width = Math.max(
+            0,
+            Math.min(imagePositions[3].right, borderWrapper.offsetWidth),
+          );
           const targetWidth2 = Math.max(0, imagePositions[index].width);
           gsap.to(heroBorderOverlay, {
             opacity: 1,
@@ -445,60 +496,618 @@ function initHeroAnimation() {
     }
   }
 
-  mm.add({
-    isLargeDesktop: "(min-width: 1380px)",
-    isDesktop: "(min-width: 992px) and (min-height: 701px)",
-    isShortDesktop: "(min-width: 992px) and (max-height: 700px)",
-    isMobile: "(max-width: 991px)",
-    isTabletMobile: "(max-width: 991px) and (min-width: 768px)",
-    isMediumMobile: "(max-width: 767px) and (min-width: 480px)",
-    isSmallMobile: "(max-width: 479px)",
-    isMobileXS: "(max-width: 575px)",
-    isMobileXXS: "(max-width: 335px)",
-    isShortScreen: "(max-height: 700px)",
-  }, (context) => {
-    isLargeDesktopLayout = context.conditions.isLargeDesktop;
-    isMobileLayout = context.conditions.isMobile;
-    isTabletMobileLayout = context.conditions.isTabletMobile;
-    isMediumMobileLayout = context.conditions.isMediumMobile;
-    isSmallMobileLayout = context.conditions.isSmallMobile;
-    isMobileXSLayout = context.conditions.isMobileXS;
-    isMobileXXSLayout = context.conditions.isMobileXXS;
-    isShortDesktopLayout = context.conditions.isShortDesktop;
+  mm.add(
+    {
+      isLargeDesktop: "(min-width: 1380px)",
+      isDesktop: "(min-width: 992px) and (min-height: 701px)",
+      isShortDesktop: "(min-width: 992px) and (max-height: 700px)",
+      isMobile: "(max-width: 991px)",
+      isTabletMobile: "(max-width: 991px) and (min-width: 768px)",
+      isMediumMobile: "(max-width: 767px) and (min-width: 480px)",
+      isSmallMobile: "(max-width: 479px)",
+      isMobileXS: "(max-width: 575px)",
+      isMobileXXS: "(max-width: 335px)",
+      isShortScreen: "(max-height: 700px)",
+    },
+    (context) => {
+      isLargeDesktopLayout = context.conditions.isLargeDesktop;
+      isMobileLayout = context.conditions.isMobile;
+      isTabletMobileLayout = context.conditions.isTabletMobile;
+      isMediumMobileLayout = context.conditions.isMediumMobile;
+      isSmallMobileLayout = context.conditions.isSmallMobile;
+      isMobileXSLayout = context.conditions.isMobileXS;
+      isMobileXXSLayout = context.conditions.isMobileXXS;
+      isShortDesktopLayout = context.conditions.isShortDesktop;
 
-    if (context.conditions.isMobile || context.conditions.isShortScreen) {
-      gsap.set(section, { clearProps: "height,maxHeight,minHeight" });
-    }
-
-    if (isShortDesktopLayout) {
-      gsap.set(section, { clearProps: "height,maxHeight,minHeight" });
-      section.style.minHeight = "auto";
-
-      gsap.set([wrap, title1, description1], { clearProps: "all" });
-      wrap.classList.remove("active");
-
-      gsap.set(title1, { display: "none" });
-      gsap.set(description1, { display: "none" });
-
-      gsap.set(title2, { display: "block", opacity: 1, position: "relative", left: 0, x: 0, y: 0, transform: "none" });
-      if (description2) {
-        gsap.set(description2, { display: "block", opacity: 1, position: "relative", left: 0, x: 0, y: 0, transform: "none" });
+      if (context.conditions.isMobile || context.conditions.isShortScreen) {
+        gsap.set(section, { clearProps: "height,maxHeight,minHeight" });
       }
 
-      if (heroDescriptionContent) gsap.set(heroDescriptionContent, { overflow: "visible" });
-      gsap.set(heroImgContent, { opacity: 1, y: 0, scale: 1, x: 0, width: "auto", clearProps: "transform" });
-      if (heroContentItems) gsap.set(heroContentItems, { opacity: 1, x: 0 });
-      if (heroOverlays) gsap.set(heroOverlays, { opacity: 1, y: 0 });
+      if (isShortDesktopLayout) {
+        gsap.set(section, { clearProps: "height,maxHeight,minHeight" });
+        section.style.minHeight = "auto";
+
+        gsap.set([wrap, title1, description1], { clearProps: "all" });
+        wrap.classList.remove("active");
+
+        gsap.set(title1, { display: "none" });
+        gsap.set(description1, { display: "none" });
+
+        gsap.set(title2, {
+          display: "block",
+          opacity: 1,
+          position: "relative",
+          left: 0,
+          x: 0,
+          y: 0,
+          transform: "none",
+        });
+        if (description2) {
+          gsap.set(description2, {
+            display: "block",
+            opacity: 1,
+            position: "relative",
+            left: 0,
+            x: 0,
+            y: 0,
+            transform: "none",
+          });
+        }
+
+        if (heroDescriptionContent)
+          gsap.set(heroDescriptionContent, { overflow: "visible" });
+        gsap.set(heroImgContent, {
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          x: 0,
+          width: "auto",
+          clearProps: "transform",
+        });
+        if (heroContentItems) gsap.set(heroContentItems, { opacity: 1, x: 0 });
+        if (heroOverlays) gsap.set(heroOverlays, { opacity: 1, y: 0 });
+
+        calculateImagePositions();
+        animateToStepIndex(0, 0.4);
+        startAutoPlay(3500);
+
+        const clickHandlers = [];
+        const handleItemClick = (index) => {
+          stopAutoPlay();
+          calculateImagePositions();
+          animateToStepIndex(index, 0.8);
+        };
+
+        imgWrappers.forEach((wrapper, index) => {
+          const clickHandler = () => handleItemClick(index);
+          wrapper.addEventListener("click", clickHandler);
+          clickHandlers.push({ element: wrapper, clickHandler });
+        });
+
+        contentItems.forEach((item, index) => {
+          const clickHandler = () => handleItemClick(index);
+          item.addEventListener("click", clickHandler);
+          clickHandlers.push({ element: item, clickHandler });
+        });
+
+        heroBtns.forEach((btn) => {
+          const btnHandler = (e) => {
+            e.stopPropagation();
+            stopAutoPlay();
+            const lastIndex = heroImages.length - 1;
+            const lastImg = heroImages[lastIndex];
+
+            if (lastImg) {
+              gsap.killTweensOf(lastImg);
+              lastImg.classList.remove("hero-img-2");
+            }
+
+            if (imgWrappers[lastIndex])
+              imgWrappers[lastIndex].classList.remove("active");
+            if (contentItems[lastIndex])
+              contentItems[lastIndex].classList.remove("active");
+
+            if (activeIndex === lastIndex) {
+              const fallbackIndex = Math.max(0, lastIndex - 1);
+              animateToStepIndex(fallbackIndex);
+            }
+          };
+
+          btn.addEventListener("click", btnHandler);
+          clickHandlers.push({ element: btn, clickHandler: btnHandler });
+        });
+
+        let startX = 0;
+        let startY = 0;
+        let isDragging = false;
+        const minSwipeDistance = 40;
+
+        heroImgContent.style.cursor = "grab";
+
+        const handlePointerDown = (e) => {
+          isDragging = true;
+          startX = e.type.includes("touch") ? e.touches[0].clientX : e.clientX;
+          startY = e.type.includes("touch") ? e.touches[0].clientY : e.clientY;
+          heroImgContent.style.cursor = "grabbing";
+          stopAutoPlay();
+        };
+
+        const handlePointerMove = (e) => {
+          if (!isDragging) return;
+        };
+
+        const handlePointerUp = (e) => {
+          if (!isDragging) return;
+          isDragging = false;
+          heroImgContent.style.cursor = "grab";
+
+          const endX = e.type.includes("touch")
+            ? e.changedTouches[0].clientX
+            : e.clientX;
+          const endY = e.type.includes("touch")
+            ? e.changedTouches[0].clientY
+            : e.clientY;
+          const deltaX = endX - startX;
+          const deltaY = endY - startY;
+
+          if (
+            Math.abs(deltaX) > Math.abs(deltaY) &&
+            Math.abs(deltaX) > minSwipeDistance
+          ) {
+            if (deltaX < 0) {
+              if (activeIndex < heroImages.length - 1) {
+                handleItemClick(activeIndex + 1);
+              }
+            } else {
+              if (activeIndex > 0) {
+                handleItemClick(activeIndex - 1);
+              }
+            }
+          }
+        };
+
+        heroImgContent.addEventListener("mousedown", handlePointerDown);
+        window.addEventListener("mousemove", handlePointerMove);
+        window.addEventListener("mouseup", handlePointerUp);
+        heroImgContent.addEventListener("touchstart", handlePointerDown, {
+          passive: true,
+        });
+        heroImgContent.addEventListener("touchend", handlePointerUp, {
+          passive: true,
+        });
+
+        return () => {
+          stopAutoPlay();
+          heroImgContent.removeEventListener("mousedown", handlePointerDown);
+          window.removeEventListener("mousemove", handlePointerMove);
+          window.removeEventListener("mouseup", handlePointerUp);
+          heroImgContent.removeEventListener("touchstart", handlePointerDown);
+          heroImgContent.removeEventListener("touchend", handlePointerUp);
+
+          clickHandlers.forEach(({ element, clickHandler }) => {
+            if (element) element.removeEventListener("click", clickHandler);
+          });
+        };
+      }
 
       calculateImagePositions();
-      animateToStepIndex(0, 0.4);
-      startAutoPlay(3500);
+      setInteractiveState(false);
+
+      const firstLetters = gsap.utils.toArray(".first-letter", title1);
+      let meraClones = buildMeraClones(firstLetters);
+
+      function recalculateHeights() {
+        gsap.set([wrap, title2], { clearProps: "height,overflow" });
+        const naturalWrapHeight = wrap.getBoundingClientRect().height;
+        const naturalTitle2Height = title2.getBoundingClientRect().height;
+        const targetWrapHeight = naturalTitle2Height;
+        return { naturalWrapHeight, targetWrapHeight };
+      }
+
+      let { naturalWrapHeight, targetWrapHeight } = recalculateHeights();
+
+      const handleRefreshInit = () => {
+        calculateImagePositions();
+        const heights = recalculateHeights();
+        naturalWrapHeight = heights.naturalWrapHeight;
+        targetWrapHeight = heights.targetWrapHeight;
+        syncMeraClonesPosition();
+        if (tl) tl.invalidate();
+      };
+
+      ScrollTrigger.addEventListener("refreshInit", handleRefreshInit);
+
+      gsap.set(title1, { opacity: 0, y: 0, autoAlpha: 0 });
+      const title2InitialY = isLargeDesktopLayout
+        ? 70
+        : isMobileXSLayout
+          ? 35
+          : isMobileLayout
+            ? 46
+            : 60;
+      gsap.set(title2, { opacity: 0, autoAlpha: 0, y: title2InitialY });
+      gsap.set(description1, { opacity: 0, y: 0 });
+
+      if (description2) {
+        const desc2InitialY = isMobileXXSLayout
+          ? 40
+          : isMobileXSLayout
+            ? 22
+            : isMobileLayout
+              ? 34
+              : 40;
+        gsap.set(description2, { opacity: 0, autoAlpha: 0, y: desc2InitialY });
+      }
+
+      const startImgXMobile =
+        isMobileLayout && imgOffsetsMobile[0] !== undefined
+          ? imgOffsetsMobile[0]
+          : 0;
+      if (heroContentItems) gsap.set(heroContentItems, { opacity: 0, x: 0 });
+
+      if (heroOverlays) {
+        gsap.set(heroOverlays, {
+          opacity: 0,
+          y: 30,
+          position: "absolute",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
+          pointerEvents: "none",
+          zIndex: 10,
+        });
+      }
+
+      contentItems.forEach((item) => item.classList.remove("active"));
+      imgWrappers.forEach((wrapper) => wrapper.classList.remove("active"));
+
+      if (heroImgOverlay) {
+        gsap.set(heroImgOverlay, { opacity: 0 });
+        if (imagePositions[0]) {
+          const x1 = imagePositions[0].imgPctLeft;
+          const x2 = imagePositions[0].imgPctRight;
+          heroImgOverlay.style.clipPath = `polygon(
+          0% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 0%, 
+          ${x1}% 0%, ${x1}% 100%, ${x2}% 100%, ${x2}% 0%, ${x1}% 0%
+        )`;
+        }
+      }
+
+      if (heroBorderOverlay) {
+        const firstCardWidth = () => {
+          if (isMobileLayout) return itemCumulativeWidths[0] || 0;
+          if (!borderWrapper || !imagePositions[0]) return 0;
+          return Math.max(
+            0,
+            Math.min(imagePositions[0].right, borderWrapper.offsetWidth),
+          );
+        };
+        gsap.set(heroBorderOverlay, { opacity: 0, width: firstCardWidth });
+      }
+
+      if (heroBorderOverlay2)
+        gsap.set(heroBorderOverlay2, { width: 0, opacity: 0 });
+
+      if (itemDesc1) gsap.set(itemDesc1, { color: "#66666682" });
+      if (itemDesc2) gsap.set(itemDesc2, { color: "#66666682" });
+
+      contentItems.forEach((item) => {
+        const titleText = item.querySelector(".hero-content-title");
+        const descText = item.querySelector(".hero-content-description");
+        if (titleText) gsap.set(titleText, { color: "#66666682" });
+        if (descText) gsap.set(descText, { color: "#66666682" });
+      });
+
+      gsap.set(heroImgContent, {
+        opacity: 0,
+        y: isMobileLayout ? 0 : 70,
+        scale: isMobileLayout ? 1 : 0.5,
+        x: startImgXMobile,
+        width: isMobileLayout ? "100%" : "auto",
+        transformOrigin: "center bottom",
+      });
+
+      const totalSteps = heroImages.length;
+      const scrollDistancePerStep = isMobileLayout ? 500 : 700;
+      const baseIntroDistance = isMobileLayout ? 800 : 1200;
+      const dynamicEndScroll =
+        baseIntroDistance + totalSteps * scrollDistancePerStep;
+
+      tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: section,
+          start: "top top",
+          end: `+=${dynamicEndScroll}`,
+          pin: true,
+          pinSpacing: true,
+          scrub: isMobileLayout ? 0.8 : 0.5,
+          invalidateOnRefresh: true,
+          fastScrollEnd: true,
+          preventOverlaps: true,
+        },
+      });
+
+      const titleFadeDuration = 0.3;
+      tl.to(
+        title1,
+        {
+          opacity: 1,
+          autoAlpha: 1,
+          duration: titleFadeDuration,
+          ease: "power1.out",
+        },
+        0,
+      );
+      tl.to(
+        ".char-rest",
+        { "--position": "0%", duration: 0.5, ease: "power1.inOut" },
+        titleFadeDuration + 0.1,
+      );
+      tl.to(
+        firstLetters,
+        { color: "#00dafd", duration: 0.2, ease: "none" },
+        ">",
+      );
+      tl.add(() => {
+        syncMeraClonesPosition();
+      }, ">");
+      tl.to(meraClones, { opacity: 1, duration: 0.15, ease: "linear" }, ">");
+      tl.to(firstLetters, { opacity: 0, duration: 0.15, ease: "linear" }, "<");
+      tl.to(
+        meraClones,
+        {
+          left: (i, el) => {
+            const wrapRect = wrap.getBoundingClientRect();
+            const clones = gsap.utils.toArray(".mera-clone");
+            if (clones.length) updateMeraCloneTargets(clones, wrapRect, 4);
+            return Number(el.dataset.targetLeft);
+          },
+          top: "50%",
+          yPercent: -50,
+          duration: 0.5,
+          ease: "power2.inOut",
+          onComplete: () => wrap.classList.remove("active"),
+          onReverseComplete: () => wrap.classList.add("active"),
+        },
+        ">",
+      );
+
+      tl.to(
+        wrap,
+        {
+          height: () => targetWrapHeight,
+          duration: 1.15,
+          ease: "power2.inOut",
+        },
+        ">",
+      );
+
+      if (isMobileLayout) {
+        tl.to(
+          heroImgContent,
+          {
+            opacity: 1,
+            x: () => startImgXMobile,
+            duration: 0.8,
+            ease: "power2.inOut",
+          },
+          ">",
+        );
+      } else {
+        tl.to(
+          heroImgContent,
+          {
+            opacity: 1,
+            y: -36,
+            scale: 1,
+            duration: 1.15,
+            ease: "power2.inOut",
+          },
+          "<",
+        );
+      }
+
+      tl.to(
+        description1,
+        { opacity: 1, duration: 0.4, ease: "power1.out" },
+        ">+=0.2",
+      );
+      if (description2) {
+        tl.to(
+          description2,
+          { opacity: 1, autoAlpha: 1, duration: 0.4, ease: "power1.out" },
+          "<",
+        );
+      }
+
+      const finalMoveDuration = 0.55;
+      tl.to(
+        description1,
+        {
+          y: 0,
+          opacity: 0,
+          autoAlpha: 0,
+          duration: finalMoveDuration,
+          ease: "power2.inOut",
+        },
+        ">",
+      );
+      if (description2) {
+        tl.to(
+          description2,
+          {
+            y: 0,
+            opacity: 1,
+            autoAlpha: 1,
+            duration: finalMoveDuration,
+            ease: "power2.inOut",
+          },
+          "<",
+        );
+      }
+
+      tl.to(
+        [title1, cloneWrap],
+        {
+          y: -70,
+          opacity: 0,
+          autoAlpha: 0,
+          duration: finalMoveDuration,
+          ease: "power2.inOut",
+        },
+        "<",
+      );
+      tl.to(
+        title2,
+        {
+          opacity: 1,
+          autoAlpha: 1,
+          y: 0,
+          duration: finalMoveDuration,
+          ease: "power2.inOut",
+        },
+        "<",
+      );
+      if (heroContentItems) {
+        tl.to(
+          heroContentItems,
+          {
+            opacity: 1,
+            x: 0,
+            duration: finalMoveDuration,
+            ease: "power2.inOut",
+          },
+          "<",
+        );
+      }
+
+      if (isMobileLayout) {
+        tl.to(
+          heroImgContent,
+          {
+            width: () => getResponsiveTargetWidth(),
+            x: () => startImgXMobile,
+            duration: 0.8,
+            ease: "power2.inOut",
+          },
+          ">",
+        );
+      }
+
+      tl.add("overlaysEntry", ">");
+      tl.add(() => calculateImagePositions(), "overlaysEntry-=0.05");
+
+      if (heroOverlays)
+        tl.to(
+          heroOverlays,
+          { opacity: 0.5, y: 0, duration: 0.4, ease: "power2.out" },
+          "overlaysEntry",
+        );
+      if (heroImgOverlay)
+        tl.to(
+          heroImgOverlay,
+          { opacity: 0.5, duration: 0.4, ease: "power2.out" },
+          "overlaysEntry",
+        );
+
+      const firstItem = contentItems[0];
+      if (firstItem) {
+        const firstTitle = firstItem.querySelector(".hero-content-title");
+        const firstDesc = firstItem.querySelector(".hero-content-description");
+        if (firstTitle)
+          tl.to(
+            firstTitle,
+            { color: "#00dafd", duration: 0.4, ease: "power2.out" },
+            "overlaysEntry",
+          );
+        if (firstDesc)
+          tl.to(
+            firstDesc,
+            { color: "#ffffff", duration: 0.4, ease: "power2.out" },
+            "overlaysEntry",
+          );
+      }
+
+      if (heroBorderOverlay)
+        tl.to(
+          heroBorderOverlay,
+          { opacity: 1, duration: 0.4, ease: "power2.out" },
+          "overlaysEntry",
+        );
+      if (itemDesc1)
+        tl.to(
+          itemDesc1,
+          { color: "#ffffff", duration: 0.4, ease: "power2.out" },
+          "overlaysEntry",
+        );
+
+      if (heroOverlays)
+        tl.to(
+          heroOverlays,
+          { opacity: 1, duration: 0.4, ease: "power2.out" },
+          ">",
+        );
+      if (heroImgOverlay)
+        tl.to(
+          heroImgOverlay,
+          { opacity: 1, duration: 0.4, ease: "power2.out" },
+          "<",
+        );
+
+      tl.add("overlaysActiveStart", ">");
+      tl.add(() => {
+        if (isClickScrolling) return;
+        animateToStepIndex(0, 0.4);
+      }, "overlaysActiveStart");
+
+      if (heroImages.length > 0) {
+        heroImages.forEach((_, index) => {
+          const isFirst = index === 0;
+          const stepLabel = `step_${index}`;
+          tl.add(stepLabel, isFirst ? "overlaysActiveStart" : "+=0.6");
+          tl.add(() => {
+            if (isClickScrolling) return;
+            animateToStepIndex(index, 0.6);
+          }, stepLabel);
+        });
+      }
+
+      tl.to({}, { duration: 1.0 });
 
       const clickHandlers = [];
       const handleItemClick = (index) => {
-        stopAutoPlay();
+        if (!tl || index === activeIndex) return;
         calculateImagePositions();
-        animateToStepIndex(index, 0.8);
+        const labelTime = tl.labels[`step_${index}`];
+
+        if (labelTime !== undefined) {
+          isClickScrolling = true;
+          animateToStepIndex(index, 0.8);
+
+          const scrollST = tl.scrollTrigger;
+          const stepOffset = index === 0 ? 0.5 : 0.8;
+          const finalTweenTime = labelTime + stepOffset;
+          const safeTime = Math.min(finalTweenTime, tl.duration());
+          const progress = safeTime / tl.duration();
+          const targetScroll =
+            scrollST.start + progress * (scrollST.end - scrollST.start);
+
+          gsap.to(window, {
+            scrollTo: { y: targetScroll, autoKill: true },
+            duration: 1.0,
+            ease: "power2.inOut",
+            onStart: () => {
+              isClickScrolling = true;
+            },
+            onComplete: () => {
+              isClickScrolling = false;
+            },
+            onInterrupt: () => {
+              isClickScrolling = false;
+            },
+          });
+        }
       };
 
       imgWrappers.forEach((wrapper, index) => {
@@ -516,7 +1125,6 @@ function initHeroAnimation() {
       heroBtns.forEach((btn) => {
         const btnHandler = (e) => {
           e.stopPropagation();
-          stopAutoPlay();
           const lastIndex = heroImages.length - 1;
           const lastImg = heroImages[lastIndex];
 
@@ -525,8 +1133,10 @@ function initHeroAnimation() {
             lastImg.classList.remove("hero-img-2");
           }
 
-          if (imgWrappers[lastIndex]) imgWrappers[lastIndex].classList.remove("active");
-          if (contentItems[lastIndex]) contentItems[lastIndex].classList.remove("active");
+          if (imgWrappers[lastIndex])
+            imgWrappers[lastIndex].classList.remove("active");
+          if (contentItems[lastIndex])
+            contentItems[lastIndex].classList.remove("active");
 
           if (activeIndex === lastIndex) {
             const fallbackIndex = Math.max(0, lastIndex - 1);
@@ -538,354 +1148,20 @@ function initHeroAnimation() {
         clickHandlers.push({ element: btn, clickHandler: btnHandler });
       });
 
-      let startX = 0;
-      let startY = 0;
-      let isDragging = false;
-      const minSwipeDistance = 40;
-
-      heroImgContent.style.cursor = "grab";
-
-      const handlePointerDown = (e) => {
-        isDragging = true;
-        startX = e.type.includes("touch") ? e.touches[0].clientX : e.clientX;
-        startY = e.type.includes("touch") ? e.touches[0].clientY : e.clientY;
-        heroImgContent.style.cursor = "grabbing";
-        stopAutoPlay();
-      };
-
-      const handlePointerMove = (e) => {
-        if (!isDragging) return;
-      };
-
-      const handlePointerUp = (e) => {
-        if (!isDragging) return;
-        isDragging = false;
-        heroImgContent.style.cursor = "grab";
-
-        const endX = e.type.includes("touch") ? e.changedTouches[0].clientX : e.clientX;
-        const endY = e.type.includes("touch") ? e.changedTouches[0].clientY : e.clientY;
-        const deltaX = endX - startX;
-        const deltaY = endY - startY;
-
-        if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > minSwipeDistance) {
-          if (deltaX < 0) {
-            if (activeIndex < heroImages.length - 1) {
-              handleItemClick(activeIndex + 1);
-            }
-          } else {
-            if (activeIndex > 0) {
-              handleItemClick(activeIndex - 1);
-            }
-          }
-        }
-      };
-
-      heroImgContent.addEventListener("mousedown", handlePointerDown);
-      window.addEventListener("mousemove", handlePointerMove);
-      window.addEventListener("mouseup", handlePointerUp);
-      heroImgContent.addEventListener("touchstart", handlePointerDown, { passive: true });
-      heroImgContent.addEventListener("touchend", handlePointerUp, { passive: true });
+      setTimeout(() => {
+        calculateImagePositions();
+        ScrollTrigger.refresh();
+      }, 300);
 
       return () => {
-        stopAutoPlay();
-        heroImgContent.removeEventListener("mousedown", handlePointerDown);
-        window.removeEventListener("mousemove", handlePointerMove);
-        window.removeEventListener("mouseup", handlePointerUp);
-        heroImgContent.removeEventListener("touchstart", handlePointerDown);
-        heroImgContent.removeEventListener("touchend", handlePointerUp);
-
+        ScrollTrigger.removeEventListener("refreshInit", handleRefreshInit);
         clickHandlers.forEach(({ element, clickHandler }) => {
           if (element) element.removeEventListener("click", clickHandler);
         });
+        if (tl) tl.kill();
       };
-    }
-
-    calculateImagePositions();
-    setInteractiveState(false);
-
-    const firstLetters = gsap.utils.toArray(".first-letter", title1);
-    let meraClones = buildMeraClones(firstLetters);
-
-    function recalculateHeights() {
-      gsap.set([wrap, title2], { clearProps: "height,overflow" });
-      const naturalWrapHeight = wrap.getBoundingClientRect().height;
-      const naturalTitle2Height = title2.getBoundingClientRect().height;
-      const targetWrapHeight = naturalTitle2Height;
-      return { naturalWrapHeight, targetWrapHeight };
-    }
-
-    let { naturalWrapHeight, targetWrapHeight } = recalculateHeights();
-
-    const handleRefreshInit = () => {
-      calculateImagePositions();
-      const heights = recalculateHeights();
-      naturalWrapHeight = heights.naturalWrapHeight;
-      targetWrapHeight = heights.targetWrapHeight;
-      syncMeraClonesPosition();
-      if (tl) tl.invalidate();
-    };
-
-    ScrollTrigger.addEventListener("refreshInit", handleRefreshInit);
-
-    gsap.set(title1, { opacity: 0, y: 0, autoAlpha: 0 });
-    const title2InitialY = isLargeDesktopLayout ? 70 : isMobileXSLayout ? 35 : isMobileLayout ? 46 : 60;
-    gsap.set(title2, { opacity: 0, autoAlpha: 0, y: title2InitialY });
-    gsap.set(description1, { opacity: 0, y: 0 });
-
-    if (description2) {
-      const desc2InitialY = isMobileXXSLayout ? 40 : isMobileXSLayout ? 22 : isMobileLayout ? 34 : 40;
-      gsap.set(description2, { opacity: 0, autoAlpha: 0, y: desc2InitialY });
-    }
-
-    const startImgXMobile = isMobileLayout && imgOffsetsMobile[0] !== undefined ? imgOffsetsMobile[0] : 0;
-    if (heroContentItems) gsap.set(heroContentItems, { opacity: 0, x: 0 });
-
-    if (heroOverlays) {
-      gsap.set(heroOverlays, {
-        opacity: 0,
-        y: 30,
-        position: "absolute",
-        top: 0,
-        left: 0,
-        width: "100%",
-        height: "100%",
-        pointerEvents: "none",
-        zIndex: 10,
-      });
-    }
-
-    contentItems.forEach((item) => item.classList.remove("active"));
-    imgWrappers.forEach((wrapper) => wrapper.classList.remove("active"));
-
-    if (heroImgOverlay) {
-      gsap.set(heroImgOverlay, { opacity: 0 });
-      if (imagePositions[0]) {
-        const x1 = imagePositions[0].imgPctLeft;
-        const x2 = imagePositions[0].imgPctRight;
-        heroImgOverlay.style.clipPath = `polygon(
-          0% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 0%, 
-          ${x1}% 0%, ${x1}% 100%, ${x2}% 100%, ${x2}% 0%, ${x1}% 0%
-        )`;
-      }
-    }
-
-    if (heroBorderOverlay) {
-      const firstCardWidth = () => {
-        if (isMobileLayout) return itemCumulativeWidths[0] || 0;
-        if (!borderWrapper || !imagePositions[0]) return 0;
-        return Math.max(0, Math.min(imagePositions[0].right, borderWrapper.offsetWidth));
-      };
-      gsap.set(heroBorderOverlay, { opacity: 0, width: firstCardWidth });
-    }
-
-    if (heroBorderOverlay2) gsap.set(heroBorderOverlay2, { width: 0, opacity: 0 });
-
-    if (itemDesc1) gsap.set(itemDesc1, { color: "#66666682" });
-    if (itemDesc2) gsap.set(itemDesc2, { color: "#66666682" });
-
-    contentItems.forEach((item) => {
-      const titleText = item.querySelector(".hero-content-title");
-      const descText = item.querySelector(".hero-content-description");
-      if (titleText) gsap.set(titleText, { color: "#66666682" });
-      if (descText) gsap.set(descText, { color: "#66666682" });
-    });
-
-    gsap.set(heroImgContent, {
-      opacity: 0,
-      y: isMobileLayout ? 0 : 70,
-      scale: isMobileLayout ? 1 : 0.5,
-      x: startImgXMobile,
-      width: isMobileLayout ? "100%" : "auto",
-      transformOrigin: "center bottom",
-    });
-
-    const totalSteps = heroImages.length;
-    const scrollDistancePerStep = isMobileLayout ? 500 : 700;
-    const baseIntroDistance = isMobileLayout ? 800 : 1200;
-    const dynamicEndScroll = baseIntroDistance + totalSteps * scrollDistancePerStep;
-
-    tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: section,
-        start: "top top",
-        end: `+=${dynamicEndScroll}`,
-        pin: true,
-        pinSpacing: true,
-        scrub: isMobileLayout ? 0.8 : 0.5,
-        invalidateOnRefresh: true,
-        fastScrollEnd: true,
-        preventOverlaps: true
-      },
-    });
-
-    const titleFadeDuration = 0.3;
-    tl.to(title1, { opacity: 1, autoAlpha: 1, duration: titleFadeDuration, ease: "power1.out" }, 0);
-    tl.to(".char-rest", { "--position": "0%", duration: 0.5, ease: "power1.inOut" }, titleFadeDuration + 0.1);
-    tl.to(firstLetters, { color: "#00dafd", duration: 0.2, ease: "none" }, ">");
-    tl.add(() => { syncMeraClonesPosition(); }, ">");
-    tl.to(meraClones, { opacity: 1, duration: 0.15, ease: "linear" }, ">");
-    tl.to(firstLetters, { opacity: 0, duration: 0.15, ease: "linear" }, "<");
-    tl.to(meraClones, {
-      left: (i, el) => {
-        const wrapRect = wrap.getBoundingClientRect();
-        const clones = gsap.utils.toArray(".mera-clone");
-        if (clones.length) updateMeraCloneTargets(clones, wrapRect, 4);
-        return Number(el.dataset.targetLeft);
-      },
-      top: "50%",
-      yPercent: -50,
-      duration: 0.5,
-      ease: "power2.inOut",
-      onComplete: () => wrap.classList.remove("active"),
-      onReverseComplete: () => wrap.classList.add("active"),
-    }, ">");
-
-    tl.to(wrap, { height: () => targetWrapHeight, duration: 1.15, ease: "power2.inOut" }, ">");
-
-    if (isMobileLayout) {
-      tl.to(heroImgContent, { opacity: 1, x: () => startImgXMobile, duration: 0.8, ease: "power2.inOut" }, ">");
-    } else {
-      tl.to(heroImgContent, { opacity: 1, y: -36, scale: 1, duration: 1.15, ease: "power2.inOut" }, "<");
-    }
-
-    tl.to(description1, { opacity: 1, duration: 0.4, ease: "power1.out" }, ">+=0.2");
-    if (description2) {
-      tl.to(description2, { opacity: 1, autoAlpha: 1, duration: 0.4, ease: "power1.out" }, "<");
-    }
-
-    const finalMoveDuration = 0.55;
-    tl.to(description1, { y: 0, opacity: 0, autoAlpha: 0, duration: finalMoveDuration, ease: "power2.inOut" }, ">");
-    if (description2) {
-      tl.to(description2, { y: 0, opacity: 1, autoAlpha: 1, duration: finalMoveDuration, ease: "power2.inOut" }, "<");
-    }
-
-    tl.to([title1, cloneWrap], { y: -70, opacity: 0, autoAlpha: 0, duration: finalMoveDuration, ease: "power2.inOut" }, "<");
-    tl.to(title2, { opacity: 1, autoAlpha: 1, y: 0, duration: finalMoveDuration, ease: "power2.inOut" }, "<");
-    if (heroContentItems) {
-      tl.to(heroContentItems, { opacity: 1, x: 0, duration: finalMoveDuration, ease: "power2.inOut" }, "<");
-    }
-
-    if (isMobileLayout) {
-      tl.to(heroImgContent, { width: () => getResponsiveTargetWidth(), x: () => startImgXMobile, duration: 0.8, ease: "power2.inOut" }, ">");
-    }
-
-    tl.add("overlaysEntry", ">");
-    tl.add(() => calculateImagePositions(), "overlaysEntry-=0.05");
-
-    if (heroOverlays) tl.to(heroOverlays, { opacity: 0.5, y: 0, duration: 0.4, ease: "power2.out" }, "overlaysEntry");
-    if (heroImgOverlay) tl.to(heroImgOverlay, { opacity: 0.5, duration: 0.4, ease: "power2.out" }, "overlaysEntry");
-
-    const firstItem = contentItems[0];
-    if (firstItem) {
-      const firstTitle = firstItem.querySelector(".hero-content-title");
-      const firstDesc = firstItem.querySelector(".hero-content-description");
-      if (firstTitle) tl.to(firstTitle, { color: "#00dafd", duration: 0.4, ease: "power2.out" }, "overlaysEntry");
-      if (firstDesc) tl.to(firstDesc, { color: "#ffffff", duration: 0.4, ease: "power2.out" }, "overlaysEntry");
-    }
-
-    if (heroBorderOverlay) tl.to(heroBorderOverlay, { opacity: 1, duration: 0.4, ease: "power2.out" }, "overlaysEntry");
-    if (itemDesc1) tl.to(itemDesc1, { color: "#ffffff", duration: 0.4, ease: "power2.out" }, "overlaysEntry");
-
-    if (heroOverlays) tl.to(heroOverlays, { opacity: 1, duration: 0.4, ease: "power2.out" }, ">");
-    if (heroImgOverlay) tl.to(heroImgOverlay, { opacity: 1, duration: 0.4, ease: "power2.out" }, "<");
-
-    tl.add("overlaysActiveStart", ">");
-    tl.add(() => {
-      if (isClickScrolling) return;
-      animateToStepIndex(0, 0.4);
-    }, "overlaysActiveStart");
-
-    if (heroImages.length > 0) {
-      heroImages.forEach((_, index) => {
-        const isFirst = index === 0;
-        const stepLabel = `step_${index}`;
-        tl.add(stepLabel, isFirst ? "overlaysActiveStart" : "+=0.6");
-        tl.add(() => {
-          if (isClickScrolling) return;
-          animateToStepIndex(index, 0.6);
-        }, stepLabel);
-      });
-    }
-
-    tl.to({}, { duration: 1.0 });
-
-    const clickHandlers = [];
-    const handleItemClick = (index) => {
-      if (!tl || index === activeIndex) return;
-      calculateImagePositions();
-      const labelTime = tl.labels[`step_${index}`];
-
-      if (labelTime !== undefined) {
-        isClickScrolling = true;
-        animateToStepIndex(index, 0.8);
-
-        const scrollST = tl.scrollTrigger;
-        const stepOffset = index === 0 ? 0.5 : 0.8;
-        const finalTweenTime = labelTime + stepOffset;
-        const safeTime = Math.min(finalTweenTime, tl.duration());
-        const progress = safeTime / tl.duration();
-        const targetScroll = scrollST.start + progress * (scrollST.end - scrollST.start);
-
-        gsap.to(window, {
-          scrollTo: { y: targetScroll, autoKill: true },
-          duration: 1.0,
-          ease: "power2.inOut",
-          onStart: () => { isClickScrolling = true; },
-          onComplete: () => { isClickScrolling = false; },
-          onInterrupt: () => { isClickScrolling = false; },
-        });
-      }
-    };
-
-    imgWrappers.forEach((wrapper, index) => {
-      const clickHandler = () => handleItemClick(index);
-      wrapper.addEventListener("click", clickHandler);
-      clickHandlers.push({ element: wrapper, clickHandler });
-    });
-
-    contentItems.forEach((item, index) => {
-      const clickHandler = () => handleItemClick(index);
-      item.addEventListener("click", clickHandler);
-      clickHandlers.push({ element: item, clickHandler });
-    });
-
-    heroBtns.forEach((btn) => {
-      const btnHandler = (e) => {
-        e.stopPropagation();
-        const lastIndex = heroImages.length - 1;
-        const lastImg = heroImages[lastIndex];
-
-        if (lastImg) {
-          gsap.killTweensOf(lastImg);
-          lastImg.classList.remove("hero-img-2");
-        }
-
-        if (imgWrappers[lastIndex]) imgWrappers[lastIndex].classList.remove("active");
-        if (contentItems[lastIndex]) contentItems[lastIndex].classList.remove("active");
-
-        if (activeIndex === lastIndex) {
-          const fallbackIndex = Math.max(0, lastIndex - 1);
-          animateToStepIndex(fallbackIndex);
-        }
-      };
-
-      btn.addEventListener("click", btnHandler);
-      clickHandlers.push({ element: btn, clickHandler: btnHandler });
-    });
-
-    setTimeout(() => {
-      calculateImagePositions();
-      ScrollTrigger.refresh();
-    }, 300);
-
-    return () => {
-      ScrollTrigger.removeEventListener("refreshInit", handleRefreshInit);
-      clickHandlers.forEach(({ element, clickHandler }) => {
-        if (element) element.removeEventListener("click", clickHandler);
-      });
-      if (tl) tl.kill();
-    };
-  });
+    },
+  );
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -899,11 +1175,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const imgContentContainer = document.querySelector(".hero-img-content-2");
 
   const mainHeader = document.querySelector(
-    ".hero-model-title:not(.hero-process-title)"
+    ".hero-model-title:not(.hero-process-title)",
   );
   const titles = Array.from(document.querySelectorAll(".hero-process-title"));
   const descriptions = Array.from(
-    document.querySelectorAll(".hero-model-content-title")
+    document.querySelectorAll(".hero-model-content-title"),
   );
   const mainImgs = Array.from(document.querySelectorAll(".hero-model-img"));
 
@@ -916,9 +1192,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const getOffscreenLeftPosition = (targetImg) => {
     const imgWidth = getTargetImageWidth(targetImg);
     const containerWidth = imgContentContainer
-      ? imgContentContainer.parentElement?.getBoundingClientRect().width || window.innerWidth
+      ? imgContentContainer.parentElement?.getBoundingClientRect().width ||
+        window.innerWidth
       : window.innerWidth;
-    
+
     return `${containerWidth + imgWidth + 100}px`;
   };
 
@@ -941,7 +1218,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (imgContentContainer && width > 0) {
       imgContentContainer.style.setProperty(
         "--processSliderImgWrapperWidth",
-        `${width}px`
+        `${width}px`,
       );
     }
     return width;
@@ -963,15 +1240,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
     return Array.from(
       document.querySelectorAll(
-        `${containerSelector} .hero-process-chart-items`
-      )
+        `${containerSelector} .hero-process-chart-items`,
+      ),
     );
   };
 
   const totalSlides = Math.min(
     titles.length,
     descriptions.length,
-    mainImgs.length
+    mainImgs.length,
   );
 
   const updateContentHeight = (index, duration = 0.5) => {
@@ -1070,7 +1347,11 @@ document.addEventListener("DOMContentLoaded", () => {
       if (idx === 0) {
         gsap.set(img, { opacity: 1, left: "0px", pointerEvents: "auto" });
       } else {
-        gsap.set(img, { opacity: 0, left: offscreenPos, pointerEvents: "none" });
+        gsap.set(img, {
+          opacity: 0,
+          left: offscreenPos,
+          pointerEvents: "none",
+        });
       }
     });
 
@@ -1112,7 +1393,7 @@ document.addEventListener("DOMContentLoaded", () => {
         ease: "power1.inOut",
         onStart: () => {
           incomingTextElements.forEach(
-            (el) => (el.style.pointerEvents = "auto")
+            (el) => (el.style.pointerEvents = "auto"),
           );
         },
       });
@@ -1172,7 +1453,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (incomingImg) {
       const offscreenPosIn = getOffscreenLeftPosition(incomingImg);
-      gsap.set(incomingImg, { left: offscreenPosIn, opacity: 0, xPercent: 0, x: 0 });
+      gsap.set(incomingImg, {
+        left: offscreenPosIn,
+        opacity: 0,
+        xPercent: 0,
+        x: 0,
+      });
       gsap.to(incomingImg, {
         left: "0px",
         opacity: 1,
