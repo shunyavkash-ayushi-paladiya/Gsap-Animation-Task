@@ -1,12 +1,12 @@
 gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
 
 ScrollTrigger.config({
-  ignoreMobileResize: true,
+  ignoreMobileResize: !0,
   autoRefreshEvents: "DOMContentLoaded,load,visibilitychange",
 });
 
 if (ScrollTrigger.isTouch) {
-  ScrollTrigger.normalizeScroll(true);
+  ScrollTrigger.normalizeScroll(!0);
 }
 
 const isTouchDevice = "ontouchstart" in window || navigator.maxTouchPoints > 0;
@@ -32,13 +32,9 @@ function initHeroAnimation() {
   const wrap = document.querySelector(".hero-title-content");
   const title1 = document.querySelector(".hero-title:not(.hero-title-2)");
   const title2 = document.querySelector(".hero-title-2");
-  const description1 = document.querySelector(
-    ".hero-description:not(.hero-description-2)"
-  );
+  const description1 = document.querySelector(".hero-description:not(.hero-description-2)");
   const description2 = document.querySelector(".hero-description-2");
-  const heroDescriptionContent = document.querySelector(
-    ".hero-description-content"
-  );
+  const heroDescriptionContent = document.querySelector(".hero-description-content");
   const heroImgContent = document.querySelector(".hero-img-content");
   const heroContentItems = document.querySelector(".hero-content-items");
   const heroOverlays = document.querySelector(".hero-overlays");
@@ -47,45 +43,63 @@ function initHeroAnimation() {
   const heroBorderOverlay2 = document.querySelector(".hero-border-overlay-2");
   const borderWrapper = document.querySelector(".hero-content-item-wrapper");
   const contentItems = document.querySelectorAll(".hero-content-item");
-  const itemDesc1 = document.querySelector(
-    ".hero-item-description:not(.hero-item-description-v2)"
-  );
+  const itemDesc1 = document.querySelector(".hero-item-description:not(.hero-item-description-v2)");
   const itemDesc2 = document.querySelector(".hero-item-description-v2");
   const heroContent = document.querySelector(".hero-content");
   const heroBtns = document.querySelectorAll(".hero-btn");
 
-  if (
-    !section ||
-    !wrap ||
-    !title1 ||
-    !title2 ||
-    !description1 ||
-    !heroImgContent ||
-    !heroContent
-  ) {
+  if (!section || !wrap || !title1 || !title2 || !description1 || !heroImgContent || !heroContent) {
     console.warn("Hero animation skipped: Core DOM elements missing.");
     return;
   }
 
   const heroImages = heroImgContent.querySelectorAll(".hero-img");
   const imgWrappers = heroImgContent.querySelectorAll(".hero-img-wrapper");
+
   let imagePositions = [];
   let itemOffsets = [];
   let imgOffsetsMobile = [];
   let itemCumulativeWidths = [];
   let tl;
   let mm = gsap.matchMedia();
-  let isLargeDesktopLayout = false;
-  let isMobileLayout = false;
-  let isTabletMobileLayout = false;
-  let isMediumMobileLayout = false;
-  let isSmallMobileLayout = false;
-  let isMobileXSLayout = false;
-  let isMobileXXSLayout = false;
-  let isShortDesktopLayout = false;
+
+  let isLargeDesktopLayout = !1;
+  let isMobileLayout = !1;
+  let isTabletMobileLayout = !1;
+  let isMediumMobileLayout = !1;
+  let isSmallMobileLayout = !1;
+  let isMobileXSLayout = !1;
+  let isMobileXXSLayout = !1;
+  let isShortDesktopLayout = !1;
+
   let activeIndex = 0;
-  let isClickScrolling = false;
+  let isClickScrolling = !1;
   let autoPlayTimer = null;
+
+  // Perfect section height calculation including padding & margins
+  function adjustHeroSectionHeight() {
+    if (!heroContent || !section) return;
+
+    // Reset styles to get the true unpinned scrollHeight
+    gsap.set(section, { clearProps: "height,minHeight,maxHeight" });
+
+    const sectionStyle = window.getComputedStyle(section);
+    const paddingTop = parseFloat(sectionStyle.paddingTop) || 0;
+    const paddingBottom = parseFloat(sectionStyle.paddingBottom) || 0;
+    const marginTop = parseFloat(sectionStyle.marginTop) || 0;
+    const marginBottom = parseFloat(sectionStyle.marginBottom) || 0;
+
+    // Measure total required height including paddings
+    const contentHeight = heroContent.getBoundingClientRect().height;
+    const totalRequiredHeight = Math.ceil(contentHeight + paddingTop + paddingBottom + marginTop + marginBottom);
+    const windowHeight = window.innerHeight;
+
+    // Apply exact minHeight to section to prevent viewport clipping
+    const finalHeight = Math.max(windowHeight, totalRequiredHeight);
+
+    section.style.minHeight = `${finalHeight}px`;
+    section.style.height = `${finalHeight}px`;
+  }
 
   function getResponsiveTargetWidth() {
     if (isSmallMobileLayout) return "265%";
@@ -103,12 +117,8 @@ function initHeroAnimation() {
     if (!borderWrapper || imgWrappers.length === 0) return;
 
     const originalImgStyle = heroImgContent.getAttribute("style") || "";
-    const originalContentItemsStyle = heroContentItems
-      ? heroContentItems.getAttribute("style") || ""
-      : "";
-    const originalOverlaysStyle = heroOverlays
-      ? heroOverlays.getAttribute("style") || ""
-      : "";
+    const originalContentItemsStyle = heroContentItems ? heroContentItems.getAttribute("style") || "" : "";
+    const originalOverlaysStyle = heroOverlays ? heroOverlays.getAttribute("style") || "" : "";
 
     gsap.set([heroImgContent, heroContentItems, heroOverlays], {
       clearProps: "transform,scale,x,y,width,height",
@@ -124,25 +134,9 @@ function initHeroAnimation() {
 
     imgWrappers.forEach((wrapper) => {
       const rect = wrapper.getBoundingClientRect();
-      const pctLeft =
-        imgContentRect.width > 0
-          ? Math.max(
-              0,
-              Math.min(
-                100,
-                ((rect.left - imgContentRect.left) / imgContentRect.width) * 100
-              )
-            )
-          : 0;
-      const pctWidth =
-        imgContentRect.width > 0
-          ? Math.max(
-              0,
-              Math.min(100, (rect.width / imgContentRect.width) * 100)
-            )
-          : 0;
-      const centerOffset =
-        rect.left - imgContentRect.left + rect.width / 2;
+      const pctLeft = imgContentRect.width > 0 ? Math.max(0, Math.min(100, ((rect.left - imgContentRect.left) / imgContentRect.width) * 100)) : 0;
+      const pctWidth = imgContentRect.width > 0 ? Math.max(0, Math.min(100, (rect.width / imgContentRect.width) * 100)) : 0;
+      const centerOffset = rect.left - imgContentRect.left + rect.width / 2;
 
       imagePositions.push({
         left: rect.left - wrapperRect.left,
@@ -167,27 +161,21 @@ function initHeroAnimation() {
     });
 
     heroImgContent.setAttribute("style", originalImgStyle);
-    if (heroContentItems)
-      heroContentItems.setAttribute("style", originalContentItemsStyle);
-    if (heroOverlays)
-      heroOverlays.setAttribute("style", originalOverlaysStyle);
+    if (heroContentItems) heroContentItems.setAttribute("style", originalContentItemsStyle);
+    if (heroOverlays) heroOverlays.setAttribute("style", originalOverlaysStyle);
   }
 
   function setInteractiveState(enabled, targetIndex = activeIndex) {
     imgWrappers.forEach((wrapper, idx) => {
       if (wrapper) {
-        wrapper.style.pointerEvents =
-          !enabled || idx === targetIndex ? "none" : "auto";
-        wrapper.style.cursor =
-          !enabled || idx === targetIndex ? "default" : "pointer";
+        wrapper.style.pointerEvents = !enabled || idx === targetIndex ? "none" : "auto";
+        wrapper.style.cursor = !enabled || idx === targetIndex ? "default" : "pointer";
       }
     });
     contentItems.forEach((item, idx) => {
       if (item) {
-        item.style.pointerEvents =
-          !enabled || idx === targetIndex ? "none" : "auto";
-        item.style.cursor =
-          !enabled || idx === targetIndex ? "default" : "pointer";
+        item.style.pointerEvents = !enabled || idx === targetIndex ? "none" : "auto";
+        item.style.cursor = !enabled || idx === targetIndex ? "default" : "pointer";
       }
     });
   }
@@ -198,8 +186,8 @@ function initHeroAnimation() {
     const parts = text.split(/(\s+)/);
     let firstLetterIndex = 0;
     const meraLetters = ["M", "e", "R", "A"];
-    el.innerHTML = "";
 
+    el.innerHTML = "";
     parts.forEach((part) => {
       if (/^\s+$/.test(part)) {
         const space = document.createElement("span");
@@ -208,7 +196,6 @@ function initHeroAnimation() {
         el.appendChild(space);
         return;
       }
-
       const word = document.createElement("span");
       word.className = "word";
       word.style.display = "inline-block";
@@ -216,12 +203,10 @@ function initHeroAnimation() {
 
       const firstLetterSpan = document.createElement("span");
       firstLetterSpan.className = "char first-letter";
-      firstLetterSpan.dataset.acronym =
-        meraLetters[firstLetterIndex] || part[0];
+      firstLetterSpan.dataset.acronym = meraLetters[firstLetterIndex] || part[0];
       firstLetterSpan.textContent = part[0];
       firstLetterSpan.style.display = "inline-block";
       word.appendChild(firstLetterSpan);
-
       firstLetterIndex++;
 
       if (part.length > 1) {
@@ -305,9 +290,7 @@ function initHeroAnimation() {
 
   function updateMeraCloneTargets(clones, wrapRect, gap = 4) {
     const currentWrapRect = wrapRect || wrap.getBoundingClientRect();
-    const totalWidth =
-      clones.reduce((sum, clone) => sum + clone.offsetWidth, 0) +
-      gap * (clones.length - 1);
+    const totalWidth = clones.reduce((sum, clone) => sum + clone.offsetWidth, 0) + gap * (clones.length - 1);
     let x = currentWrapRect.width / 2 - totalWidth / 2;
 
     clones.forEach((clone) => {
@@ -321,7 +304,7 @@ function initHeroAnimation() {
     if (!imagePositions[index]) return;
 
     activeIndex = index;
-    setInteractiveState(true, index);
+    setInteractiveState(!0, index);
 
     imgWrappers.forEach((wrapper, idx) => {
       if (wrapper) wrapper.classList.toggle("active", idx === index);
@@ -345,7 +328,6 @@ function initHeroAnimation() {
       const isCurrent = idx === index;
       const titleText = item.querySelector(".hero-content-title");
       const contentDescText = item.querySelector(".hero-content-description");
-
       item.classList.toggle("active", isCurrent);
 
       if (titleText) {
@@ -420,10 +402,7 @@ function initHeroAnimation() {
         });
       } else {
         if (index < 4) {
-          const targetWidth = Math.max(
-            0,
-            Math.min(imagePositions[index].right, borderWrapper.offsetWidth)
-          );
+          const targetWidth = Math.max(0, Math.min(imagePositions[index].right, borderWrapper.offsetWidth));
           gsap.to(heroBorderOverlay, {
             opacity: 1,
             width: targetWidth,
@@ -439,10 +418,7 @@ function initHeroAnimation() {
             overwrite: "auto",
           });
         } else {
-          const maxOverlay1Width = Math.max(
-            0,
-            Math.min(imagePositions[3].right, borderWrapper.offsetWidth)
-          );
+          const maxOverlay1Width = Math.max(0, Math.min(imagePositions[3].right, borderWrapper.offsetWidth));
           const targetWidth2 = Math.max(0, imagePositions[index].width);
           gsap.to(heroBorderOverlay, {
             opacity: 1,
@@ -518,20 +494,20 @@ function initHeroAnimation() {
       isMobileXXSLayout = context.conditions.isMobileXXS;
       isShortDesktopLayout = context.conditions.isShortDesktop;
 
-      if (context.conditions.isMobile || context.conditions.isShortScreen) {
-        gsap.set(section, { clearProps: "height,maxHeight,minHeight" });
-      }
-
       let resizeTimeout;
       const handleResize = () => {
         clearTimeout(resizeTimeout);
         resizeTimeout = setTimeout(() => {
+          adjustHeroSectionHeight();
           calculateImagePositions();
           syncMeraClonesPosition();
           ScrollTrigger.refresh();
         }, 150);
       };
+
       window.addEventListener("resize", handleResize);
+
+      adjustHeroSectionHeight();
 
       if (isShortDesktopLayout) {
         gsap.set(section, { clearProps: "height,maxHeight,minHeight" });
@@ -562,8 +538,7 @@ function initHeroAnimation() {
           });
         }
 
-        if (heroDescriptionContent)
-          gsap.set(heroDescriptionContent, { overflow: "visible" });
+        if (heroDescriptionContent) gsap.set(heroDescriptionContent, { overflow: "visible" });
         gsap.set(heroImgContent, {
           opacity: 1,
           y: 0,
@@ -610,10 +585,8 @@ function initHeroAnimation() {
               gsap.killTweensOf(lastImg);
               lastImg.classList.remove("hero-img-2");
             }
-            if (imgWrappers[lastIndex])
-              imgWrappers[lastIndex].classList.remove("active");
-            if (contentItems[lastIndex])
-              contentItems[lastIndex].classList.remove("active");
+            if (imgWrappers[lastIndex]) imgWrappers[lastIndex].classList.remove("active");
+            if (contentItems[lastIndex]) contentItems[lastIndex].classList.remove("active");
 
             if (activeIndex === lastIndex) {
               const fallbackIndex = Math.max(0, lastIndex - 1);
@@ -626,18 +599,15 @@ function initHeroAnimation() {
 
         let startX = 0;
         let startY = 0;
-        let isDragging = false;
+        let isDragging = !1;
         const minSwipeDistance = 40;
+
         heroImgContent.style.cursor = "grab";
 
         const handlePointerDown = (e) => {
-          isDragging = true;
-          startX = e.type.includes("touch")
-            ? e.touches[0].clientX
-            : e.clientX;
-          startY = e.type.includes("touch")
-            ? e.touches[0].clientY
-            : e.clientY;
+          isDragging = !0;
+          startX = e.type.includes("touch") ? e.touches[0].clientX : e.clientX;
+          startY = e.type.includes("touch") ? e.touches[0].clientY : e.clientY;
           heroImgContent.style.cursor = "grabbing";
           stopAutoPlay();
         };
@@ -648,21 +618,14 @@ function initHeroAnimation() {
 
         const handlePointerUp = (e) => {
           if (!isDragging) return;
-          isDragging = false;
+          isDragging = !1;
           heroImgContent.style.cursor = "grab";
-          const endX = e.type.includes("touch")
-            ? e.changedTouches[0].clientX
-            : e.clientX;
-          const endY = e.type.includes("touch")
-            ? e.changedTouches[0].clientY
-            : e.clientY;
+          const endX = e.type.includes("touch") ? e.changedTouches[0].clientX : e.clientX;
+          const endY = e.type.includes("touch") ? e.changedTouches[0].clientY : e.clientY;
           const deltaX = endX - startX;
           const deltaY = endY - startY;
 
-          if (
-            Math.abs(deltaX) > Math.abs(deltaY) &&
-            Math.abs(deltaX) > minSwipeDistance
-          ) {
+          if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > minSwipeDistance) {
             if (deltaX < 0) {
               if (activeIndex < heroImages.length - 1) {
                 handleItemClick(activeIndex + 1);
@@ -678,12 +641,8 @@ function initHeroAnimation() {
         heroImgContent.addEventListener("mousedown", handlePointerDown);
         window.addEventListener("mousemove", handlePointerMove);
         window.addEventListener("mouseup", handlePointerUp);
-        heroImgContent.addEventListener("touchstart", handlePointerDown, {
-          passive: true,
-        });
-        heroImgContent.addEventListener("touchend", handlePointerUp, {
-          passive: true,
-        });
+        heroImgContent.addEventListener("touchstart", handlePointerDown, { passive: !0 });
+        heroImgContent.addEventListener("touchend", handlePointerUp, { passive: !0 });
 
         return () => {
           window.removeEventListener("resize", handleResize);
@@ -700,7 +659,7 @@ function initHeroAnimation() {
       }
 
       calculateImagePositions();
-      setInteractiveState(false);
+      setInteractiveState(!1);
 
       const firstLetters = gsap.utils.toArray(".first-letter", title1);
       let meraClones = buildMeraClones(firstLetters);
@@ -710,12 +669,14 @@ function initHeroAnimation() {
         const naturalWrapHeight = wrap.getBoundingClientRect().height;
         const naturalTitle2Height = title2.getBoundingClientRect().height;
         const targetWrapHeight = naturalTitle2Height;
+
         return { naturalWrapHeight, targetWrapHeight };
       }
 
       let { naturalWrapHeight, targetWrapHeight } = recalculateHeights();
 
       const handleRefreshInit = () => {
+        adjustHeroSectionHeight();
         calculateImagePositions();
         const heights = recalculateHeights();
         naturalWrapHeight = heights.naturalWrapHeight;
@@ -727,34 +688,19 @@ function initHeroAnimation() {
       ScrollTrigger.addEventListener("refreshInit", handleRefreshInit);
 
       gsap.set(title1, { opacity: 0, y: 0, autoAlpha: 0 });
-
-      const title2InitialY = isLargeDesktopLayout
-        ? 70
-        : isMobileXSLayout
-        ? 35
-        : isMobileLayout
-        ? 46
-        : 60;
+      const title2InitialY = isLargeDesktopLayout ? 70 : isMobileXSLayout ? 35 : isMobileLayout ? 46 : 60;
       gsap.set(title2, { opacity: 0, autoAlpha: 0, y: title2InitialY });
-      gsap.set(description1, { opacity: 0, y: 0 });
 
+      gsap.set(description1, { opacity: 0, y: 0 });
       if (description2) {
-        const desc2InitialY = isMobileXXSLayout
-          ? 40
-          : isMobileXSLayout
-          ? 22
-          : isMobileLayout
-          ? 34
-          : 40;
+        const desc2InitialY = isMobileXXSLayout ? 40 : isMobileXSLayout ? 22 : isMobileLayout ? 34 : 40;
         gsap.set(description2, { opacity: 0, autoAlpha: 0, y: desc2InitialY });
       }
 
-      const startImgXMobile =
-        isMobileLayout && imgOffsetsMobile[0] !== undefined
-          ? imgOffsetsMobile[0]
-          : 0;
+      const startImgXMobile = isMobileLayout && imgOffsetsMobile[0] !== undefined ? imgOffsetsMobile[0] : 0;
 
       if (heroContentItems) gsap.set(heroContentItems, { opacity: 0, x: 0 });
+
       if (heroOverlays) {
         gsap.set(heroOverlays, {
           opacity: 0,
@@ -788,10 +734,7 @@ function initHeroAnimation() {
         const firstCardWidth = () => {
           if (isMobileLayout) return itemCumulativeWidths[0] || 0;
           if (!borderWrapper || !imagePositions[0]) return 0;
-          return Math.max(
-            0,
-            Math.min(imagePositions[0].right, borderWrapper.offsetWidth)
-          );
+          return Math.max(0, Math.min(imagePositions[0].right, borderWrapper.offsetWidth));
         };
         gsap.set(heroBorderOverlay, { opacity: 0, width: firstCardWidth });
       }
@@ -819,20 +762,19 @@ function initHeroAnimation() {
       const totalSteps = heroImages.length;
       const scrollDistancePerStep = isMobileLayout ? 500 : 700;
       const baseIntroDistance = isMobileLayout ? 800 : 1200;
-      const dynamicEndScroll =
-        baseIntroDistance + totalSteps * scrollDistancePerStep;
+      const dynamicEndScroll = baseIntroDistance + totalSteps * scrollDistancePerStep;
 
       tl = gsap.timeline({
         scrollTrigger: {
           trigger: section,
           start: "top top",
           end: `+=${dynamicEndScroll}`,
-          pin: true,
-          pinSpacing: true,
-          scrub: isMobileLayout ? 0.8 : 0.5,
-          invalidateOnRefresh: true,
-          fastScrollEnd: true,
-          preventOverlaps: true,
+          pin: !0,
+          pinSpacing: !0,
+          scrub: isMobileLayout ? 1 : 1,
+          invalidateOnRefresh: !0,
+          fastScrollEnd: !0,
+          preventOverlaps: !0,
         },
       });
 
@@ -847,21 +789,15 @@ function initHeroAnimation() {
         },
         0
       );
-      tl.to(
-        ".char-rest",
-        { "--position": "0%", duration: 0.5, ease: "power1.inOut" },
-        titleFadeDuration + 0.1
-      );
-      tl.to(
-        firstLetters,
-        { color: "#00dafd", duration: 0.2, ease: "none" },
-        ">"
-      );
+
+      tl.to(".char-rest", { "--position": "0%", duration: 0.5, ease: "power1.inOut" }, titleFadeDuration + 0.1);
+      tl.to(firstLetters, { color: "#00dafd", duration: 0.2, ease: "none" }, ">");
       tl.add(() => {
         syncMeraClonesPosition();
       }, ">");
       tl.to(meraClones, { opacity: 1, duration: 0.15, ease: "linear" }, ">");
       tl.to(firstLetters, { opacity: 0, duration: 0.15, ease: "linear" }, "<");
+
       tl.to(
         meraClones,
         {
@@ -880,6 +816,7 @@ function initHeroAnimation() {
         },
         ">"
       );
+
       tl.to(
         wrap,
         {
@@ -915,17 +852,9 @@ function initHeroAnimation() {
         );
       }
 
-      tl.to(
-        description1,
-        { opacity: 1, duration: 0.4, ease: "power1.out" },
-        ">+=0.2"
-      );
+      tl.to(description1, { opacity: 1, duration: 0.4, ease: "power1.out" }, ">+=0.2");
       if (description2) {
-        tl.to(
-          description2,
-          { opacity: 1, autoAlpha: 1, duration: 0.4, ease: "power1.out" },
-          "<"
-        );
+        tl.to(description2, { opacity: 1, autoAlpha: 1, duration: 0.4, ease: "power1.out" }, "<");
       }
 
       const finalMoveDuration = 0.55;
@@ -940,6 +869,7 @@ function initHeroAnimation() {
         },
         ">"
       );
+
       if (description2) {
         tl.to(
           description2,
@@ -953,6 +883,7 @@ function initHeroAnimation() {
           "<"
         );
       }
+
       tl.to(
         [title1, cloneWrap],
         {
@@ -964,6 +895,7 @@ function initHeroAnimation() {
         },
         "<"
       );
+
       tl.to(
         title2,
         {
@@ -975,6 +907,7 @@ function initHeroAnimation() {
         },
         "<"
       );
+
       if (heroContentItems) {
         tl.to(
           heroContentItems,
@@ -1004,62 +937,22 @@ function initHeroAnimation() {
       tl.add("overlaysEntry", ">");
       tl.add(() => calculateImagePositions(), "overlaysEntry-=0.05");
 
-      if (heroOverlays)
-        tl.to(
-          heroOverlays,
-          { opacity: 0.5, y: 0, duration: 0.4, ease: "power2.out" },
-          "overlaysEntry"
-        );
-      if (heroImgOverlay)
-        tl.to(
-          heroImgOverlay,
-          { opacity: 0.5, duration: 0.4, ease: "power2.out" },
-          "overlaysEntry"
-        );
+      if (heroOverlays) tl.to(heroOverlays, { opacity: 0.5, y: 0, duration: 0.4, ease: "power2.out" }, "overlaysEntry");
+      if (heroImgOverlay) tl.to(heroImgOverlay, { opacity: 0.5, duration: 0.4, ease: "power2.out" }, "overlaysEntry");
 
       const firstItem = contentItems[0];
       if (firstItem) {
         const firstTitle = firstItem.querySelector(".hero-content-title");
         const firstDesc = firstItem.querySelector(".hero-content-description");
-        if (firstTitle)
-          tl.to(
-            firstTitle,
-            { color: "#00dafd", duration: 0.4, ease: "power2.out" },
-            "overlaysEntry"
-          );
-        if (firstDesc)
-          tl.to(
-            firstDesc,
-            { color: "#ffffff", duration: 0.4, ease: "power2.out" },
-            "overlaysEntry"
-          );
+        if (firstTitle) tl.to(firstTitle, { color: "#00dafd", duration: 0.4, ease: "power2.out" }, "overlaysEntry");
+        if (firstDesc) tl.to(firstDesc, { color: "#ffffff", duration: 0.4, ease: "power2.out" }, "overlaysEntry");
       }
 
-      if (heroBorderOverlay)
-        tl.to(
-          heroBorderOverlay,
-          { opacity: 1, duration: 0.4, ease: "power2.out" },
-          "overlaysEntry"
-        );
-      if (itemDesc1)
-        tl.to(
-          itemDesc1,
-          { color: "#ffffff", duration: 0.4, ease: "power2.out" },
-          "overlaysEntry"
-        );
+      if (heroBorderOverlay) tl.to(heroBorderOverlay, { opacity: 1, duration: 0.4, ease: "power2.out" }, "overlaysEntry");
+      if (itemDesc1) tl.to(itemDesc1, { color: "#ffffff", duration: 0.4, ease: "power2.out" }, "overlaysEntry");
 
-      if (heroOverlays)
-        tl.to(
-          heroOverlays,
-          { opacity: 1, duration: 0.4, ease: "power2.out" },
-          ">"
-        );
-      if (heroImgOverlay)
-        tl.to(
-          heroImgOverlay,
-          { opacity: 1, duration: 0.4, ease: "power2.out" },
-          "<"
-        );
+      if (heroOverlays) tl.to(heroOverlays, { opacity: 1, duration: 0.4, ease: "power2.out" }, ">");
+      if (heroImgOverlay) tl.to(heroImgOverlay, { opacity: 1, duration: 0.4, ease: "power2.out" }, "<");
 
       tl.add("overlaysActiveStart", ">");
       tl.add(() => {
@@ -1086,29 +979,29 @@ function initHeroAnimation() {
         if (!tl || index === activeIndex) return;
         calculateImagePositions();
         const labelTime = tl.labels[`step_${index}`];
+
         if (labelTime !== undefined) {
-          isClickScrolling = true;
+          isClickScrolling = !0;
           animateToStepIndex(index, 0.8);
           const scrollST = tl.scrollTrigger;
           const stepOffset = index === 0 ? 0.5 : 0.8;
           const finalTweenTime = labelTime + stepOffset;
           const safeTime = Math.min(finalTweenTime, tl.duration());
           const progress = safeTime / tl.duration();
-          const targetScroll =
-            scrollST.start + progress * (scrollST.end - scrollST.start);
+          const targetScroll = scrollST.start + progress * (scrollST.end - scrollST.start);
 
           gsap.to(window, {
-            scrollTo: { y: targetScroll, autoKill: true },
+            scrollTo: { y: targetScroll, autoKill: !0 },
             duration: 1.0,
             ease: "power2.inOut",
             onStart: () => {
-              isClickScrolling = true;
+              isClickScrolling = !0;
             },
             onComplete: () => {
-              isClickScrolling = false;
+              isClickScrolling = !1;
             },
             onInterrupt: () => {
-              isClickScrolling = false;
+              isClickScrolling = !1;
             },
           });
         }
@@ -1136,10 +1029,8 @@ function initHeroAnimation() {
             gsap.killTweensOf(lastImg);
             lastImg.classList.remove("hero-img-2");
           }
-          if (imgWrappers[lastIndex])
-            imgWrappers[lastIndex].classList.remove("active");
-          if (contentItems[lastIndex])
-            contentItems[lastIndex].classList.remove("active");
+          if (imgWrappers[lastIndex]) imgWrappers[lastIndex].classList.remove("active");
+          if (contentItems[lastIndex]) contentItems[lastIndex].classList.remove("active");
 
           if (activeIndex === lastIndex) {
             const fallbackIndex = Math.max(0, lastIndex - 1);
@@ -1151,6 +1042,7 @@ function initHeroAnimation() {
       });
 
       setTimeout(() => {
+        adjustHeroSectionHeight();
         calculateImagePositions();
         ScrollTrigger.refresh();
       }, 300);
