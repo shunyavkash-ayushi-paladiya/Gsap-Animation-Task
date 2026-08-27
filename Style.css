@@ -170,6 +170,7 @@ img {
 
 .hero-btn svg {
   color: #00dafd;
+  width: 24px;
 }
 
 .hero-btn:hover {
