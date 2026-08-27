@@ -464,43 +464,4 @@
     right: 0%;
     transform: translateY(-50%);
   }
-
-  /* .hero-section {
-    min-height: 100vh !important;
-    max-height: 100vh !important;
-    height: 100vh !important;
-  } */
 }
-
-/* @media screen and (min-height: 701px){
-  .hero-title {
-    font-size: 44px;
-  }
-
-  .hero-description {
-    font-size: 20px;
-  }
-
-  .hero-description-content{
-    margin-top: 8px;
-  }
-
-  .hero-content-items{
-    margin-top: 6px;
-  }
-
-  .hero-section{
-    padding-block: 40px;
-    min-height: 120vh;
-  }
-
-  .hero-content-title {
-    font-size: 14px;
-  }
-
-  .hero-content-description{
-    margin-top: 4px;
-  }
-} */
-
-/* and (max-width: 1024px) and (min-width:768px) */
