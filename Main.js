@@ -1,5 +1,4 @@
 gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
-
 ScrollTrigger.config({
   ignoreMobileResize: !0,
   autoRefreshEvents: "DOMContentLoaded,load,visibilitychange",
@@ -55,14 +54,12 @@ function initHeroAnimation() {
 
   const heroImages = heroImgContent.querySelectorAll(".hero-img");
   const imgWrappers = heroImgContent.querySelectorAll(".hero-img-wrapper");
-
   let imagePositions = [];
   let itemOffsets = [];
   let imgOffsetsMobile = [];
   let itemCumulativeWidths = [];
   let tl;
   let mm = gsap.matchMedia();
-
   let isLargeDesktopLayout = !1;
   let isMobileLayout = !1;
   let isTabletMobileLayout = !1;
@@ -71,32 +68,22 @@ function initHeroAnimation() {
   let isMobileXSLayout = !1;
   let isMobileXXSLayout = !1;
   let isShortDesktopLayout = !1;
-
   let activeIndex = 0;
   let isClickScrolling = !1;
   let autoPlayTimer = null;
 
-  // Perfect section height calculation including padding & margins
   function adjustHeroSectionHeight() {
     if (!heroContent || !section) return;
-
-    // Reset styles to get the true unpinned scrollHeight
     gsap.set(section, { clearProps: "height,minHeight,maxHeight" });
-
     const sectionStyle = window.getComputedStyle(section);
     const paddingTop = parseFloat(sectionStyle.paddingTop) || 0;
     const paddingBottom = parseFloat(sectionStyle.paddingBottom) || 0;
     const marginTop = parseFloat(sectionStyle.marginTop) || 0;
     const marginBottom = parseFloat(sectionStyle.marginBottom) || 0;
-
-    // Measure total required height including paddings
     const contentHeight = heroContent.getBoundingClientRect().height;
     const totalRequiredHeight = Math.ceil(contentHeight + paddingTop + paddingBottom + marginTop + marginBottom);
     const windowHeight = window.innerHeight;
-
-    // Apply exact minHeight to section to prevent viewport clipping
     const finalHeight = Math.max(windowHeight, totalRequiredHeight);
-
     section.style.minHeight = `${finalHeight}px`;
     section.style.height = `${finalHeight}px`;
   }
@@ -113,31 +100,24 @@ function initHeroAnimation() {
     itemOffsets = [];
     imgOffsetsMobile = [];
     itemCumulativeWidths = [];
-
     if (!borderWrapper || imgWrappers.length === 0) return;
-
     const originalImgStyle = heroImgContent.getAttribute("style") || "";
     const originalContentItemsStyle = heroContentItems ? heroContentItems.getAttribute("style") || "" : "";
     const originalOverlaysStyle = heroOverlays ? heroOverlays.getAttribute("style") || "" : "";
-
     gsap.set([heroImgContent, heroContentItems, heroOverlays], {
       clearProps: "transform,scale,x,y,width,height",
     });
-
     if (isMobileLayout) {
       gsap.set(heroImgContent, { width: getResponsiveTargetWidth() });
     }
-
     void borderWrapper.offsetWidth;
     const wrapperRect = borderWrapper.getBoundingClientRect();
     const imgContentRect = heroImgContent.getBoundingClientRect();
-
     imgWrappers.forEach((wrapper) => {
       const rect = wrapper.getBoundingClientRect();
       const pctLeft = imgContentRect.width > 0 ? Math.max(0, Math.min(100, ((rect.left - imgContentRect.left) / imgContentRect.width) * 100)) : 0;
       const pctWidth = imgContentRect.width > 0 ? Math.max(0, Math.min(100, (rect.width / imgContentRect.width) * 100)) : 0;
       const centerOffset = rect.left - imgContentRect.left + rect.width / 2;
-
       imagePositions.push({
         left: rect.left - wrapperRect.left,
         right: rect.right - wrapperRect.left,
@@ -146,11 +126,9 @@ function initHeroAnimation() {
         imgPctRight: Math.min(100, pctLeft + pctWidth),
         centerOffset: centerOffset,
       });
-
       const imgXOffset = -(rect.left - imgContentRect.left);
       imgOffsetsMobile.push(imgXOffset);
     });
-
     let accumX = 0;
     const gap = 30;
     contentItems.forEach((item) => {
@@ -159,7 +137,6 @@ function initHeroAnimation() {
       accumX += itemWidth + gap;
       itemCumulativeWidths.push(accumX);
     });
-
     heroImgContent.setAttribute("style", originalImgStyle);
     if (heroContentItems) heroContentItems.setAttribute("style", originalContentItemsStyle);
     if (heroOverlays) heroOverlays.setAttribute("style", originalOverlaysStyle);
@@ -186,7 +163,6 @@ function initHeroAnimation() {
     const parts = text.split(/(\s+)/);
     let firstLetterIndex = 0;
     const meraLetters = ["M", "e", "R", "A"];
-
     el.innerHTML = "";
     parts.forEach((part) => {
       if (/^\s+$/.test(part)) {
@@ -200,7 +176,6 @@ function initHeroAnimation() {
       word.className = "word";
       word.style.display = "inline-block";
       word.style.whiteSpace = "nowrap";
-
       const firstLetterSpan = document.createElement("span");
       firstLetterSpan.className = "char first-letter";
       firstLetterSpan.dataset.acronym = meraLetters[firstLetterIndex] || part[0];
@@ -208,7 +183,6 @@ function initHeroAnimation() {
       firstLetterSpan.style.display = "inline-block";
       word.appendChild(firstLetterSpan);
       firstLetterIndex++;
-
       if (part.length > 1) {
         const restSpan = document.createElement("span");
         restSpan.className = "char-rest";
@@ -226,7 +200,6 @@ function initHeroAnimation() {
     cloneWrap.className = "mera-clone-wrap";
     wrap.appendChild(cloneWrap);
   }
-
   splitTitle(title1);
 
   function syncMeraClonesPosition() {
@@ -234,7 +207,6 @@ function initHeroAnimation() {
     const titleStyle = window.getComputedStyle(title1);
     const firstLetters = gsap.utils.toArray(".first-letter", title1);
     const clones = gsap.utils.toArray(".mera-clone");
-
     firstLetters.forEach((letter, idx) => {
       const clone = clones[idx];
       if (clone && letter) {
@@ -257,14 +229,12 @@ function initHeroAnimation() {
     cloneWrap.innerHTML = "";
     const wrapRect = wrap.getBoundingClientRect();
     const titleStyle = window.getComputedStyle(title1);
-
     firstLetters.forEach((letter) => {
       const rect = letter.getBoundingClientRect();
       const clone = document.createElement("span");
       clone.className = "mera-clone";
       clone.textContent = letter.dataset.acronym;
       cloneWrap.appendChild(clone);
-
       gsap.set(clone, {
         position: "absolute",
         display: "inline-block",
@@ -281,7 +251,6 @@ function initHeroAnimation() {
         willChange: "transform, opacity, left, top",
       });
     });
-
     const clones = gsap.utils.toArray(".mera-clone");
     if (!clones.length) return clones;
     updateMeraCloneTargets(clones, wrapRect, 4);
@@ -292,7 +261,6 @@ function initHeroAnimation() {
     const currentWrapRect = wrapRect || wrap.getBoundingClientRect();
     const totalWidth = clones.reduce((sum, clone) => sum + clone.offsetWidth, 0) + gap * (clones.length - 1);
     let x = currentWrapRect.width / 2 - totalWidth / 2;
-
     clones.forEach((clone) => {
       clone.dataset.targetLeft = x;
       x += clone.offsetWidth + gap;
@@ -302,14 +270,11 @@ function initHeroAnimation() {
   function animateToStepIndex(index, duration = 0.6) {
     if (!imagePositions[index]) calculateImagePositions();
     if (!imagePositions[index]) return;
-
     activeIndex = index;
     setInteractiveState(!0, index);
-
     imgWrappers.forEach((wrapper, idx) => {
       if (wrapper) wrapper.classList.toggle("active", idx === index);
     });
-
     const lastImg = heroImages[heroImages.length - 1];
     if (lastImg) {
       if (index === heroImages.length - 1) {
@@ -323,13 +288,11 @@ function initHeroAnimation() {
         lastImg.classList.remove("hero-img-2");
       }
     }
-
     contentItems.forEach((item, idx) => {
       const isCurrent = idx === index;
       const titleText = item.querySelector(".hero-content-title");
       const contentDescText = item.querySelector(".hero-content-description");
       item.classList.toggle("active", isCurrent);
-
       if (titleText) {
         gsap.to(titleText, {
           color: isCurrent ? "#00dafd" : "#66666682",
@@ -347,18 +310,15 @@ function initHeroAnimation() {
         });
       }
     });
-
     if (isMobileLayout) {
       const imgTargetX = imgOffsetsMobile[index] || 0;
       const contentTargetX = itemOffsets[index] || 0;
-
       gsap.to(heroImgContent, {
         x: imgTargetX,
         duration: duration,
         ease: "power2.inOut",
         overwrite: "auto",
       });
-
       if (heroContentItems) {
         gsap.to(heroContentItems, {
           x: contentTargetX,
@@ -368,7 +328,6 @@ function initHeroAnimation() {
         });
       }
     }
-
     if (heroImgOverlay) {
       const pos = imagePositions[index];
       gsap.to(heroImgOverlay, {
@@ -382,7 +341,6 @@ function initHeroAnimation() {
         overwrite: "auto",
       });
     }
-
     if (heroBorderOverlay && heroBorderOverlay2) {
       if (isMobileLayout) {
         const targetWidth = itemCumulativeWidths[index] || 0;
@@ -437,7 +395,6 @@ function initHeroAnimation() {
         }
       }
     }
-
     if (itemDesc1) {
       gsap.to(itemDesc1, {
         color: index < 4 ? "#ffffff" : "#66666682",
@@ -445,7 +402,6 @@ function initHeroAnimation() {
         overwrite: "auto",
       });
     }
-
     if (itemDesc2) {
       gsap.to(itemDesc2, {
         color: index === 4 ? "#ffffff" : "#66666682",
@@ -504,9 +460,7 @@ function initHeroAnimation() {
           ScrollTrigger.refresh();
         }, 150);
       };
-
       window.addEventListener("resize", handleResize);
-
       adjustHeroSectionHeight();
 
       if (isShortDesktopLayout) {
@@ -525,7 +479,6 @@ function initHeroAnimation() {
           y: 0,
           transform: "none",
         });
-
         if (description2) {
           gsap.set(description2, {
             display: "block",
@@ -537,7 +490,6 @@ function initHeroAnimation() {
             transform: "none",
           });
         }
-
         if (heroDescriptionContent) gsap.set(heroDescriptionContent, { overflow: "visible" });
         gsap.set(heroImgContent, {
           opacity: 1,
@@ -547,10 +499,8 @@ function initHeroAnimation() {
           width: "auto",
           clearProps: "transform",
         });
-
         if (heroContentItems) gsap.set(heroContentItems, { opacity: 1, x: 0 });
         if (heroOverlays) gsap.set(heroOverlays, { opacity: 1, y: 0 });
-
         calculateImagePositions();
         animateToStepIndex(0, 0.4);
         startAutoPlay(3500);
@@ -561,37 +511,20 @@ function initHeroAnimation() {
           calculateImagePositions();
           animateToStepIndex(index, 0.8);
         };
-
         imgWrappers.forEach((wrapper, index) => {
           const clickHandler = () => handleItemClick(index);
           wrapper.addEventListener("click", clickHandler);
           clickHandlers.push({ element: wrapper, clickHandler });
         });
-
         contentItems.forEach((item, index) => {
           const clickHandler = () => handleItemClick(index);
           item.addEventListener("click", clickHandler);
           clickHandlers.push({ element: item, clickHandler });
         });
-
         heroBtns.forEach((btn) => {
           const btnHandler = (e) => {
             e.stopPropagation();
             stopAutoPlay();
-            const lastIndex = heroImages.length - 1;
-            const lastImg = heroImages[lastIndex];
-
-            if (lastImg) {
-              gsap.killTweensOf(lastImg);
-              lastImg.classList.remove("hero-img-2");
-            }
-            if (imgWrappers[lastIndex]) imgWrappers[lastIndex].classList.remove("active");
-            if (contentItems[lastIndex]) contentItems[lastIndex].classList.remove("active");
-
-            if (activeIndex === lastIndex) {
-              const fallbackIndex = Math.max(0, lastIndex - 1);
-              animateToStepIndex(fallbackIndex);
-            }
           };
           btn.addEventListener("click", btnHandler);
           clickHandlers.push({ element: btn, clickHandler: btnHandler });
@@ -601,9 +534,7 @@ function initHeroAnimation() {
         let startY = 0;
         let isDragging = !1;
         const minSwipeDistance = 40;
-
         heroImgContent.style.cursor = "grab";
-
         const handlePointerDown = (e) => {
           isDragging = !0;
           startX = e.type.includes("touch") ? e.touches[0].clientX : e.clientX;
@@ -611,20 +542,17 @@ function initHeroAnimation() {
           heroImgContent.style.cursor = "grabbing";
           stopAutoPlay();
         };
-
         const handlePointerMove = (e) => {
           if (!isDragging) return;
         };
-
         const handlePointerUp = (e) => {
           if (!isDragging) return;
-          isDragging = !1;
+          isDragging = !0;
           heroImgContent.style.cursor = "grab";
           const endX = e.type.includes("touch") ? e.changedTouches[0].clientX : e.clientX;
           const endY = e.type.includes("touch") ? e.changedTouches[0].clientY : e.clientY;
           const deltaX = endX - startX;
           const deltaY = endY - startY;
-
           if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > minSwipeDistance) {
             if (deltaX < 0) {
               if (activeIndex < heroImages.length - 1) {
@@ -637,7 +565,6 @@ function initHeroAnimation() {
             }
           }
         };
-
         heroImgContent.addEventListener("mousedown", handlePointerDown);
         window.addEventListener("mousemove", handlePointerMove);
         window.addEventListener("mouseup", handlePointerUp);
@@ -660,7 +587,6 @@ function initHeroAnimation() {
 
       calculateImagePositions();
       setInteractiveState(!1);
-
       const firstLetters = gsap.utils.toArray(".first-letter", title1);
       let meraClones = buildMeraClones(firstLetters);
 
@@ -669,12 +595,10 @@ function initHeroAnimation() {
         const naturalWrapHeight = wrap.getBoundingClientRect().height;
         const naturalTitle2Height = title2.getBoundingClientRect().height;
         const targetWrapHeight = naturalTitle2Height;
-
         return { naturalWrapHeight, targetWrapHeight };
       }
 
       let { naturalWrapHeight, targetWrapHeight } = recalculateHeights();
-
       const handleRefreshInit = () => {
         adjustHeroSectionHeight();
         calculateImagePositions();
@@ -684,13 +608,11 @@ function initHeroAnimation() {
         syncMeraClonesPosition();
         if (tl) tl.invalidate();
       };
-
       ScrollTrigger.addEventListener("refreshInit", handleRefreshInit);
 
       gsap.set(title1, { opacity: 0, y: 0, autoAlpha: 0 });
       const title2InitialY = isLargeDesktopLayout ? 70 : isMobileXSLayout ? 35 : isMobileLayout ? 46 : 60;
       gsap.set(title2, { opacity: 0, autoAlpha: 0, y: title2InitialY });
-
       gsap.set(description1, { opacity: 0, y: 0 });
       if (description2) {
         const desc2InitialY = isMobileXXSLayout ? 40 : isMobileXSLayout ? 22 : isMobileLayout ? 34 : 40;
@@ -698,9 +620,7 @@ function initHeroAnimation() {
       }
 
       const startImgXMobile = isMobileLayout && imgOffsetsMobile[0] !== undefined ? imgOffsetsMobile[0] : 0;
-
       if (heroContentItems) gsap.set(heroContentItems, { opacity: 0, x: 0 });
-
       if (heroOverlays) {
         gsap.set(heroOverlays, {
           opacity: 0,
@@ -779,17 +699,7 @@ function initHeroAnimation() {
       });
 
       const titleFadeDuration = 0.3;
-      tl.to(
-        title1,
-        {
-          opacity: 1,
-          autoAlpha: 1,
-          duration: titleFadeDuration,
-          ease: "power1.out",
-        },
-        0
-      );
-
+      tl.to(title1, { opacity: 1, autoAlpha: 1, duration: titleFadeDuration, ease: "power1.out" }, 0);
       tl.to(".char-rest", { "--position": "0%", duration: 0.5, ease: "power1.inOut" }, titleFadeDuration + 0.1);
       tl.to(firstLetters, { color: "#00dafd", duration: 0.2, ease: "none" }, ">");
       tl.add(() => {
@@ -797,7 +707,6 @@ function initHeroAnimation() {
       }, ">");
       tl.to(meraClones, { opacity: 1, duration: 0.15, ease: "linear" }, ">");
       tl.to(firstLetters, { opacity: 0, duration: 0.15, ease: "linear" }, "<");
-
       tl.to(
         meraClones,
         {
@@ -816,40 +725,12 @@ function initHeroAnimation() {
         },
         ">"
       );
-
-      tl.to(
-        wrap,
-        {
-          height: () => targetWrapHeight,
-          duration: 1.15,
-          ease: "power2.inOut",
-        },
-        ">"
-      );
+      tl.to(wrap, { height: () => targetWrapHeight, duration: 1.15, ease: "power2.inOut" }, ">");
 
       if (isMobileLayout) {
-        tl.to(
-          heroImgContent,
-          {
-            opacity: 1,
-            x: () => startImgXMobile,
-            duration: 0.8,
-            ease: "power2.inOut",
-          },
-          ">"
-        );
+        tl.to(heroImgContent, { opacity: 1, x: () => startImgXMobile, duration: 0.8, ease: "power2.inOut" }, ">");
       } else {
-        tl.to(
-          heroImgContent,
-          {
-            opacity: 1,
-            y: -36,
-            scale: 1,
-            duration: 1.15,
-            ease: "power2.inOut",
-          },
-          "<"
-        );
+        tl.to(heroImgContent, { opacity: 1, y: -36, scale: 1, duration: 1.15, ease: "power2.inOut" }, "<");
       }
 
       tl.to(description1, { opacity: 1, duration: 0.4, ease: "power1.out" }, ">+=0.2");
@@ -858,85 +739,23 @@ function initHeroAnimation() {
       }
 
       const finalMoveDuration = 0.55;
-      tl.to(
-        description1,
-        {
-          y: 0,
-          opacity: 0,
-          autoAlpha: 0,
-          duration: finalMoveDuration,
-          ease: "power2.inOut",
-        },
-        ">"
-      );
-
+      tl.to(description1, { y: 0, opacity: 0, autoAlpha: 0, duration: finalMoveDuration, ease: "power2.inOut" }, ">");
       if (description2) {
-        tl.to(
-          description2,
-          {
-            y: 0,
-            opacity: 1,
-            autoAlpha: 1,
-            duration: finalMoveDuration,
-            ease: "power2.inOut",
-          },
-          "<"
-        );
+        tl.to(description2, { y: 0, opacity: 1, autoAlpha: 1, duration: finalMoveDuration, ease: "power2.inOut" }, "<");
       }
 
-      tl.to(
-        [title1, cloneWrap],
-        {
-          y: -70,
-          opacity: 0,
-          autoAlpha: 0,
-          duration: finalMoveDuration,
-          ease: "power2.inOut",
-        },
-        "<"
-      );
-
-      tl.to(
-        title2,
-        {
-          opacity: 1,
-          autoAlpha: 1,
-          y: 0,
-          duration: finalMoveDuration,
-          ease: "power2.inOut",
-        },
-        "<"
-      );
-
+      tl.to([title1, cloneWrap], { y: -70, opacity: 0, autoAlpha: 0, duration: finalMoveDuration, ease: "power2.inOut" }, "<");
+      tl.to(title2, { opacity: 1, autoAlpha: 1, y: 0, duration: finalMoveDuration, ease: "power2.inOut" }, "<");
       if (heroContentItems) {
-        tl.to(
-          heroContentItems,
-          {
-            opacity: 1,
-            x: 0,
-            duration: finalMoveDuration,
-            ease: "power2.inOut",
-          },
-          "<"
-        );
+        tl.to(heroContentItems, { opacity: 1, x: 0, duration: finalMoveDuration, ease: "power2.inOut" }, "<");
       }
 
       if (isMobileLayout) {
-        tl.to(
-          heroImgContent,
-          {
-            width: () => getResponsiveTargetWidth(),
-            x: () => startImgXMobile,
-            duration: 0.8,
-            ease: "power2.inOut",
-          },
-          ">"
-        );
+        tl.to(heroImgContent, { width: () => getResponsiveTargetWidth(), x: () => startImgXMobile, duration: 0.8, ease: "power2.inOut" }, ">");
       }
 
       tl.add("overlaysEntry", ">");
       tl.add(() => calculateImagePositions(), "overlaysEntry-=0.05");
-
       if (heroOverlays) tl.to(heroOverlays, { opacity: 0.5, y: 0, duration: 0.4, ease: "power2.out" }, "overlaysEntry");
       if (heroImgOverlay) tl.to(heroImgOverlay, { opacity: 0.5, duration: 0.4, ease: "power2.out" }, "overlaysEntry");
 
@@ -950,7 +769,6 @@ function initHeroAnimation() {
 
       if (heroBorderOverlay) tl.to(heroBorderOverlay, { opacity: 1, duration: 0.4, ease: "power2.out" }, "overlaysEntry");
       if (itemDesc1) tl.to(itemDesc1, { color: "#ffffff", duration: 0.4, ease: "power2.out" }, "overlaysEntry");
-
       if (heroOverlays) tl.to(heroOverlays, { opacity: 1, duration: 0.4, ease: "power2.out" }, ">");
       if (heroImgOverlay) tl.to(heroImgOverlay, { opacity: 1, duration: 0.4, ease: "power2.out" }, "<");
 
@@ -979,7 +797,6 @@ function initHeroAnimation() {
         if (!tl || index === activeIndex) return;
         calculateImagePositions();
         const labelTime = tl.labels[`step_${index}`];
-
         if (labelTime !== undefined) {
           isClickScrolling = !0;
           animateToStepIndex(index, 0.8);
@@ -989,7 +806,6 @@ function initHeroAnimation() {
           const safeTime = Math.min(finalTweenTime, tl.duration());
           const progress = safeTime / tl.duration();
           const targetScroll = scrollST.start + progress * (scrollST.end - scrollST.start);
-
           gsap.to(window, {
             scrollTo: { y: targetScroll, autoKill: !0 },
             duration: 1.0,
@@ -1022,20 +838,7 @@ function initHeroAnimation() {
       heroBtns.forEach((btn) => {
         const btnHandler = (e) => {
           e.stopPropagation();
-          const lastIndex = heroImages.length - 1;
-          const lastImg = heroImages[lastIndex];
-
-          if (lastImg) {
-            gsap.killTweensOf(lastImg);
-            lastImg.classList.remove("hero-img-2");
-          }
-          if (imgWrappers[lastIndex]) imgWrappers[lastIndex].classList.remove("active");
-          if (contentItems[lastIndex]) contentItems[lastIndex].classList.remove("active");
-
-          if (activeIndex === lastIndex) {
-            const fallbackIndex = Math.max(0, lastIndex - 1);
-            animateToStepIndex(fallbackIndex);
-          }
+          stopAutoPlay();
         };
         btn.addEventListener("click", btnHandler);
         clickHandlers.push({ element: btn, clickHandler: btnHandler });
