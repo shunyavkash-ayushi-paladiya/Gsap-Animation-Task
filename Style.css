@@ -549,18 +549,18 @@ img {
 .close-modal-btn {
   cursor: pointer;
   color: #00dafd;
-  width: 50px;
+  width: 26px;
   aspect-ratio: 1;
   position: absolute;
   top: 2%;
-  right: 0%;
+  right: 2%;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .close-modal-btn svg {
-  width: 80%;
+  width: 100%;
 }
 
 .hero-model-arrows {
@@ -569,7 +569,7 @@ img {
   gap: 30px;
   position: absolute;
   top: 50%;
-  right: 0%;
+  right: 2%;
   transform: translateY(-50%);
 }
 
@@ -577,7 +577,7 @@ img {
   color: #666666;
   cursor: pointer;
   transition: all 0.3s ease-in-out;
-  width: 50px;
+  width: 16px;
 }
 
 .hero-model-arrow:hover {
