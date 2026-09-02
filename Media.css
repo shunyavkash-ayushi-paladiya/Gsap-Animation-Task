@@ -22,12 +22,12 @@
     font-size: 20px;
   }
 
-  .hero-btn{
+  .hero-btn {
     margin-top: 10px;
     font-size: 14px;
   }
 
-  .hero-btn svg{
+  .hero-btn svg {
     width: 20px;
   }
 
@@ -391,7 +391,7 @@
   }
 }
 
-@media screen and (max-width: 767px) and (min-width: 576px) and (max-height: 700px) {
+/* @media screen and (max-width: 767px) and (min-width: 576px) and (max-height: 700px) {
   .hero-title,
   .mera-clone {
     font-size: 30px;
@@ -425,9 +425,9 @@
   .hero-model-content {
     margin-top: 20px;
   }
-}
+} */
 
-@media screen and (max-width: 1025px) and (min-width: 768px) and (max-height: 700px) {
+/* @media screen and (max-width: 1025px) and (min-width: 768px) and (max-height: 700px) {
   .hero-content-description {
     margin-top: 8px;
   }
@@ -450,9 +450,11 @@
   }
 
   .hero-content-title {
-    font-size: 14px;
+    font-size: 13px;
+    min-height: auto;
   }
-}
+  
+} */
 
 @media screen and (max-height: 700px) {
   .hero-model-arrows {
@@ -463,5 +465,80 @@
     top: 50%;
     right: 0%;
     transform: translateY(-50%);
+  }
+}
+
+@media screen and (min-width: 992px) and (max-height: 700px) {
+  .hero-section {
+    min-height: auto !important;
+    max-height: none !important;
+    height: auto !important;
+  }
+}
+
+@media screen and (max-width: 991px) and (min-width: 320px) and (max-height: 700px) {
+  .hero-section {
+    min-height: 100dvh !important;
+    max-height: 100dvh !important;
+    height: 100dvh !important;
+  }
+
+  .hero-border-item {
+    margin-top: 20px;
+  }
+
+  .hero-content-items {
+    margin-top: 10px;
+  }
+
+  .hero-btn svg {
+    width: 22px;
+  }
+
+  .hero-btn {
+    margin-top: 12px;
+    font-size: 14px;
+  }
+
+  .hero-title,
+  .mera-clone {
+    font-size: 32px;
+  }
+
+  .hero-content-title {
+    font-size: 13px;
+    min-height: 42px;
+  }
+
+  .hero-description {
+    font-size: 18px;
+  }
+}
+
+@media screen and (min-width: 1330px) and (max-height: 850px) and (min-height: 701px) {
+  .hero-section {
+    min-height: auto !important;
+    max-height: none !important;
+    height: auto !important;
+  }
+
+  .hero-title {
+    font-size: 48px;
+  }
+
+  .hero-description {
+    font-size: 20px;
+  }
+
+  .hero-description-content {
+    margin-top: 6px;
+  }
+}
+
+@media screen and (max-width: 1329px) and (max-height: 850px) and (min-height: 701px) {
+  .hero-section {
+    min-height: auto !important;
+    max-height: none !important;
+    height: auto !important;
   }
 }
